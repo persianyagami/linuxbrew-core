@@ -74,8 +74,10 @@ class Wxpython < Formula
       end
 
       # avoid triggering "helpful" distutils code that doesn't recognize Xcode 7 .tbd stubs
-      header_path = "-I#{MacOS.sdk_path}/System/Library/Frameworks/Tk.framework/Versions/8.5/Headers"
-      ENV.append "CFLAGS", header_path if OS.mac? && MacOS::CLT.installed?
+      if OS.mac?
+        header_path = "-I#{MacOS.sdk_path}/System/Library/Frameworks/Tk.framework/Versions/8.5/Headers"
+        ENV.append "CFLAGS", header_path if MacOS::CLT.installed?
+      end
       venv.pip_install Pathname.pwd
     end
 
