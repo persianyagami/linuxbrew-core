@@ -4,16 +4,15 @@ class Packmol < Formula
   url "https://github.com/mcubeg/packmol/archive/20.010.tar.gz"
   sha256 "23285f2a9e2bef0e8253250d7eae2d4026a9535ddcc2b9b383f5ad45b19e123d"
   license "MIT"
-  revision 1
-  head "https://github.com/mcubeg/packmol.git"
+  revision OS.mac? ? 2 : 3
+  head "https://github.com/mcubeg/packmol.git", branch: "master"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "891b4a635649b6a18cc9f4743ff3c4580dd38deaa6e5b1c17435f0154a528e9b" => :big_sur
-    sha256 "2de3ad79e6630d32fe68ac901ab113ba8ae3370e1976909390bcf4eb76a9a1d9" => :catalina
-    sha256 "2db13531577dfafcaa3d654a714e0c44503049b968ae3f6622baf3d53933afec" => :mojave
-    sha256 "ccdde7eab41ce8847bc3fcabdb482c68ea3f39c029abe0c146ec9ea370c97bfe" => :high_sierra
-    sha256 "145010afe93bf17333fc35b38baeab6f4d3bb85246ea4bf6e8094d301adec2e9" => :x86_64_linux
+    sha256                               arm64_big_sur: "3d43d73153e16a136bc8c222e38b04b564d974de27030ea6bc07a854e801b837"
+    sha256                               big_sur:       "5e17a008667df7e5bc6bee6d5563dc3972c3f52b4243ab2d92507be35ce9d12b"
+    sha256                               catalina:      "3ab1f82f9882aeb3e7fe733e7c375902bb5b9ced8573fcbc90913fcf19407c9a"
+    sha256                               mojave:        "d881b332e102b00f5ebfd5f48ad10cb80087a0535d919514fe766e70e7fdf4f7"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "407dbf1eb02939bce641526ace747907a8c42a11718f0606288a90b521cb91f1" # linuxbrew-core
   end
 
   depends_on "gcc" # for gfortran

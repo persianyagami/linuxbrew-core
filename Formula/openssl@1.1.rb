@@ -1,10 +1,10 @@
 class OpensslAT11 < Formula
   desc "Cryptography and SSL/TLS Toolkit"
   homepage "https://openssl.org/"
-  url "https://www.openssl.org/source/openssl-1.1.1i.tar.gz"
-  mirror "https://dl.bintray.com/homebrew/mirror/openssl-1.1.1i.tar.gz"
-  mirror "https://www.mirrorservice.org/sites/ftp.openssl.org/source/openssl-1.1.1i.tar.gz"
-  sha256 "e8be6a35fe41d10603c3cc635e93289ed00bf34b79671a3a4de64fcee00d5242"
+  url "https://www.openssl.org/source/openssl-1.1.1l.tar.gz"
+  mirror "https://www.mirrorservice.org/sites/ftp.openssl.org/source/openssl-1.1.1l.tar.gz"
+  mirror "https://www.openssl.org/source/old/1.1.1/openssl-1.1.1l.tar.gz"
+  sha256 "0b7a3e5e59c34827fe0c3a74b7ec8baef302b98fa80088d7f9153aa16fa76bd1"
   license "OpenSSL"
   version_scheme 1
 
@@ -14,11 +14,11 @@ class OpensslAT11 < Formula
   end
 
   bottle do
-    sha256 "8008537d37a7f09eedbcd03c575e15206c54f97fe162c6d36da904897e9cee31" => :big_sur
-    sha256 "14646cc636f207b835b12172b2ca2cd908e2955bf537d72be6ab049285db7398" => :arm64_big_sur
-    sha256 "066b9f114617872e77fa3d4afee2337daabc2c181d7564fe60a5b26d89d69742" => :catalina
-    sha256 "f5a348793735d449d990693ab687049fb11c08ade0b74c6f7337a56fc0a77908" => :mojave
-    sha256 "2dd3e4e402e5b9e38edf6a9e8047e061c2fb15ad7c7a5e25679da48e0410f464" => :x86_64_linux
+    sha256 arm64_big_sur: "9acf35f49127e7db9a1190c0c19330cd51f925bc3c482b699aaad802be2fea2b"
+    sha256 big_sur:       "ff8b2a965c680b4d9baccd60e799d0989e7dc562d2ba81696a9996bab256a6ad"
+    sha256 catalina:      "9c8490c19c5e18a5c9f92c3410b501ad456b348f711f760b2932fd763d0d0c14"
+    sha256 mojave:        "e310413752934299a0b8277b5aca3ceeddad0a2cecbcf2a9b81277c2219312b8"
+    sha256 x86_64_linux:  "4e8d3bcafe560d3d3ae2e0a29b98fa009101d72c249cd5b99892d706ac23e6dc" # linuxbrew-core
   end
 
   keg_only :shadowed_by_macos, "macOS provides LibreSSL"
@@ -101,7 +101,6 @@ class OpensslAT11 < Formula
       end
     end
 
-    ENV.deparallelize
     system "perl", "./Configure", *(configure_args + arch_args)
     system "make"
     system "make", "install", "MANDIR=#{man}", "MANSUFFIX=ssl"
@@ -118,17 +117,21 @@ class OpensslAT11 < Formula
   end
 
   def macos_post_install
+    ohai "Regenerating CA certificate bundle from keychain, this may take a while..."
+
     keychains = %w[
+      /Library/Keychains/System.keychain
       /System/Library/Keychains/SystemRootCertificates.keychain
     ]
 
-    certs_list = `security find-certificate -a -p #{keychains.join(" ")}`
+    certs_list = `/usr/bin/security find-certificate -a -p #{keychains.join(" ")}`
     certs = certs_list.scan(
       /-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----/m,
     )
 
+    # Check that the certificate has not expired
     valid_certs = certs.select do |cert|
-      IO.popen("#{bin}/openssl x509 -inform pem -checkend 0 -noout >/dev/null", "w") do |openssl_io|
+      IO.popen("#{bin}/openssl x509 -inform pem -checkend 0 -noout &>/dev/null", "w") do |openssl_io|
         openssl_io.write(cert)
         openssl_io.close_write
       end
@@ -136,8 +139,25 @@ class OpensslAT11 < Formula
       $CHILD_STATUS.success?
     end
 
+    # Check that the certificate is trusted in keychain
+    trusted_certs = begin
+      tmpfile = Tempfile.new
+
+      valid_certs.select do |cert|
+        tmpfile.rewind
+        tmpfile.write cert
+        tmpfile.truncate cert.size
+        tmpfile.flush
+        IO.popen("/usr/bin/security verify-cert -l -L -R offline -c #{tmpfile.path} &>/dev/null")
+
+        $CHILD_STATUS.success?
+      end
+    ensure
+      tmpfile&.close!
+    end
+
     openssldir.mkpath
-    (openssldir/"cert.pem").atomic_write(valid_certs.join("\n") << "\n")
+    (openssldir/"cert.pem").atomic_write(trusted_certs.join("\n") << "\n")
   end
 
   def linux_post_install

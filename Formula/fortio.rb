@@ -2,22 +2,27 @@ class Fortio < Formula
   desc "HTTP and gRPC load testing and visualization tool and server"
   homepage "https://fortio.org/"
   url "https://github.com/fortio/fortio.git",
-      tag:      "v1.11.4",
-      revision: "6dd1b178adba1a28da7e20e8a0be4dc32ea7a048"
+      tag:      "v1.17.0",
+      revision: "2d52633138d540a33a14d641d7470a998e424c6e"
   license "Apache-2.0"
 
+  livecheck do
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
+  end
+
   bottle do
-    sha256 "dc3dcac1c7007b2b21dd9105c55505cb1b6f86149be1242ac413baa0a361feb4" => :big_sur
-    sha256 "41a9b9b4ddb5729ee114dfb42e305f558260c055d786bd1b17cc837344bff1d0" => :catalina
-    sha256 "eb37c04b1d2bcdf1237fdf75fcbf0c83a274f4027b532b2eb6a9e62fe63f39d7" => :mojave
-    sha256 "7de326ef437edb7b5a701b472e3ab2622f29c680470478f27fe36f0bfaf8d869" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "3e36df84fc9f27fcb185b928578011de490f09696cf9d6c42e45fde88c895e2a"
+    sha256 cellar: :any_skip_relocation, big_sur:       "52f0ae2dcb229904142d93ecfbd053f5ef3a3b28df118625e8516b7e5af57635"
+    sha256 cellar: :any_skip_relocation, catalina:      "72be3944ede1dc33bf377db6693920dbd3f7d667ad61d8b1ee50d4c4c64b65a6"
+    sha256 cellar: :any_skip_relocation, mojave:        "396c971624a6adf19b6b0bb8788190a592dae099af38e841d23278e4b46aab42"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c36707b7959d7bd49c7a528d00221135ab6d9040f79ea43ececdf6f20e04a05f" # linuxbrew-core
   end
 
   depends_on "go" => :build
 
   def install
-    system "make", "official-build", "OFFICIAL_BIN=#{bin}/fortio", "LIB_DIR=#{lib}"
-    lib.install "ui/static", "ui/templates"
+    system "make", "official-build-clean", "official-build-version", "OFFICIAL_BIN=#{bin}/fortio"
   end
 
   test do
@@ -30,7 +35,7 @@ class Fortio < Formula
       end
       sleep 2
       output = shell_output("#{bin}/fortio load http://localhost:#{port}/ 2>&1")
-      assert_match /^All\sdone/, output.lines.last
+      assert_match(/^All\sdone/, output.lines.last)
     ensure
       Process.kill("SIGTERM", pid)
     end

@@ -2,21 +2,40 @@ class Volta < Formula
   desc "JavaScript toolchain manager for reproducible environments"
   homepage "https://volta.sh"
   url "https://github.com/volta-cli/volta.git",
-      tag:      "v0.9.3",
-      revision: "3594af004be527ec007918ddaa52c477ec9d2394"
+      tag:      "v1.0.4",
+      revision: "e4ab3604097bd48b5d32fa8adf69daa336d66c21"
   license "BSD-2-Clause"
 
+  livecheck do
+    url :stable
+    strategy :github_latest
+  end
+
   bottle do
-    cellar :any_skip_relocation
-    sha256 "1f8252db32da052bd833de2f3e71bfd73b9c35e8b45e18c59130de3e60f73970" => :big_sur
-    sha256 "9ed05f093675d06e11d11527f9a8d84683c425cb1e13c7da23e2727023b8da4b" => :catalina
-    sha256 "dd9a7fa26847cfedde18605a26d26966aaf1f3531e0ba933bd3201c40572ffb9" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "b48dd9fcdeaf5bd99d19670b90435ecef8b40b0f6e8b406a302f1e7f0d9d804e"
+    sha256 cellar: :any_skip_relocation, big_sur:       "b05113b680e109746163c3bf082ca7a2b2a00da1dcebb899416d7822e68d3a67"
+    sha256 cellar: :any_skip_relocation, catalina:      "dc76e1f95915f42a5289f7f368cdd970771f002992200e19160d7ae89651ebd2"
+    sha256 cellar: :any_skip_relocation, mojave:        "4f7ad7853a922751e34e48ac78656beea5fcb51b1c0c65f1d30010f2acbc85dc"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ab596bf783b9335ff4fc202fe97b9f3fa4c76a306b1740af8fa1436fd81343a9" # linuxbrew-core
   end
 
   depends_on "rust" => :build
 
+  uses_from_macos "openssl@1.1"
+
+  on_linux do
+    depends_on "pkg-config" => :build
+  end
+
   def install
     system "cargo", "install", *std_cargo_args
+
+    bash_output = Utils.safe_popen_read("#{bin}/volta", "completions", "bash")
+    (bash_completion/"volta").write bash_output
+    zsh_output = Utils.safe_popen_read("#{bin}/volta", "completions", "zsh")
+    (zsh_completion/"_volta").write zsh_output
+    fish_output = Utils.safe_popen_read("#{bin}/volta", "completions", "fish")
+    (fish_completion/"volta.fish").write fish_output
   end
 
   test do

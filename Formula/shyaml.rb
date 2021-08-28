@@ -3,23 +3,17 @@ class Shyaml < Formula
 
   desc "Command-line YAML parser"
   homepage "https://github.com/0k/shyaml"
-  url "https://files.pythonhosted.org/packages/bc/ca/d8c47fad7a6ce01ddd2b7093673433dbfae414015f971ea7ffda56da125f/shyaml-0.6.1.tar.gz"
-  sha256 "3a57e380f66043c661d417106a0f101f8068c80caa2afef57c90447b88526c3d"
+  url "https://files.pythonhosted.org/packages/b9/59/7e6873fa73a476de053041d26d112b65d7e1e480b88a93b4baa77197bd04/shyaml-0.6.2.tar.gz"
+  sha256 "696e94f1c49d496efa58e09b49c099f5ebba7e24b5abe334f15e9759740b7fd0"
   license "BSD-2-Clause"
-  revision OS.mac? ? 2 : 3
-  head "https://github.com/0k/shyaml.git"
-
-  livecheck do
-    url :stable
-  end
+  head "https://github.com/0k/shyaml.git", branch: "master"
 
   bottle do
-    cellar :any
-    sha256 "daf25766ecb83bea348309fff2f86e310a75189ea138e8fd2c28d49b065f0e5e" => :big_sur
-    sha256 "701dda753798f5e343311a1e8378614a572909b0b35b6882f6ac0be56ab9e16a" => :catalina
-    sha256 "ea8a71d7782e8bdf0c700e93e3455e7b4180ae86388f9631eaf1fca440b58e69" => :mojave
-    sha256 "b1dae6f7ee6138a7bd70301a4851720e693b45adceabd47184618d091d767fdb" => :high_sierra
-    sha256 "bdf291316854fbce30d9e9d491d3d25335b289b5e167ad6cc4f60ba00050a118" => :x86_64_linux
+    sha256 cellar: :any, arm64_big_sur: "ff1ab13915b1148905c77a4bac3ff65db4bc496d3b2fcdf031f30678f781c9f1"
+    sha256 cellar: :any, big_sur:       "bdfdbc881e2ef1cc0ae52ad5cafae3715bdfaf76a1ac905a6e3aa3a7fc1736a2"
+    sha256 cellar: :any, catalina:      "c95f616993a2fd70d3ed9fbb7556b582ef2aca26fbda97b36898bcfb9efbcee1"
+    sha256 cellar: :any, mojave:        "1f157591a67c0165af8492b3cb1b6049a7e151b0770aaed4c176c15fe3050f68"
+    sha256 cellar: :any, x86_64_linux:  "bd997637829ddd933b8047b8c4428752bc0c7db7877b2b7a68a8c94d4e69d450" # linuxbrew-core
   end
 
   depends_on "libyaml"

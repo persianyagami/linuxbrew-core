@@ -2,15 +2,23 @@ class Monero < Formula
   desc "Official Monero wallet and CPU miner"
   homepage "https://www.getmonero.org/"
   url "https://github.com/monero-project/monero.git",
-      tag:      "v0.17.1.7",
-      revision: "54a4071473432f30b83638a98779941e0b164f39"
+      tag:      "v0.17.2.0",
+      revision: "f6e63ef260e795aacd408c28008398785b84103a"
   license "BSD-3-Clause"
+  revision 1
+
+  livecheck do
+    url :stable
+    strategy :github_latest
+  end
 
   bottle do
-    cellar :any
-    sha256 "b54fd343aee01f7427e461fa8e0185ef9eb11b26937b940ed5d9cd7ccd6c1ac0" => :big_sur
-    sha256 "260476373b27309cbf1e3690d379431f3fcf44220f31d057f4234b16f317af6a" => :catalina
-    sha256 "afdf3092eab84acf8e234bc514bef795cdec9762a8cac6bcbb3b519a40faef62" => :mojave
+    rebuild 2
+    sha256 cellar: :any,                 arm64_big_sur: "d9cfe133eaae8416ad9584d1ba44c90988637c7cab623debae8d06e503ad4f3a"
+    sha256 cellar: :any,                 big_sur:       "48b8e19c8db0fd8a8b1b5b3d1f376b43b62497d7be38b1ccdafbf6b5a22da8d6"
+    sha256 cellar: :any,                 catalina:      "52f133890b8bf7f44025ce97aa18608b9bb9ebcaadc26be7563f1a3c8638f475"
+    sha256 cellar: :any,                 mojave:        "21e5deea5fcd08facc7bc6c39f4da5ecdcdf6e5237f1316c6f445039d485bfe7"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "73e77885cf3551c3e65a731f39b0ff61445f56aaf9ec64d3c3cdbc79856516e5" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
@@ -26,6 +34,10 @@ class Monero < Formula
 
   conflicts_with "wownero", because: "both install a wallet2_api.h header"
 
+  # Boost 1.76 compatibility
+  # https://github.com/loqs/monero/commit/5e902e5e32c672661dfe5677c4a950c4dd409198
+  patch :DATA
+
   def install
     system "cmake", ".", *std_cmake_args
     system "make", "install"
@@ -35,36 +47,33 @@ class Monero < Formula
     rm lib/"libminiupnpc.a"
   end
 
-  plist_options manual: "monerod"
-
-  def plist
-    <<~EOS
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-      <dict>
-        <key>Label</key>
-        <string>#{plist_name}</string>
-        <key>ProgramArguments</key>
-        <array>
-          <string>#{opt_bin}/monerod</string>
-          <string>--non-interactive</string>
-        </array>
-        <key>RunAtLoad</key>
-        <true/>
-      </dict>
-      </plist>
-    EOS
+  service do
+    run [opt_bin/"monerod", "--non-interactive"]
   end
 
   test do
     cmd = "yes '' | #{bin}/monero-wallet-cli --restore-deterministic-wallet " \
-      "--password brew-test --restore-height 1 --generate-new-wallet wallet " \
-      "--electrum-seed 'baptism cousin whole exquisite bobsled fuselage left " \
-      "scoop emerge puzzled diet reinvest basin feast nautical upon mullet " \
-      "ponies sixteen refer enhanced maul aztec bemused basin'" \
-      "--command address"
+          "--password brew-test --restore-height 1 --generate-new-wallet wallet " \
+          "--electrum-seed 'baptism cousin whole exquisite bobsled fuselage left " \
+          "scoop emerge puzzled diet reinvest basin feast nautical upon mullet " \
+          "ponies sixteen refer enhanced maul aztec bemused basin'" \
+          "--command address"
     address = "4BDtRc8Ym9wGzx8vpkQQvpejxBNVpjEmVBebBPCT4XqvMxW3YaCALFraiQibejyMAxUXB5zqn4pVgHVm3JzhP2WzVAJDpHf"
     assert_equal address, shell_output(cmd).lines.last.split[1]
   end
 end
+
+__END__
+diff --git a/contrib/epee/include/storages/portable_storage.h b/contrib/epee/include/storages/portable_storage.h
+index 1e68605ab..801bb2c34 100644
+--- a/contrib/epee/include/storages/portable_storage.h
++++ b/contrib/epee/include/storages/portable_storage.h
+@@ -40,6 +40,8 @@
+ #include "span.h"
+ #include "int-util.h"
+
++#include <boost/mpl/contains.hpp>
++
+ namespace epee
+ {
+   namespace serialization

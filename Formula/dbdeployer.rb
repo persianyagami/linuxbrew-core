@@ -1,24 +1,30 @@
 class Dbdeployer < Formula
   desc "Tool to deploy sandboxed MySQL database servers"
   homepage "https://github.com/datacharmer/dbdeployer"
-  url "https://github.com/datacharmer/dbdeployer/archive/v1.57.0.tar.gz"
-  sha256 "c8c84802cffcf3f8ac433c92fc13b75d966321bb8ac89efc4f1142618f896576"
+  url "https://github.com/datacharmer/dbdeployer/archive/v1.62.0.tar.gz"
+  sha256 "a97d91bd319e90122f57b185fa0ba1d64358fa33dab6a859b31bda866ca6cdf8"
   license "Apache-2.0"
   head "https://github.com/datacharmer/dbdeployer.git"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "fc872b9096b1b93ff20408c90adf9c52f14460b2f25aaf55fb601fee7e31f36a" => :big_sur
-    sha256 "2662fbc7ff443f1941dfc13f72f336100d2d866637fdf6d366dff854e17de4f4" => :catalina
-    sha256 "8706acc54a4278288eb16cb84c111b40a4380b366a9deb118c81de5387d73dd6" => :mojave
-    sha256 "b274b7b0c3c48730d8b228efa1c1cd23c6e301b79d9105df14f88829a5474877" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "6969c1f05657328981c0d9f2ad69b126143eee62824f78eda9534c5de14273c0"
+    sha256 cellar: :any_skip_relocation, big_sur:       "d96b7c9c43b6e46cdb82c43e834056f17ef53807d3d0ad67c109d76a0a158176"
+    sha256 cellar: :any_skip_relocation, catalina:      "1a4a6bc0085fe70bf416841a046018c9f7798480b7b59c18e2846ee3d7157161"
+    sha256 cellar: :any_skip_relocation, mojave:        "64a865c61c858e1f847bdbdc4640df078a79d7aed8fcf920931b5b133946aa84"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1f453d5d94ca68ccbd7b1e2d6612afa3d6c186dbe9d3ee586a67a3922df60159" # linuxbrew-core
   end
 
   depends_on "go" => :build
 
   def install
-    system "./scripts/build.sh", OS.mac? ? "OSX" : "linux"
-    bin.install "dbdeployer-#{version}.#{OS.mac? ? "osx" : "linux"}" => "dbdeployer"
+    on_macos do
+      system "./scripts/build.sh", "OSX"
+      bin.install "dbdeployer-#{version}.osx" => "dbdeployer"
+    end
+    on_linux do
+      system "./scripts/build.sh", "linux"
+      bin.install "dbdeployer-#{version}.linux" => "dbdeployer"
+    end
     bash_completion.install "docs/dbdeployer_completion.sh"
   end
 

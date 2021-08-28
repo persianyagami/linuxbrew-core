@@ -1,9 +1,12 @@
 class Uhd < Formula
   desc "Hardware driver for all USRP devices"
   homepage "https://files.ettus.com/manual/"
-  url "https://github.com/EttusResearch/uhd/archive/v4.0.0.0.tar.gz"
-  sha256 "4f3513c43edf0178391ed5755266864532716b8b503bcfb9a983ae6256c51b14"
+  # The build system uses git to recover version information
+  url "https://github.com/EttusResearch/uhd.git",
+      tag:      "v4.0.0.0",
+      revision: "90ce6062b6b5df2eddeee723777be85108e4e7c7"
   license all_of: ["GPL-3.0-or-later", "LGPL-3.0-or-later", "MIT", "BSD-3-Clause", "Apache-2.0"]
+  revision 2
   head "https://github.com/EttusResearch/uhd.git"
 
   livecheck do
@@ -12,20 +15,22 @@ class Uhd < Formula
   end
 
   bottle do
-    sha256 "6cc2856cd61dbc5757d003a75efc9f0a6a5bed1c559a9c21f5ac87a65b496126" => :big_sur
-    sha256 "000b6f7fd9126542c480b004ad6c0b7e85279d00ab5c3ff96bb45ba98acdf489" => :catalina
-    sha256 "90f5734f4608e8a2c198bee12f4de067d7e5297d531c625bcfc4dbfcfd0fe7fe" => :mojave
+    sha256 arm64_big_sur: "6d7c30e045cd3c2db314798a440e9b6ef803f776efe61a1c43cec845eba345c7"
+    sha256 big_sur:       "8958921dbc42bfa6fa8280009f934beb86cffadf488e17cd433b7f6b2b79f744"
+    sha256 catalina:      "cea4d4a254b7ece640531c5c7a4e8555a512ba80a9a67c856ac880dd13d6c4e4"
+    sha256 mojave:        "36ce3765f122569d97f783b9e81718e8c03bbae8777f4f32d82085cd0c73787a"
   end
 
   depends_on "cmake" => :build
   depends_on "doxygen" => :build
+  depends_on "pkg-config" => :build
   depends_on "boost"
   depends_on "libusb"
   depends_on "python@3.9"
 
   resource "Mako" do
-    url "https://files.pythonhosted.org/packages/72/89/402d2b4589e120ca76a6aed8fee906a0f5ae204b50e455edd36eda6e778d/Mako-1.1.3.tar.gz"
-    sha256 "8195c8c1400ceb53496064314c6736719c6f25e7479cd24c77be3d9361cddc27"
+    url "https://files.pythonhosted.org/packages/5c/db/2d2d88b924aa4674a080aae83b59ea19d593250bfe5ed789947c21736785/Mako-1.1.4.tar.gz"
+    sha256 "17831f0b7087c313c0ffae2bcbbd3c1d5ba9eeac9c38f2eb7b50e8c99fe9d5ab"
   end
 
   def install
@@ -45,6 +50,6 @@ class Uhd < Formula
   end
 
   test do
-    assert_match version.to_s, shell_output("#{bin}/uhd_config_info --version")
+    assert_match version.major_minor_patch.to_s, shell_output("#{bin}/uhd_config_info --version")
   end
 end

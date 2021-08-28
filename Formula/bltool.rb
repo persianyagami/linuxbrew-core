@@ -10,7 +10,7 @@ class Bltool < Formula
     depends_on "leiningen" => :build
   end
 
-  bottle :unneeded
+  depends_on "openjdk"
 
   def install
     if build.head?
@@ -37,6 +37,6 @@ class Bltool < Formula
                          "--input", "test.edn",
                          "--output", "test.txt"
 
-    assert_match /12527736\s+360\s+unfinished\s+Assassin/, File.read("test.txt")
+    assert_match(/12527736\s+360\s+unfinished\s+Assassin/, File.read("test.txt"))
   end
 end

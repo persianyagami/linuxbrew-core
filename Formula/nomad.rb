@@ -1,62 +1,36 @@
 class Nomad < Formula
   desc "Distributed, Highly Available, Datacenter-Aware Scheduler"
   homepage "https://www.nomadproject.io"
-  url "https://github.com/hashicorp/nomad/archive/v1.0.0.tar.gz"
-  sha256 "970d7a35fe61e7a6ee3be06c0a2829e7dcc0f5e72fcb2539f457d2f4ab138cec"
+  url "https://github.com/hashicorp/nomad/archive/v1.1.4.tar.gz"
+  sha256 "b5064c7453f24f7029707b6a9b1ca3000a4a99264ef06bdea3b3d2c387baaf6a"
   license "MPL-2.0"
-  head "https://github.com/hashicorp/nomad.git"
+  head "https://github.com/hashicorp/nomad.git", branch: "main"
 
   livecheck do
-    url :head
+    url :stable
     regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "bb256c8d79e17876ddc00c2629c48cd58d231dcac436a1ca476c62a4f3be9ae4" => :big_sur
-    sha256 "468820b673a49cf95f75bfd996d681d450c6b1f2eff4bb9e05631bd54491e69d" => :catalina
-    sha256 "0d4521070fef88af7b7a74ae53406db65801c242b54eb39dabb46fdd95ff340c" => :mojave
-    sha256 "9d65a92da7fcb66e3a5934ac06b2ede5bf4f8ec0b2ba68032bafbdf88d7840e9" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "24c97212a30225373e2b540b1483c611449ec0a8c3267d19b2d94390beaef331"
+    sha256 cellar: :any_skip_relocation, big_sur:       "dd3706ae0be742f69d7cf9a3800fa2afc0ca5287e83f31edb604e3f43b81f70e"
+    sha256 cellar: :any_skip_relocation, catalina:      "a97f752a4f01e8fc40e85759e4e024f4f08b421ac678f9d3a7f9efa5661aa445"
+    sha256 cellar: :any_skip_relocation, mojave:        "9b06e7280d7d08d5d2598e8652ef3fb7a25082a235b0337ec5ac5dd6322b8f23"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4e5240a2fa90f74995075d3908ef7bf58e74ff5aea3d8ef0cb89fef07643bcb3" # linuxbrew-core
   end
 
   depends_on "go" => :build
 
   def install
-    system "go", "build", *std_go_args, "-tags", "ui"
+    system "go", "build", *std_go_args(ldflags: "-s -w"), "-tags", "ui"
   end
 
-  plist_options manual: "nomad agent -dev"
-
-  def plist
-    <<~EOS
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-        <dict>
-          <key>KeepAlive</key>
-          <dict>
-            <key>SuccessfulExit</key>
-            <false/>
-          </dict>
-          <key>Label</key>
-          <string>#{plist_name}</string>
-          <key>ProgramArguments</key>
-          <array>
-            <string>#{opt_bin}/nomad</string>
-            <string>agent</string>
-            <string>-dev</string>
-          </array>
-          <key>RunAtLoad</key>
-          <true/>
-          <key>WorkingDirectory</key>
-          <string>#{var}</string>
-          <key>StandardErrorPath</key>
-          <string>#{var}/log/nomad.log</string>
-          <key>StandardOutPath</key>
-          <string>#{var}/log/nomad.log</string>
-        </dict>
-      </plist>
-    EOS
+  service do
+    run [opt_bin/"nomad", "agent", "-dev"]
+    keep_alive true
+    working_dir var
+    log_path var/"log/nomad.log"
+    error_log_path var/"log/nomad.log"
   end
 
   test do

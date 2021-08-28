@@ -1,12 +1,12 @@
 class Parallel < Formula
   desc "Shell command parallelization utility"
   homepage "https://savannah.gnu.org/projects/parallel/"
-  url "https://ftp.gnu.org/gnu/parallel/parallel-20201122.tar.bz2"
-  mirror "https://ftpmirror.gnu.org/parallel/parallel-20201122.tar.bz2"
-  sha256 "4da0bf42c466493b44dcbd8750e7bf99c31da4c701e8be272276c16ec4caff30"
+  url "https://ftp.gnu.org/gnu/parallel/parallel-20210622.tar.bz2"
+  mirror "https://ftpmirror.gnu.org/parallel/parallel-20210622.tar.bz2"
+  sha256 "7b33279bf71e76c52c393081d2db69057dd320be019759c4e704841a6761ec86"
   license "GPL-3.0-or-later"
   version_scheme 1
-  head "https://git.savannah.gnu.org/git/parallel.git"
+  head "https://git.savannah.gnu.org/git/parallel.git", branch: "master"
 
   livecheck do
     url :homepage
@@ -14,11 +14,8 @@ class Parallel < Formula
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "144e116a689c4fea40febb62cf7ed46dba36eee17e3ead766f63ecd55392bd8b" => :big_sur
-    sha256 "dc76d7573944f64ce047c3025320a12aef3c744d019449d62040d7121a476d23" => :catalina
-    sha256 "32f6187f65e0b9b6c706a5eb6c6e24c8097a3701f5d8f7cc885bf0be82478cf0" => :mojave
-    sha256 "7e24471e4cc77c1d865413664e28db8a052e0155fa9996e596c4a7257e521855" => :x86_64_linux
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "2e0165ed1310328267d9ec1225f107f7a67b917ffc0bdee2971cf24a1a86b4de" # linuxbrew-core
   end
 
   conflicts_with "moreutils", because: "both install a `parallel` executable"
@@ -26,6 +23,15 @@ class Parallel < Formula
   def install
     system "./configure", "--prefix=#{prefix}"
     system "make", "install"
+
+    inreplace_files = [
+      bin/"parallel",
+      doc/"parallel.texi",
+      doc/"parallel_design.texi",
+      man1/"parallel.1",
+      man7/"parallel_design.7",
+    ]
+    inreplace inreplace_files, "/usr/local", HOMEBREW_PREFIX
   end
 
   test do

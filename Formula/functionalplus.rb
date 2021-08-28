@@ -1,18 +1,23 @@
 class Functionalplus < Formula
   desc "Functional Programming Library for C++"
   homepage "https://github.com/Dobiasd/FunctionalPlus"
-  url "https://github.com/Dobiasd/FunctionalPlus/archive/v0.2.13-p0.tar.gz"
-  version "0.2.13"
-  sha256 "62f61ce6500859f0d77306b1644b5c6992287688de38e170b17b8a66b2448b54"
+  url "https://github.com/Dobiasd/FunctionalPlus/archive/v0.2.15-p0.tar.gz"
+  version "0.2.15"
+  sha256 "4c76104ec8f6da5e66ed768380bdf128e0ba01725056c40a3c1b850cf4b441ad"
   license "BSL-1.0"
   head "https://github.com/Dobiasd/FunctionalPlus.git"
 
+  livecheck do
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+(?:[._-]p\d+)?)$/i)
+    strategy :git do |tags, regex|
+      # Omit `-p0` suffix but allow `-p1`, etc.
+      tags.map { |tag| tag[regex, 1]&.sub(/[._-]p0/i, "") }
+    end
+  end
+
   bottle do
-    cellar :any_skip_relocation
-    sha256 "244d54ac6b458a8f170a5eba497817b5b22b374e834d65537d674ab9e39c666c" => :big_sur
-    sha256 "73e1e7337735aefb7deed60dd5a2fa21f6e08852c3ed2b030e599196c7af2328" => :catalina
-    sha256 "7c71a5c706e7b89288b9f9897eaee2a22f4b375ef710c68d94fe131b012daa6d" => :mojave
-    sha256 "c7259c9f83e0959dcf4e1051778f01de7e8bc993917c575814f74d59cb2f580c" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "ab75da7d297b2258e1e906027bd3d5abe6b7464339288730eae5fec22b931715" # linuxbrew-core
   end
 
   depends_on "cmake" => :build

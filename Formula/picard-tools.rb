@@ -1,8 +1,8 @@
 class PicardTools < Formula
   desc "Tools for manipulating HTS data and formats"
   homepage "https://broadinstitute.github.io/picard/"
-  url "https://github.com/broadinstitute/picard/releases/download/2.23.9/picard.jar"
-  sha256 "9386624d16f30eb666efc11652000ca5db61425f20730ce6ed9a2d0d52a1edf9"
+  url "https://github.com/broadinstitute/picard/releases/download/2.26.0/picard.jar"
+  sha256 "b33ffb32d702265525acdcb5e96d5807fcd732161e2cb6d038839dccdb065bbc"
   license "MIT"
 
   livecheck do
@@ -10,7 +10,9 @@ class PicardTools < Formula
     strategy :github_latest
   end
 
-  bottle :unneeded
+  bottle do
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "5c6f3b39a85a9a581ef9a85ef5bcc5acc24364341c711973c999709ac2f8289d" # linuxbrew-core
+  end
 
   depends_on "openjdk"
 

@@ -13,8 +13,6 @@ class Sqoop < Formula
     regex(%r{href=["']?v?((?!\d+\.9\d+)\d+(?:\.\d+)+)/?["' >]}i)
   end
 
-  bottle :unneeded
-
   depends_on "coreutils"
   depends_on "hadoop"
   depends_on "hbase"
@@ -53,6 +51,6 @@ class Sqoop < Formula
   end
 
   test do
-    assert_match /#{version}/, shell_output("#{bin}/sqoop version")
+    assert_match version.to_s, shell_output("#{bin}/sqoop version")
   end
 end

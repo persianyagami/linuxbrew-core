@@ -1,21 +1,21 @@
 class Pdnsrec < Formula
   desc "Non-authoritative/recursing DNS server"
   homepage "https://www.powerdns.com/recursor.html"
-  url "https://downloads.powerdns.com/releases/pdns-recursor-4.4.1.tar.bz2"
-  sha256 "f97fa34635d42c68acee5d4da9db0e5ff619fd49e62acace7b4bdb7ee3675698"
+  url "https://downloads.powerdns.com/releases/pdns-recursor-4.5.5.tar.bz2"
+  sha256 "a836a39b99fcc21873e4ba3a60aa9915a33fac7b44922696e9a257f551fe05fb"
   license "GPL-2.0-only"
-  revision 1
 
   livecheck do
     url "https://downloads.powerdns.com/releases/"
-    regex(/href=.*?pdns-recursor[._-]v?(\d+(?:\.\d+)*)\.t/i)
+    regex(/href=.*?pdns-recursor[._-]v?(\d+(?:\.\d+)+)\.t/i)
   end
 
   bottle do
-    sha256 "0f080e316dd2d20e656f7ae48dbb881fc9824a5ca35b468dd9fd153c9e2a3c22" => :big_sur
-    sha256 "f38be52b2d55015172cc0e89dac5a29eadffdd12e8f7b21c4247050237ffc246" => :catalina
-    sha256 "f1e89927a21f517c6e96668149735b838fa1f9e96e36878fbbddc52d61253900" => :mojave
-    sha256 "d457c35465a16903cf3e55c8812c24ee62a72e460f128cdef68357cf95bbb1c2" => :x86_64_linux
+    sha256 arm64_big_sur: "6d91a9a10c37e9957d9d54a9b1c7dfd053a590582078dedabe0c1b2c5583fbff"
+    sha256 big_sur:       "2e5c07a26540b304ae52a2ed4569a09a0f6f9641f93b3cdcc4ce81c14423936c"
+    sha256 catalina:      "0c3355b03b41fb4ad9d76bdb6d0f87f90ebe52c0f20fbf0721904e9393a33cca"
+    sha256 mojave:        "30bf6621caa349c712e84b8211877f55785c356dbdce558c390b6fdf19bf3ad7"
+    sha256 x86_64_linux:  "568c51ec9a9591e9eb638c4fc24cb1d6bdad16806148c612859d2916f8bfd262" # linuxbrew-core
   end
 
   depends_on "pkg-config" => :build
@@ -23,8 +23,30 @@ class Pdnsrec < Formula
   depends_on "lua"
   depends_on "openssl@1.1"
 
+  on_macos do
+    depends_on "llvm" => :build if DevelopmentTools.clang_build_version <= 1100
+  end
+
+  on_linux do
+    depends_on "gcc"
+  end
+
+  fails_with :clang do
+    build 1100
+    cause <<-EOS
+      Undefined symbols for architecture x86_64:
+        "MOADNSParser::init(bool, std::__1::basic_string_view<char, std::__1::char_traits<char> > const&)"
+    EOS
+  end
+
+  fails_with gcc: "5"
+
   def install
     ENV.cxx11
+    ENV.remove "HOMEBREW_LIBRARY_PATHS", Formula["llvm"].opt_lib
+    on_macos do
+      ENV.llvm_clang if DevelopmentTools.clang_build_version <= 1100
+    end
 
     args = %W[
       --prefix=#{prefix}

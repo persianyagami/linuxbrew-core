@@ -4,24 +4,15 @@ class ClangFormat < Formula
   # The LLVM Project is under the Apache License v2.0 with LLVM Exceptions
   license "Apache-2.0"
   version_scheme 1
+  head "https://github.com/llvm/llvm-project.git", branch: "main"
 
   stable do
-    url "https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/llvm-11.0.0.src.tar.xz"
-    sha256 "913f68c898dfb4a03b397c5e11c6a2f39d0f22ed7665c9cefa87a34423a72469"
+    url "https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.1/llvm-12.0.1.src.tar.xz"
+    sha256 "7d9a8405f557cefc5a21bf5672af73903b64749d9bc3a50322239f56f34ffddf"
 
     resource "clang" do
-      url "https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/clang-11.0.0.src.tar.xz"
-      sha256 "0f96acace1e8326b39f220ba19e055ba99b0ab21c2475042dbc6a482649c5209"
-    end
-
-    resource "libcxx" do
-      url "https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/libcxx-11.0.0.src.tar.xz"
-      sha256 "6c1ee6690122f2711a77bc19241834a9219dda5036e1597bfa397f341a9b8b7a"
-    end
-
-    resource "libcxxabi" do
-      url "https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/libcxxabi-11.0.0.src.tar.xz"
-      sha256 "58697d4427b7a854ec7529337477eb4fba16407222390ad81a40d125673e4c15"
+      url "https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.1/clang-12.0.1.src.tar.xz"
+      sha256 "6e912133bcf56e9cfe6a346fa7e5c52c2cde3e4e48b7a6cc6fcc7c75047da45f"
     end
   end
 
@@ -32,50 +23,28 @@ class ClangFormat < Formula
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "078658e8e606dc1ce2dd6d1c2912a081203f92cebef2c6e5f82947aa2e48dad6" => :big_sur
-    sha256 "4ea52df9cb0e800e8fe2f7a62b4c8b7424ae2d9eba162db16567c9488d6f0f38" => :catalina
-    sha256 "4ede17c7d92cf28437513c553283a8916e50c4da976f7fef4e1036b3609917d4" => :mojave
-    sha256 "59ebd49389d11862f756f02f7d4bc3aa8de109563a40eb9a8c469eb2ada625fb" => :high_sierra
-    sha256 "9acef9bbec0efdf9d163a24e9551f1ffe3071ae13a0f09c923cab39cefb66799" => :x86_64_linux
-  end
-
-  head do
-    url "https://git.llvm.org/git/llvm.git"
-
-    resource "clang" do
-      url "https://git.llvm.org/git/clang.git"
-    end
-
-    resource "libcxx" do
-      url "https://git.llvm.org/git/libcxx.git"
-    end
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "1f038a1af0ed7c0c316cca7a5b74c868eb011ea5c1106bd34d451c7d99b16ca4"
+    sha256 cellar: :any_skip_relocation, big_sur:       "a919653359246062c53f2ce6a7a3fd822e71b1d65c4f75bd20a361bc7264b139"
+    sha256 cellar: :any_skip_relocation, catalina:      "e18818a9555c17fffdf416deb5e16526f4b7fb07ec684d5dda22b6b8b1fd7c4e"
+    sha256 cellar: :any_skip_relocation, mojave:        "2ce598eddb5655854cc4a0e88591ced06b0a2d5bab96497c0b7081f5a2b0dd74"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "383d62c5cf383052a8c1489a252d76b4931650cc4906e21cdc209813484fc4d8" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
   depends_on "ninja" => :build
-  depends_on "subversion" => :build
-  unless OS.mac?
-    depends_on "bison" => :build
-    depends_on "gcc" # needed for libstdc++
-    if Formula["glibc"].any_version_installed? || OS::Linux::Glibc.system_version < Formula["glibc"].version
-      depends_on "glibc"
-    end
-    depends_on "libedit" # llvm requires <histedit.h>
-  end
 
   uses_from_macos "libxml2"
   uses_from_macos "ncurses"
   uses_from_macos "zlib"
 
+  on_linux do
+    keg_only "it conflicts with llvm"
+  end
+
   def install
     if build.head?
-      ln_s buildpath/"libcxx", buildpath/"llvm/projects/libcxx"
-      ln_s buildpath/"libcxxabi", buildpath/"llvm/tools/libcxxabi"
       ln_s buildpath/"clang", buildpath/"llvm/tools/clang"
     else
-      (buildpath/"projects/libcxx").install resource("libcxx")
-      (buildpath/"projects/libcxxabi").install resource("libcxxabi")
       (buildpath/"tools/clang").install resource("clang")
     end
 
@@ -83,10 +52,7 @@ class ClangFormat < Formula
 
     mkdir llvmpath/"build" do
       args = std_cmake_args
-      args << "-DLLVM_ENABLE_LIBCXX=ON"
-      args << "-DLLVM_EXTERNAL_PROJECTS=\"clang;libcxx;libcxxabi\""
-      args << "-DLLVM_EXTERNAL_LIBCXX_SOURCE_DIR=\"#{buildpath/"projects/libcxx"}\""
-      args << "-DCMAKE_BUILD_TYPE=Release"
+      args << "-DLLVM_EXTERNAL_PROJECTS=\"clang\""
       args << ".."
       system "cmake", "-G", "Ninja", *args
       system "ninja", "clang-format"

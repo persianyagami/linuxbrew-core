@@ -5,8 +5,6 @@ class Kommit < Formula
   sha256 "c51e87c9719574feb9841fdcbd6d1a43b73a45afeca25e1312d2699fdf730161"
   license "MIT"
 
-  bottle :unneeded
-
   def install
     bin.install "bin/git-kommit"
   end
@@ -14,6 +12,6 @@ class Kommit < Formula
   test do
     system "git", "init"
     system "#{bin}/git-kommit", "-m", "Hello"
-    assert_match /Hello/, shell_output("#{bin}/git-kommit -s /dev/null 2>&1")
+    assert_match "Hello", shell_output("#{bin}/git-kommit -s /dev/null 2>&1")
   end
 end

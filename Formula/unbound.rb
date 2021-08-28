@@ -1,10 +1,10 @@
 class Unbound < Formula
   desc "Validating, recursive, caching DNS resolver"
   homepage "https://www.unbound.net"
-  url "https://nlnetlabs.nl/downloads/unbound/unbound-1.13.0.tar.gz"
-  sha256 "a954043a95b0326ca4037e50dace1f3a207a0a19e9a4a22f4c6718fc623db2a1"
+  url "https://nlnetlabs.nl/downloads/unbound/unbound-1.13.2.tar.gz"
+  sha256 "0a13b547f3b92a026b5ebd0423f54c991e5718037fd9f72445817f6a040e1a83"
   license "BSD-3-Clause"
-  head "https://github.com/NLnetLabs/unbound.git"
+  head "https://github.com/NLnetLabs/unbound.git", branch: "master"
 
   # We check the GitHub repo tags instead of
   # https://nlnetlabs.nl/downloads/unbound/ since the first-party site has a
@@ -15,10 +15,11 @@ class Unbound < Formula
   end
 
   bottle do
-    sha256 "cef5d9843ecaabaa0a4cb9b89e04bc3d370ce143e4ff2e0f6711aa6572b1ad3a" => :big_sur
-    sha256 "132e7387adde0939a0f50d125ef5b6bdfa0186bae6dd9628668e9813813f4a9a" => :catalina
-    sha256 "a1941e3c48de236e9310547620b1fdf71ec5c07ff8cb6dadc9e9433d02dfa1a7" => :mojave
-    sha256 "d56628ab4a9be7bb17f1f23d6b842fb26772661857851e512df63fbb9a568350" => :x86_64_linux
+    sha256 arm64_big_sur: "81f5590b866fd09a8910863c2bef3eefa98b7c9cef293a0bc140aa16a9c68b07"
+    sha256 big_sur:       "4e4b82b339beb0a6adc5385e39f7a44165deda8759ed6b80f08b947a3b6db994"
+    sha256 catalina:      "46d5cce43c8e9f99d04c597f925a4c4ee9e84d2d33cc03d3344e9d659fafb292"
+    sha256 mojave:        "0ecc5fa9233d3fb74789f80c553ede84b9d783a9f6f886cf9a29937b6a8b3bf8"
+    sha256 x86_64_linux:  "3984ad5082f41b699c7e259172ccb0163b8368d3fb163e945ed43fc21d8b495f" # linuxbrew-core
   end
 
   depends_on "libevent"
@@ -39,10 +40,11 @@ class Unbound < Formula
       --with-ssl=#{Formula["openssl@1.1"].opt_prefix}
     ]
 
-    if OS.mac?
+    on_macos do
       args << "--with-libexpat=#{MacOS.sdk_path}/usr" if MacOS.sdk_path_if_needed
-    else
-      args << "--with-libexpat=#{Formula["expat"].prefix}"
+    end
+    on_linux do
+      args << "--with-libexpat=#{Formula["expat"].opt_prefix}"
     end
     system "./configure", *args
 

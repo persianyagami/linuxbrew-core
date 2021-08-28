@@ -1,12 +1,11 @@
 class Paket < Formula
   desc "Dependency manager for .NET with support for NuGet and Git repositories"
   homepage "https://fsprojects.github.io/Paket/"
-  url "https://github.com/fsprojects/Paket/releases/download/5.257.0/paket.exe"
-  sha256 "58185853a390c979aedec9fe2b7b2f81c1131ebfae51c5be4121b670b329deef"
+  url "https://github.com/fsprojects/Paket/releases/download/6.0.7/paket.exe"
+  sha256 "449668fc2a744114fd8affc1a51c0e2f8b90920947b825cca11d414d0cbf9997"
   license "MIT"
 
-  bottle :unneeded
-
+  depends_on arch: :x86_64 # mono is not yet supported on ARM
   depends_on "mono"
 
   def install

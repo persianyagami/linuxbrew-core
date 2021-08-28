@@ -11,22 +11,28 @@ class Libid3tag < Formula
   end
 
   bottle do
-    cellar :any
     rebuild 2
-    sha256 "ef38d5804e95cf7f2096c9e8ec31e568170c6e238e43e7ddc3df914ded26f07b" => :big_sur
-    sha256 "93b071dac99b3d85dac56e59af42e28d5de959bed9fd37a9a2178c02c8b20f17" => :catalina
-    sha256 "1186600473728830dbb65189d11912e2abf42dac5fcbf7ee38629784cc83b310" => :mojave
-    sha256 "84dc0ced0ad0ef6c7584ffe35bd20a137ac360c3ad820213ca4dd235f7403545" => :x86_64_linux
+    sha256 cellar: :any, arm64_big_sur: "cd7f36377060c5d16d3ee4d4ef5696ef47be82f4f0807172eef36f589cfad246"
+    sha256 cellar: :any, big_sur:       "ef38d5804e95cf7f2096c9e8ec31e568170c6e238e43e7ddc3df914ded26f07b"
+    sha256 cellar: :any, catalina:      "93b071dac99b3d85dac56e59af42e28d5de959bed9fd37a9a2178c02c8b20f17"
+    sha256 cellar: :any, mojave:        "1186600473728830dbb65189d11912e2abf42dac5fcbf7ee38629784cc83b310"
+    sha256 cellar: :any, x86_64_linux:  "84dc0ced0ad0ef6c7584ffe35bd20a137ac360c3ad820213ca4dd235f7403545" # linuxbrew-core
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
 
+  uses_from_macos "gperf"
   uses_from_macos "zlib"
 
   on_linux do
-    depends_on "gperf"
+    # fix build with gperf
+    # https://bugs.gentoo.org/show_bug.cgi?id=605158
+    patch do
+      url "https://gist.githubusercontent.com/iMichka/c23ea881388319b38838183754349bba/raw/4829ff0702a511f96026369676a11edd9a79ab30/libid3tag.diff"
+      sha256 "00f04427c6b3bab2bb8595f6df0ebc774b60031ee60428241801ccf6337d4c5d"
+    end
   end
 
   # patch for utf-16 (memory leaks), see https://bugs.launchpad.net/mixxx/+bug/403586
@@ -58,20 +64,6 @@ class Libid3tag < Formula
   patch :p2 do
     url "https://gitweb.gentoo.org/repo/gentoo.git/plain/media-libs/libid3tag/files/0.15.1b/libid3tag-0.15.1b-a_capella.patch?id=56bd759df1d0"
     sha256 "5e86270ebb179d82acee686700d203e90f42e82beeed455b0163d8611657d395"
-  end
-
-  unless OS.mac?
-    # fix build with gperf
-    # https://bugs.gentoo.org/show_bug.cgi?id=605158
-    patch do
-      url "https://gist.githubusercontent.com/iMichka/c23ea881388319b38838183754349bba/raw/4829ff0702a511f96026369676a11edd9a79ab30/libid3tag.diff"
-      sha256 "00f04427c6b3bab2bb8595f6df0ebc774b60031ee60428241801ccf6337d4c5d"
-    end
-  end
-
-  unless OS.mac?
-    depends_on "gperf"
-    depends_on "zlib"
   end
 
   def install

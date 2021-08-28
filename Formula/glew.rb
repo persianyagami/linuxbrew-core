@@ -4,26 +4,21 @@ class Glew < Formula
   url "https://downloads.sourceforge.net/project/glew/glew/2.2.0/glew-2.2.0.tgz"
   sha256 "d4fc82893cfb00109578d0a1a2337fb8ca335b3ceccf97b97e5cc7f08e4353e1"
   license "BSD-3-Clause"
-  revision 1 unless OS.mac?
+  revision OS.mac? ? 1 : 2
   head "https://github.com/nigels-com/glew.git"
 
-  livecheck do
-    url :stable
-  end
-
   bottle do
-    cellar :any
-    sha256 "acb605dfd8d291689743df3b4302428b610ca96f1321aa1ecdddf88621b53730" => :big_sur
-    sha256 "5f130b7557c1753c3880fc2eb16363de05a9d5a7d032294e8f8e744583df467f" => :catalina
-    sha256 "dc1e74289200e3c1db6792f085f1216529b491fc463bc6205bcd40807a4dba31" => :mojave
-    sha256 "1e2d9d489808104dfa3a4dab5662e200e1020b40b869bac45b6b84b8490cd936" => :high_sierra
-    sha256 "6579d8d82d208faeb72c6068e773d6c69ea20eb36a50a836ebd059fc0f7721d4" => :x86_64_linux
+    sha256 cellar: :any, arm64_big_sur: "4ec7d501b56e5e5682f752975340c57a9aca68431d0d2cc9f849e428860f09de"
+    sha256 cellar: :any, big_sur:       "9e0b9a17a4d7372d191d377ae63e6bb0070434eefc997299fe708ca12c02bfb5"
+    sha256 cellar: :any, catalina:      "d3113b746275f48d4f50316c9ddf0ce27e7a11e20ffaac33dd1a2aaf9e59d52a"
+    sha256 cellar: :any, mojave:        "728dbc75cee45763fcc89605d758de1ed950cf219012a1614808a6abd8883ae8"
+    sha256 cellar: :any, x86_64_linux:  "0c7121cdf0692adceb4b3ec0cacefce1938e2ec54e91fab624b74245e0bc7e10" # linuxbrew-core
   end
 
-  depends_on "cmake" => :build
-  unless OS.mac?
+  depends_on "cmake" => [:build, :test]
+
+  on_linux do
     depends_on "freeglut" => :test
-    depends_on "mesa"
     depends_on "mesa-glu"
   end
 
@@ -39,13 +34,37 @@ class Glew < Formula
   end
 
   test do
-    if ENV["DISPLAY"].nil?
-      ohai "Can not test without a display."
-      return true
+    (testpath/"CMakeLists.txt").write <<~EOS
+      project(test_glew)
+
+      set(CMAKE_CXX_STANDARD 11)
+
+      find_package(OpenGL REQUIRED)
+      find_package(GLEW REQUIRED)
+
+      add_executable(${PROJECT_NAME} main.cpp)
+      target_link_libraries(${PROJECT_NAME} PUBLIC OpenGL::GL GLEW::GLEW)
+    EOS
+
+    (testpath/"main.cpp").write <<~EOS
+      #include <GL/glew.h>
+
+      int main()
+      {
+        return 0;
+      }
+    EOS
+
+    system "cmake", ".", "-Wno-dev"
+    system "make"
+
+    glut = "GLUT"
+    on_linux do
+      glut = "GL"
     end
     (testpath/"test.c").write <<~EOS
       #include <GL/glew.h>
-      #include <#{OS.mac? ? "GLUT" : "GL"}/glut.h>
+      #include <#{glut}/glut.h>
 
       int main(int argc, char** argv) {
         glutInit(&argc, argv);
@@ -58,12 +77,17 @@ class Glew < Formula
       }
     EOS
     flags = %W[-L#{lib} -lGLEW]
-    if OS.mac?
+    on_macos do
       flags << "-framework" << "GLUT"
-    else
+    end
+    on_linux do
       flags << "-lglut"
     end
     system ENV.cc, testpath/"test.c", "-o", "test", *flags
+    on_linux do
+      # Fails in Linux CI with: freeglut (./test): failed to open display ''
+      return if ENV["HOMEBREW_GITHUB_ACTIONS"]
+    end
     system "./test"
   end
 end

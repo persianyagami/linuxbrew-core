@@ -1,18 +1,18 @@
 class Libical < Formula
   desc "Implementation of iCalendar protocols and data formats"
   homepage "https://libical.github.io/libical/"
-  url "https://github.com/libical/libical/releases/download/v3.0.8/libical-3.0.8.tar.gz"
-  sha256 "09fecacaf75ba5a242159e3a9758a5446b5ce4d0ab684f98a7040864e1d1286f"
+  url "https://github.com/libical/libical/releases/download/v3.0.10/libical-3.0.10.tar.gz"
+  sha256 "f933b3e6cf9d56a35bb5625e8e4a9c3a50239a85aea05ed842932c1a1dc336b4"
   license any_of: ["LGPL-2.1-or-later", "MPL-2.0"]
-  revision 2
+  revision 1
 
   bottle do
-    cellar :any
-    sha256 "63bf149d253ce0058dc0c8d482498bcdc2f98a1f5fbbcbb5e994ca5902d2585a" => :big_sur
-    sha256 "aee72172114e605f00d453d7a2f5e7be3b813fcc56d05463c97de76f579db5f4" => :catalina
-    sha256 "93bd93bbad50f91aaa215ba2f764046fef919790a4ff227328a309b2ad2490d2" => :mojave
-    sha256 "3ff8dae7c504718bffd8fb8ce066c3b5c777d12250bdc87ff3fbb7f230284d1b" => :high_sierra
-    sha256 "949367ed4e103787fa38f9d2c717669a9b5d00547efd7e10c02873cfa92b5a7f" => :x86_64_linux
+    rebuild 1
+    sha256 cellar: :any,                 arm64_big_sur: "d21ba9fd766b87b6b30b220e2fcd5b26f93e7a5618f6e38790402ac6f105aaa8"
+    sha256 cellar: :any,                 big_sur:       "9d900728f649ccb4c9e80df219089b8f608e9027f7cb313896115574acc8d93a"
+    sha256 cellar: :any,                 catalina:      "a76e728e573b3d72e288009edc4e3f6d792a3ef7b91fca78e9a6b5d12ee6cd3b"
+    sha256 cellar: :any,                 mojave:        "5c8fbf1cb846303940f183de67b538dc0c1139a3117d115db3aa3e02c25d0c28"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "766f5cafa3f20e22951c282f92bb9477d94f058d45ccb3fd49549d4ca55e5c60" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
@@ -26,6 +26,7 @@ class Libical < Formula
     system "cmake", ".", "-DBDB_LIBRARY=BDB_LIBRARY-NOTFOUND",
                          "-DENABLE_GTK_DOC=OFF",
                          "-DSHARED_ONLY=ON",
+                         "-DCMAKE_INSTALL_RPATH=#{rpath}",
                          *std_cmake_args
     system "make", "install"
   end

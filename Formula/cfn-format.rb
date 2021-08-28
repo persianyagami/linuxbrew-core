@@ -1,15 +1,16 @@
 class CfnFormat < Formula
   desc "Command-line tool for formatting AWS CloudFormation templates"
   homepage "https://github.com/aws-cloudformation/rain"
-  url "https://github.com/aws-cloudformation/rain/archive/v1.1.1.tar.gz"
-  sha256 "5faf25a87a6fc0fde19edcf2fe6f26c81990da91d13fbf3858b1eb33711b0ebd"
+  url "https://github.com/aws-cloudformation/rain/archive/v1.2.0.tar.gz"
+  sha256 "064bc2b563c9b759d16147f33fe5c64bf0af3640cb4ae543e49615ae17b22e01"
   license "Apache-2.0"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "736d8ccf911a2de6edeff90bed1ffe207ea9e1c21c0fd09c1afb724400152703" => :big_sur
-    sha256 "3ffc8a003adc05637ed75636c41249452feb297d72b40227699681529b8b66ed" => :catalina
-    sha256 "d68a3331c643ee79c0b815dbe655ef5773e0a9e5e2c6b9f4f8fb2d7112bfeafb" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "ae53259389b4dfb638b10beb48257b7edaf84797b2b1873cb18ce915c61cc8ad"
+    sha256 cellar: :any_skip_relocation, big_sur:       "d4907e241905aad8457ae6eaf09e1d45e300d27776d95c0a9ee658dc0551c1cc"
+    sha256 cellar: :any_skip_relocation, catalina:      "4769eaf270502dce3598a91f2d2a67b4913f9ee2fdb17b715bcf5bd6e861bf72"
+    sha256 cellar: :any_skip_relocation, mojave:        "53cc76c61dc8e73690794be8f04611a74e0eb9391855b1fdfbe2cc684604eb0c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "971256432399d20f1945a432247701365d9610fced20c1a5aad31f9839bbb4cd" # linuxbrew-core
   end
 
   depends_on "go" => :build

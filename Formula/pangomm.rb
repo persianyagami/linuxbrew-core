@@ -1,28 +1,29 @@
 class Pangomm < Formula
   desc "C++ interface to Pango"
   homepage "https://www.pango.org/"
-  url "https://download.gnome.org/sources/pangomm/2.42/pangomm-2.42.2.tar.xz"
-  sha256 "1b24c92624ae1275ccb57758175d35f7c39ad3342d8c0b4ba60f0d9849d2d08a"
+  url "https://download.gnome.org/sources/pangomm/2.48/pangomm-2.48.1.tar.xz"
+  sha256 "776ad53e791e43106b7f40ff0834bee6e4eb1c6ad7cb6d215546f7a3df0edc4d"
   license "LGPL-2.1-only"
 
-  livecheck do
-    url :stable
-  end
-
   bottle do
-    cellar :any
-    sha256 "2d556eee79fa072f1f74ee61d20496fca446a4ff047c319e1ed6c8ea2f31ceb0" => :big_sur
-    sha256 "4dde9769c575a6a199b9cf2300600e10bebf1ec8869deb42195bebc103e7b2aa" => :catalina
-    sha256 "99d31943b659f40b4c7adf0d8cabcb2e68030ef8124e28556a5bae2ba87a6822" => :mojave
-    sha256 "3ae9617802d8d8106359d55fde4f3253ebe11b13d00e74c4acd11aadce4fcd7b" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "87244c82b6ac45d8de28f5870747b96fe8bded40041dd3de159fd501b7b58754"
+    sha256 cellar: :any,                 big_sur:       "d8ea58c9fd6cece698a1605b0b3513e5818d8e0c060dc5e7357e1b0aa7325233"
+    sha256 cellar: :any,                 catalina:      "304b7e078c0c4dcbbf44e30b4912adf475f41eeda5728e65f68d45f3abcd8af4"
+    sha256 cellar: :any,                 mojave:        "6060adeb759d72e6ce9f6f7c8e076ab736b7a36107d9f1e0346ce9d9a5eaa51b"
   end
 
   depends_on "meson" => :build
   depends_on "ninja" => :build
   depends_on "pkg-config" => :build
-  depends_on "cairomm@1.14"
+  depends_on "cairomm"
   depends_on "glibmm"
   depends_on "pango"
+
+  on_linux do
+    depends_on "gcc" => :build
+  end
+
+  fails_with gcc: "5"
 
   def install
     ENV.cxx11
@@ -33,6 +34,7 @@ class Pangomm < Formula
       system "ninja", "install"
     end
   end
+
   test do
     (testpath/"test.cpp").write <<~EOS
       #include <pangomm.h>
@@ -43,7 +45,7 @@ class Pangomm < Formula
       }
     EOS
     cairo = Formula["cairo"]
-    cairomm = Formula["cairomm@1.14"]
+    cairomm = Formula["cairomm"]
     fontconfig = Formula["fontconfig"]
     freetype = Formula["freetype"]
     gettext = Formula["gettext"]
@@ -51,26 +53,28 @@ class Pangomm < Formula
     glibmm = Formula["glibmm"]
     harfbuzz = Formula["harfbuzz"]
     libpng = Formula["libpng"]
-    libsigcxx = Formula["libsigc++@2"]
+    libsigcxx = Formula["libsigc++"]
     pango = Formula["pango"]
     pixman = Formula["pixman"]
     flags = %W[
       -I#{cairo.opt_include}/cairo
-      -I#{cairomm.opt_include}/cairomm-1.0
-      -I#{cairomm.opt_lib}/cairomm-1.0/include
+      -I#{cairomm.opt_include}/cairomm-1.16
+      -I#{cairomm.opt_lib}/cairomm-1.16/include
       -I#{fontconfig.opt_include}
       -I#{freetype.opt_include}/freetype2
       -I#{gettext.opt_include}
       -I#{glib.opt_include}/glib-2.0
       -I#{glib.opt_lib}/glib-2.0/include
-      -I#{glibmm.opt_include}/glibmm-2.4
-      -I#{glibmm.opt_lib}/glibmm-2.4/include
+      -I#{glibmm.opt_include}/giomm-2.68
+      -I#{glibmm.opt_include}/glibmm-2.68
+      -I#{glibmm.opt_lib}/giomm-2.68/include
+      -I#{glibmm.opt_lib}/glibmm-2.68/include
       -I#{harfbuzz.opt_include}/harfbuzz
-      -I#{include}/pangomm-1.4
+      -I#{include}/pangomm-2.48
       -I#{libpng.opt_include}/libpng16
-      -I#{libsigcxx.opt_include}/sigc++-2.0
-      -I#{libsigcxx.opt_lib}/sigc++-2.0/include
-      -I#{lib}/pangomm-1.4/include
+      -I#{libsigcxx.opt_include}/sigc++-3.0
+      -I#{libsigcxx.opt_lib}/sigc++-3.0/include
+      -I#{lib}/pangomm-2.48/include
       -I#{pango.opt_include}/pango-1.0
       -I#{pixman.opt_include}/pixman-1
       -L#{cairo.opt_lib}
@@ -82,19 +86,19 @@ class Pangomm < Formula
       -L#{lib}
       -L#{pango.opt_lib}
       -lcairo
-      -lcairomm-1.0
+      -lcairomm-1.16
       -lglib-2.0
-      -lglibmm-2.4
+      -lglibmm-2.68
       -lgobject-2.0
       -lpango-1.0
       -lpangocairo-1.0
-      -lpangomm-1.4
-      -lsigc-2.0
+      -lpangomm-2.48
+      -lsigc-3.0
     ]
     on_macos do
       flags << "-lintl"
     end
-    system ENV.cxx, "-std=c++11", "test.cpp", "-o", "test", *flags
+    system ENV.cxx, "-std=c++17", "test.cpp", "-o", "test", *flags
     system "./test"
   end
 end

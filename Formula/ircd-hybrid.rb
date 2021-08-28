@@ -1,8 +1,8 @@
 class IrcdHybrid < Formula
   desc "High-performance secure IRC server"
   homepage "https://www.ircd-hybrid.org/"
-  url "https://downloads.sourceforge.net/project/ircd-hybrid/ircd-hybrid/ircd-hybrid-8.2.36/ircd-hybrid-8.2.36.tgz"
-  sha256 "9b3de456609dc8909d5185243a8b094c4ff910fa26f94be7462c226a3f78e469"
+  url "https://downloads.sourceforge.net/project/ircd-hybrid/ircd-hybrid/ircd-hybrid-8.2.39/ircd-hybrid-8.2.39.tgz"
+  sha256 "035d271f6b0dd451157f80146d189bc1c9b84cc9ba1b7ad06fd72ee5108e6e4d"
   license "GPL-2.0-or-later"
 
   livecheck do
@@ -11,9 +11,11 @@ class IrcdHybrid < Formula
   end
 
   bottle do
-    sha256 "f192d0cc270024015f0b6d155df8f74f617585d8250fdc9cebd4f0cbc6ed7b4e" => :big_sur
-    sha256 "c48d4c05fb9b276fdbf9e92fbfee0165ef690082d75327e4e235839ef5202a4f" => :catalina
-    sha256 "384c0bf8f2e1e8a2abeba7b6505f6bc2becd8e7e71a5a73728f7258bdf130c6a" => :mojave
+    sha256 arm64_big_sur: "b31fc7ba489af06e2decf331466810c4477774e3c7af42fcbba77882e535c97a"
+    sha256 big_sur:       "c0b51453c0d7c82c6fe504fcb3d7de3aaf181774621ecdfb1a298bc21bebe6ee"
+    sha256 catalina:      "c918bce271461b22e1eb2632db3c55ea82ba8b3e3822b1acf6e0dc09a804cda4"
+    sha256 mojave:        "53db2d5110d8a486bbb7ed75858f5920838abc4c263e8e732814a87d0015575a"
+    sha256 x86_64_linux:  "fc31f26e809d59c021617055aa26a5f318ba101ce8311c18afbb08233c959627" # linuxbrew-core
   end
 
   depends_on "openssl@1.1"
@@ -42,37 +44,14 @@ class IrcdHybrid < Formula
     EOS
   end
 
-  plist_options manual: "ircd"
-
-  def plist
-    <<~EOS
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-      <dict>
-        <key>KeepAlive</key>
-        <false/>
-        <key>Label</key>
-        <string>#{plist_name}</string>
-        <key>ProgramArguments</key>
-        <array>
-          <string>#{opt_bin}/ircd</string>
-        </array>
-        <key>RunAtLoad</key>
-        <true/>
-        <key>WorkingDirectory</key>
-        <string>#{HOMEBREW_PREFIX}</string>
-        <key>StandardErrorPath</key>
-        <string>#{var}/ircd.log</string>
-      </dict>
-      </plist>
-    EOS
+  service do
+    run opt_bin/"ircd"
+    keep_alive false
+    working_dir HOMEBREW_PREFIX
+    error_log_path var/"ircd.log"
   end
 
   test do
-    # Won't run as root
-    return if Process.uid.zero?
-
     system "#{bin}/ircd", "-version"
   end
 end

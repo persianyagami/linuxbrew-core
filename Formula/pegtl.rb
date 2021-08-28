@@ -1,16 +1,9 @@
 class Pegtl < Formula
   desc "Parsing Expression Grammar Template Library"
   homepage "https://github.com/taocpp/PEGTL"
-  url "https://github.com/taocpp/PEGTL/archive/3.0.0.tar.gz"
-  sha256 "b47af025450f5c12251cd831f90deab666e18a8029f3dbffb32672b0450af902"
+  url "https://github.com/taocpp/PEGTL/archive/3.2.1.tar.gz"
+  sha256 "af33818352bc0b73c66aa9bc037735ce43d471533f1078ee828ba7e09962847d"
   license "MIT"
-
-  bottle do
-    cellar :any_skip_relocation
-    sha256 "3044879b7c3b323251009528b53b5bea68cb314f51cfec06f59ceb15f74b492b" => :big_sur
-    sha256 "5fa80672bf58a5eaa91bf684ea3ef37c96b37a9b1f8246517e279a8613a0231e" => :catalina
-    sha256 "854e19bfaf2383f758acb6f978ea5f8ad04e23790543facef037019832a7ce6c" => :mojave
-  end
 
   depends_on "cmake" => :build
 

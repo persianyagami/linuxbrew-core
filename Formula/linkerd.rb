@@ -1,11 +1,11 @@
 class Linkerd < Formula
   desc "Command-line utility to interact with linkerd"
   homepage "https://linkerd.io"
-
   url "https://github.com/linkerd/linkerd2.git",
-      tag:      "stable-2.9.1",
-      revision: "c3cb84a6382c781f9650d90875a1e89d95346d0c"
+      tag:      "stable-2.10.2",
+      revision: "5535e9c4edda7f5a8d8d21e351b61425bd3a8208"
   license "Apache-2.0"
+  revision 1
 
   livecheck do
     url :stable
@@ -13,11 +13,11 @@ class Linkerd < Formula
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "5e1d514e823f835f30c245dbc2e2d115f287ccb60f25d33335e7aaa71adf4ba4" => :big_sur
-    sha256 "42d10f369486219dfe203c4a219310be08d2a62250e31ddfb31668921204fef2" => :catalina
-    sha256 "972c9162520a936baf72bbf3771a52f5698f15903cd7418724cfcab008669b9a" => :mojave
-    sha256 "abbab0e746fa4cd31d031bbf0328871e7e789d229461a6bd827abdd11269b630" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "a9004e38d4498ea9ab12751777ba4284ed219338aacd197a58af3e69d65c91ae"
+    sha256 cellar: :any_skip_relocation, big_sur:       "1dfd678ef51501dac82b9c51c0473d0c63731f15c59a831fcd5986929b796e94"
+    sha256 cellar: :any_skip_relocation, catalina:      "6c65d4ad2f236925e1bbbbbce61819bc935d26b835c5ed5b46a7f6caf156c5c3"
+    sha256 cellar: :any_skip_relocation, mojave:        "4331a8af8fe790fde28a085b60f40d45094a78bdadeb8c56e6890bebdde40e93"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4eecdd05d1e2db152db6989950028089d1d55f1d80f28387e169413a08a57e14" # linuxbrew-core
   end
 
   depends_on "go" => :build
@@ -25,14 +25,8 @@ class Linkerd < Formula
   def install
     ENV["CI_FORCE_CLEAN"] = "1"
 
-    os = if OS.mac?
-      "darwin"
-    else
-      "linux-amd64"
-    end
-
     system "bin/build-cli-bin"
-    bin.install "target/cli/#{os}/linkerd"
+    bin.install Dir["target/cli/*/linkerd"]
 
     # Install bash completion
     output = Utils.safe_popen_read("#{bin}/linkerd", "completion", "bash")

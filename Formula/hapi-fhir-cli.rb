@@ -1,16 +1,19 @@
 class HapiFhirCli < Formula
   desc "Command-line interface for the HAPI FHIR library"
-  homepage "https://hapifhir.io/hapi-fhir/docs/tools/hapi_fhir_cli.html"
-  url "https://github.com/jamesagnew/hapi-fhir/releases/download/v5.2.0/hapi-fhir-5.2.0-cli.zip"
-  sha256 "3d26f947aec63d9826a685403268b4db28ede4f6e7ced4026f28c2eb18c3f082"
+  homepage "https://hapifhir.io/"
+  url "https://github.com/hapifhir/hapi-fhir/releases/download/v5.4.0/hapi-fhir-5.4.0-cli.zip"
+  sha256 "142022d1d5b1d849e9a894bac0a8269bfccf3be4b1364b3eaeb685c588966995"
   license "Apache-2.0"
 
-  bottle :unneeded
+  livecheck do
+    url :stable
+    strategy :github_latest
+  end
 
   depends_on "openjdk"
 
   resource "test_resource" do
-    url "https://github.com/jamesagnew/hapi-fhir/raw/v5.1.0/hapi-fhir-structures-dstu3/src/test/resources/specimen-example.json"
+    url "https://github.com/hapifhir/hapi-fhir/raw/v5.4.0/hapi-fhir-structures-dstu3/src/test/resources/specimen-example.json"
     sha256 "4eacf47eccec800ffd2ca23b704c70d71bc840aeb755912ffb8596562a0a0f5e"
   end
 

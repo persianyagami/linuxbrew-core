@@ -2,31 +2,47 @@ class Cbmc < Formula
   desc "C Bounded Model Checker"
   homepage "https://www.cprover.org/cbmc/"
   url "https://github.com/diffblue/cbmc.git",
-      tag:      "cbmc-5.20.1",
-      revision: "a9a3644e9835addcb6fce6a2a99d4995139207f9"
+      tag:      "cbmc-5.37.0",
+      revision: "e4369b6241b7f74c8bb8b3145cb3b7c38e3bc369"
   license "BSD-4-Clause"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "e32d46292d671285d968f872d2e098d735335bde9f3e3267fb5f569512656e75" => :big_sur
-    sha256 "8ef763d09c85b4e1e7b3006004762c02deb5e4d7da28dd3afa2c415b3fdcb014" => :catalina
-    sha256 "556b07ae890f74baef162eb91c7b9b85baba673eaef6187ab7374e6ea99e7fe6" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "4ae8055b85a0f28b3e88e31474c250c4266e642f42ad711860c118659362830d"
+    sha256 cellar: :any_skip_relocation, big_sur:       "aece82ee5cd4d18a970a72be1089416a3d2795f04927b1286aadd794a44f132d"
+    sha256 cellar: :any_skip_relocation, catalina:      "05947f565f12c98b698ba8e00bd341252a12df3f9ae6773ed0523675fe2d3789"
+    sha256 cellar: :any_skip_relocation, mojave:        "1f53a8118ffcca140dc0109abfd6ed04b06b0d49b9f547e9c7c957c9a134a4e3"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "bf79003f4046d8224ab01c61039b5ecf8b015f2c7ff729dd6829d9aef5afbb61" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
   depends_on "maven" => :build
   depends_on "openjdk" => :build
 
+  uses_from_macos "bison" => :build
+  uses_from_macos "flex" => :build
+
+  on_linux do
+    depends_on "gcc"
+  end
+
+  fails_with gcc: "5"
+
   def install
-    args = std_cmake_args + %w[
-      -DCMAKE_C_COMPILER=/usr/bin/clang
-    ]
+    args = []
+
+    # Workaround borrowed from https://github.com/diffblue/cbmc/issues/4956
+    on_macos { args << "-DCMAKE_C_COMPILER=/usr/bin/clang" }
+    # Java front-end fails to build on ARM
+    args << "-DWITH_JBMC=OFF" if Hardware::CPU.arm?
 
     mkdir "build" do
-      system "cmake", "..", *args
+      system "cmake", "..", *args, *std_cmake_args
       system "cmake", "--build", "."
       system "make", "install"
     end
+
+    # lib contains only `jar` files
+    libexec.install lib unless Hardware::CPU.arm?
   end
 
   test do

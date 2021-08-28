@@ -1,23 +1,24 @@
 class Yaegi < Formula
   desc "Yet another elegant Go interpreter"
   homepage "https://github.com/containous/yaegi"
-  url "https://github.com/containous/yaegi/archive/v0.9.8.tar.gz"
-  sha256 "2085aa7f169c58eeaf2082b12b59cac6ff329a87642735613127618e8a1aec62"
+  url "https://github.com/containous/yaegi/archive/v0.9.23.tar.gz"
+  sha256 "52394e495b36b87d67f40b9104889da3e50eda5dfe5dc5b9eb2795e40c4be135"
   license "Apache-2.0"
-  head "https://github.com/containous/yaegi.git"
+  head "https://github.com/containous/yaegi.git", branch: "master"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "144f6a79dd8538807c32f360eeea485bed53ce4e9d4fce68119188d6ae8eace3" => :big_sur
-    sha256 "6597eb7396575eb91e3e68dc0cfcb1525b1f92c48256a55888d953e190fe3ea7" => :catalina
-    sha256 "8adbcfb6777e54f80c465c709e7ff9e93bb8ef87c65cb43589ddec3084898624" => :mojave
-    sha256 "89e92ab488d9046ab0df3d3ed1b9de408628d52943850804f360afe14e248a9f" => :x86_64_linux
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "fd585f269348a457fa22780f23302e91d9a8541a796a8f00e5478be3643452ff"
+    sha256 cellar: :any_skip_relocation, big_sur:       "f951ab445e8fbd81f9009c8bd674d7b223b4a396cf8a747a41ddb8f3be823b03"
+    sha256 cellar: :any_skip_relocation, catalina:      "c05353aacaa24d9d9b50ca218c181518ee5ea513f68d11c8a9be721c910e1e80"
+    sha256 cellar: :any_skip_relocation, mojave:        "5d7b8703e0093b4619d04f30971eb946aeefee0206a93ca15dc0409419615e27"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "584ba4a03a0787fd74620cc8e71af14167993c7737150dd21fe790e0904cd7de" # linuxbrew-core
   end
 
   depends_on "go" => :build
 
   def install
-    system "go", "build", *std_go_args, "./cmd/yaegi"
+    system "go", "build", *std_go_args(ldflags: "-X=main.version=#{version}"), "./cmd/yaegi"
   end
 
   test do

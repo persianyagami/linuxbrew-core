@@ -1,26 +1,25 @@
 class Ghostscript < Formula
   desc "Interpreter for PostScript and PDF"
   homepage "https://www.ghostscript.com/"
-  url "https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs9533/ghostpdl-9.53.3.tar.gz"
-  sha256 "96d04e4e464bddb062c1774ea895c4f1c1c94e6c4b62f5d32218ebd44dd65ba1"
+  url "https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs9540/ghostpdl-9.54.0.tar.gz"
+  sha256 "63e54cddcdf48ea296b6315353f86b8a622d4e46959b10d536297e006b85687b"
   license "AGPL-3.0-or-later"
 
+  # We check the tags from the `head` repository because the GitHub tags are
+  # formatted ambiguously, like `gs9533` (corresponding to version 9.53.3).
   livecheck do
     url :head
     regex(/^ghostpdl[._-]v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    sha256 "e4257c3d71ed8777dca98f732ac83e9a3477e93bbdb3b3e25d4ffbb5dfa823ee" => :big_sur
-    sha256 "d6c05b6c190b6e908d09546977eb2dc111b475ced5db2719cba16ce89ce0b0ed" => :catalina
-    sha256 "b5e6adcbf8f65731d1f3347e81e7ee494a77f35dae6a03aab4d735e714e07b05" => :mojave
-    sha256 "c582c8db6f927273af8e33521aaa33111f216ba05ef36a6d4a2befe8da5d3062" => :high_sierra
-    sha256 "ef20f84b0ffba0dbc654e807b26d779818e8e46622bf9353b2e3759ab55cb829" => :x86_64_linux
+    rebuild 1
+    sha256 x86_64_linux: "ef7d088cc989e381042288b50c73273c4fec91b4eb362436ab0bf35ab064c6ed" # linuxbrew-core
   end
 
   head do
     # Can't use shallow clone. Doing so = fatal errors.
-    url "https://git.ghostscript.com/ghostpdl.git", shallow: false
+    url "https://git.ghostscript.com/ghostpdl.git"
 
     depends_on "autoconf" => :build
     depends_on "automake" => :build
@@ -28,16 +27,28 @@ class Ghostscript < Formula
   end
 
   depends_on "pkg-config" => :build
+  depends_on "fontconfig"
+  depends_on "freetype"
+  depends_on "jbig2dec"
+  depends_on "jpeg"
+  depends_on "libidn"
+  depends_on "libpng"
   depends_on "libtiff"
+  depends_on "little-cms2"
+  depends_on "openjpeg"
+
+  uses_from_macos "expat"
+  uses_from_macos "zlib"
 
   on_macos do
     patch :DATA # Uncomment macOS-specific make vars
   end
 
   on_linux do
-    depends_on "fontconfig"
-    depends_on "libidn"
+    depends_on "gcc"
   end
+
+  fails_with gcc: "5"
 
   # https://sourceforge.net/projects/gs-fonts/
   resource "fonts" do
@@ -45,24 +56,32 @@ class Ghostscript < Formula
     sha256 "0eb6f356119f2e49b2563210852e17f57f9dcc5755f350a69a46a0d641a0c401"
   end
 
-  # Fix build on ARM Big Sur, updating config.{guess,sub}
-  # https://bugs.ghostscript.com/show_bug.cgi?id=703095
-  patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/98c39e09/ghostscript/config.patch"
-    sha256 "155cf2ee5a498d441c3194ba3d75cb7812beaa3f507a72017174a884bf742862"
-  end
-
   def install
-    # Fixes: ./soobj/dxmainc.o: file not recognized: File truncated
-    ENV.deparallelize
+    # Fix vendored tesseract build error: 'cstring' file not found
+    # Remove when possible to link to system tesseract
+    ENV.append_to_cflags "-stdlib=libc++" if ENV.compiler == :clang
+
+    # Fix VERSION file incorrectly included as C++20 <version> header
+    # Remove when possible to link to system tesseract
+    rm "tesseract/VERSION"
+
+    # Delete local vendored sources so build uses system dependencies
+    rm_rf "expat"
+    rm_rf "freetype"
+    rm_rf "jbig2dec"
+    rm_rf "jpeg"
+    rm_rf "lcms2mt"
+    rm_rf "libpng"
+    rm_rf "openjpeg"
+    rm_rf "tiff"
+    rm_rf "zlib"
 
     args = %W[
       --prefix=#{prefix}
-      --disable-cups
       --disable-compile-inits
+      --disable-cups
       --disable-gtk
-      --disable-fontconfig
-      --without-libidn
+      --with-system-libtiff
       --without-x
     ]
 
@@ -74,7 +93,7 @@ class Ghostscript < Formula
 
     # Install binaries and libraries
     system "make", "install"
-    system "make", "install-so"
+    ENV.deparallelize { system "make", "install-so" }
 
     (pkgshare/"fonts").install resource("fonts")
     (man/"de").rmtree
@@ -82,7 +101,7 @@ class Ghostscript < Formula
 
   test do
     ps = test_fixtures("test.ps")
-    assert_match /Hello World!/, shell_output("#{bin}/ps2ascii #{ps}")
+    assert_match "Hello World!", shell_output("#{bin}/ps2ascii #{ps}")
   end
 end
 

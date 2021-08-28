@@ -1,10 +1,10 @@
 class WireguardGo < Formula
   desc "Userspace Go implementation of WireGuard"
   homepage "https://www.wireguard.com/"
-  url "https://git.zx2c4.com/wireguard-go/snapshot/wireguard-go-0.0.20201118.tar.xz"
-  sha256 "8b9f3dd5f7083118fae9259868f994562270167a7ee9db28c53f415f0b20a388"
+  url "https://git.zx2c4.com/wireguard-go/snapshot/wireguard-go-0.0.20210424.tar.xz"
+  sha256 "0f9a7c0657e6119d317a0bab453aeb5140111b186ae10f62cfa081eecf2f03ba"
   license "MIT"
-  head "https://git.zx2c4.com/wireguard-go.git"
+  head "https://git.zx2c4.com/wireguard-go.git", branch: "master"
 
   livecheck do
     url :head
@@ -12,11 +12,11 @@ class WireguardGo < Formula
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "efb79650301180cef69d3d3f300436c2f8a799318ab176ecf1e6ae32bd55f45f" => :big_sur
-    sha256 "14d8dc66f51aa9fe8e8a727b0753a73f454ce35de86436cc880e9e9d8c768d87" => :catalina
-    sha256 "dc5491d1e72ced9c3f43e5cb36f639292641848b85ce70c88d9771079401a0bc" => :mojave
-    sha256 "30634fa495d57dd46d410f2177e309517949a4de78c15dee4f05390df8594da0" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "2b5cecc46c8cb3358a10768cd638fefab905dfb66f1ec151af64ce27d152f474"
+    sha256 cellar: :any_skip_relocation, big_sur:       "9f3812acc99aaf982518460b33d67930b824e8e86bfd00e9303dd0fb7e94cd74"
+    sha256 cellar: :any_skip_relocation, catalina:      "7067cc06c22612f886694f5471b1b7b7d196f9047c1939745f8140d5b1695f1f"
+    sha256 cellar: :any_skip_relocation, mojave:        "be446fceccc238dbfe68c3c23cb03feb1e911245934bba66007c263bfeb9114c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "6c8985e1ad7e3c8578218993255323be57c098926708f2cbda7c613b1e527cb4" # linuxbrew-core
   end
 
   depends_on "go" => :build
@@ -28,9 +28,13 @@ class WireguardGo < Formula
   end
 
   test do
-    # ERROR: (notrealutun) Failed to create TUN device: no such file or directory
-    return if ENV["CI"]
+    prog = "#{bin}/wireguard-go -f notrealutun 2>&1"
+    on_macos do
+      assert_match "be utun", pipe_output(prog)
+    end
 
-    assert_match "be utun", pipe_output("WG_PROCESS_FOREGROUND=1 #{bin}/wireguard-go notrealutun")
+    on_linux do
+      assert_match "Running wireguard-go is not required because this", pipe_output(prog)
+    end
   end
 end

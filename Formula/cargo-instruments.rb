@@ -1,18 +1,19 @@
 class CargoInstruments < Formula
   desc "Easily generate Instruments traces for your rust crate"
   homepage "https://github.com/cmyr/cargo-instruments"
-  url "https://github.com/cmyr/cargo-instruments/archive/v0.3.3.tar.gz"
-  sha256 "7f6f095af8029e70cb0f7d52d1480fc827fe463362b30523fc3a221825b8f207"
+  url "https://github.com/cmyr/cargo-instruments/archive/v0.4.3.tar.gz"
+  sha256 "f78146e82a6a1cf40d2c7d6f84652b2671f7c771ebe4ebdd9a798380c1e9c39c"
   license "MIT"
 
   bottle do
-    cellar :any
-    sha256 "f4ade004ec38321549c0bf97991e2287903a3060b81d44669892c5fc029b272c" => :big_sur
-    sha256 "3219c8afc7d140af7303638fffd6b2fd0fb32bed6eb7c96397b226cf1253b075" => :catalina
-    sha256 "e1d7580bd468085d12f052d988fa7b91076f18605d5a2f74f4d085d5ebd186f2" => :mojave
+    sha256 cellar: :any, arm64_big_sur: "4337fa71363264075999d4089113ff7fa3920d6a46ddede5505ed73cd66ae188"
+    sha256 cellar: :any, big_sur:       "3185c0685f90123a76d4e1d85c44c537f2c6088fdfd467052e225d15bdaf29a5"
+    sha256 cellar: :any, catalina:      "501cf5d9b290167e043f29e5464e1bd8ea49d5b28a591603370e4b47678e1a38"
+    sha256 cellar: :any, mojave:        "83f9f2294675328bb4778d55af84e638b07d5620bece3f60cea388c8a484baec"
   end
 
   depends_on "rust" => :build
+  depends_on :macos
   depends_on "openssl@1.1"
 
   def install

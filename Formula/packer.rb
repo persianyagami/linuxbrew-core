@@ -1,11 +1,10 @@
 class Packer < Formula
   desc "Tool for creating identical machine images for multiple platforms"
   homepage "https://packer.io"
-  url "https://github.com/hashicorp/packer.git",
-      tag:      "v1.6.5",
-      revision: "945908fd74adc3d63687b96caaf55749b44b5625"
+  url "https://github.com/hashicorp/packer/archive/v1.7.4.tar.gz"
+  sha256 "00a093fa302bde7b1eb01de85474524479126cc91309879f0c33f413918506a5"
   license "MPL-2.0"
-  head "https://github.com/hashicorp/packer.git"
+  head "https://github.com/hashicorp/packer.git", branch: "master"
 
   livecheck do
     url "https://releases.hashicorp.com/packer/"
@@ -13,20 +12,22 @@ class Packer < Formula
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "3a7145af46f765f9c29f3d9019f174f34ecdf0f38ff7c343cbe247721e7c78cd" => :big_sur
-    sha256 "b112017e8bf0c69756c17849b1a5b17a4820f705d4a88cfeaa584e95e7a6a7de" => :catalina
-    sha256 "4be1290b8d4e4e3fdf34b75535b4136e24355a8a165ccdf08d5fa58e801ac1b8" => :mojave
-    sha256 "1205b8daec00af365f36d44b6a9343cb9ba0a2e8e5534520199f0f3f656c9dbc" => :high_sierra
-    sha256 "a361154dc7a6829b34769fa3f7c1fea32f26605bb14c98311995cf9f7b912c88" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "5857e3b4d569263e92c0215bfbbe0da92396d12573916efb2d8c214afd2c8a14"
+    sha256 cellar: :any_skip_relocation, big_sur:       "a3904f2fbc7fa390464436188302479a0612ed9ec80a771542d7c6dc54b797c0"
+    sha256 cellar: :any_skip_relocation, catalina:      "b0a55acb7d294f529db1cb83533d837154ac8d3c174d2ca089233a3bf27be06e"
+    sha256 cellar: :any_skip_relocation, mojave:        "9bdf0e9d68b8cace130ebd58e88821da155954f575893f2dbe9b97bec7e38562"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "84e67f024d36fdd16796fb2b03588c2a37f1d81f74df5c69df1b2235c9c29e5f" # linuxbrew-core
   end
 
   depends_on "go" => :build
 
   def install
-    system "go", "build", *std_go_args
+    system "go", "build", *std_go_args(ldflags: "-s -w")
+
+    # Allow packer to find plugins in Homebrew prefix
+    bin.env_script_all_files libexec/"bin", PACKER_PLUGIN_PATH: "$PACKER_PLUGIN_PATH:#{HOMEBREW_PREFIX/"bin"}"
+
     zsh_completion.install "contrib/zsh-completion/_packer"
-    prefix.install_metafiles
   end
 
   test do

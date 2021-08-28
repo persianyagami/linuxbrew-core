@@ -1,34 +1,42 @@
 class CeresSolver < Formula
   desc "C++ library for large-scale optimization"
   homepage "http://ceres-solver.org/"
-  url "http://ceres-solver.org/ceres-solver-1.14.0.tar.gz"
-  sha256 "4744005fc3b902fed886ea418df70690caa8e2ff6b5a90f3dd88a3d291ef8e8e"
-  revision 14
-  head "https://ceres-solver.googlesource.com/ceres-solver.git"
+  url "http://ceres-solver.org/ceres-solver-2.0.0.tar.gz"
+  sha256 "10298a1d75ca884aa0507d1abb0e0f04800a92871cd400d4c361b56a777a7603"
+  license "BSD-3-Clause"
+  revision 4
+  head "https://ceres-solver.googlesource.com/ceres-solver.git", branch: "master"
 
   bottle do
-    cellar :any
-    sha256 "489c57c69f839424ff0b9e74ad3ad798622dbe20e3b6b32b9e4b0bfde8b10a6f" => :big_sur
-    sha256 "2e64cbafd1d0297c5b87f560122bc2393b2215f440f39c50e5d9a7c958b68f35" => :catalina
-    sha256 "aa4449eb545fe2a289777824d39eb080ae01dd2a9f6349943db72fab33f2a25a" => :mojave
-    sha256 "8dc8eb634d21908ea67fa2f30bebbe6809ced4da8c25161170f24be37bb1b174" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "1b729631e1d4e35fa8cdb4e38daeab4db1900273bb3b3a97800d6609c9048011"
+    sha256 cellar: :any,                 big_sur:       "ae150dc0c639a5e4efdbd7bf2f01c933f9852a20f78056670eb5b27fe3bc28f0"
+    sha256 cellar: :any,                 catalina:      "de7e1776beb556708bfb34af3b1e26f67ce5f9ecfb7e4332a56d25c456e01082"
+    sha256 cellar: :any,                 mojave:        "c7d6078d42b69ebc67ef7e2ed8cabcc9cbcfb32f0509a2a20f869fe627b1f53d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0b48b9f59af3fd2b9a599d3918909170462f503254b4bbdace0cffb2bfe17967" # linuxbrew-core
   end
 
-  depends_on "cmake"
+  depends_on "cmake" => [:build, :test]
   depends_on "eigen"
   depends_on "gflags"
   depends_on "glog"
   depends_on "metis"
+  depends_on "openblas"
   depends_on "suite-sparse"
+  depends_on "tbb"
+
+  # Fix compatibility with TBB 2021.1
+  # See https://github.com/ceres-solver/ceres-solver/issues/669
+  # Remove in the next release
+  patch do
+    url "https://github.com/ceres-solver/ceres-solver/commit/941ea13475913ef8322584f7401633de9967ccc8.patch?full_index=1"
+    sha256 "c61ca2ff1e92cc2134ba8e154bd9052717ba3fcae085e8f44957b9c22e6aa4ff"
+  end
 
   def install
     system "cmake", ".", *std_cmake_args,
                     "-DBUILD_SHARED_LIBS=ON",
-                    "-DEIGEN_INCLUDE_DIR=#{Formula["eigen"].opt_include}/eigen3",
-                    "-DMETIS_LIBRARY=#{Formula["metis"].opt_lib}/#{shared_library("libmetis")}",
-                    "-DGLOG_INCLUDE_DIR_HINTS=#{Formula["glog"].opt_include}",
-                    "-DGLOG_LIBRARY_DIR_HINTS=#{Formula["glog"].opt_lib}",
-                    "-DTBB=OFF", "-DBUILD_EXAMPLES=OFF"
+                    "-DBUILD_EXAMPLES=OFF",
+                    "-DLIB_SUFFIX=''"
     system "make"
     system "make", "install"
     pkgshare.install "examples", "data"
@@ -38,12 +46,11 @@ class CeresSolver < Formula
   test do
     cp pkgshare/"examples/helloworld.cc", testpath
     (testpath/"CMakeLists.txt").write <<~EOS
-      cmake_minimum_required(VERSION 2.8)
+      cmake_minimum_required(VERSION 3.5)
       project(helloworld)
       find_package(Ceres REQUIRED)
-      include_directories(${CERES_INCLUDE_DIRS})
       add_executable(helloworld helloworld.cc)
-      target_link_libraries(helloworld ${CERES_LIBRARIES})
+      target_link_libraries(helloworld Ceres::ceres)
     EOS
 
     system "cmake", "-DCeres_DIR=#{share}/Ceres", "."

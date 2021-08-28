@@ -1,9 +1,10 @@
 class Libedit < Formula
   desc "BSD-style licensed readline alternative"
   homepage "https://thrysoee.dk/editline/"
-  url "https://thrysoee.dk/editline/libedit-20191231-3.1.tar.gz"
-  version "20191231-3.1"
-  sha256 "dbb82cb7e116a5f8025d35ef5b4f7d4a3cdd0a3909a146a39112095a2d229071"
+  url "https://thrysoee.dk/editline/libedit-20210714-3.1.tar.gz"
+  version "20210714-3.1"
+  sha256 "3023b498ad593fd7745ae3b20abad546de506b67b8fbb5579637ca69ab82dbc9"
+  license "BSD-3-Clause"
 
   livecheck do
     url :homepage
@@ -11,12 +12,11 @@ class Libedit < Formula
   end
 
   bottle do
-    cellar :any
-    sha256 "7add4831a5be1d9829064a690c36fb47a9a3b75e8a59acf266f4fc4f2a3ad4f6" => :big_sur
-    sha256 "faa58f2e587c5b982af44765f7a034a27837fc1e94816e094ace3f408ab4a7bf" => :catalina
-    sha256 "a707377be9d5fef881cdbb77ad3b562c9d5f54befb97a10d0b7158e4db87ef86" => :mojave
-    sha256 "06e087927f024a9030947216be3aaa46f97fc9dcc1b70959f60240b86bd8f574" => :high_sierra
-    sha256 "e95fee11c5e2e861388bfe1ca575a9d845610cd41aaac23244ce841f02bf6fff" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "13d4e88e23a6c82ca458d3ca287af597b27ac211d258ef825bc0a4ab3111a80b"
+    sha256 cellar: :any,                 big_sur:       "75d0b470e0478010fbaa2708db5eefba895d71d32efe79bc3eee389e26375bb7"
+    sha256 cellar: :any,                 catalina:      "b28c79aa687f372834237a8a13ff274ff91bbb378aaa7bdd055411a0817427a7"
+    sha256 cellar: :any,                 mojave:        "b011a5735eee4db2740abc9cc25703e9dcf89da5f79e5d210a3a1e8609f9205e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "08fede13bbc6910dbb2cc33aac6d4846b933713118e19503e09490f2404d3994" # linuxbrew-core
   end
 
   keg_only :provided_by_macos
@@ -29,11 +29,9 @@ class Libedit < Formula
                           "--prefix=#{prefix}"
     system "make", "install"
 
-    unless OS.mac?
-      # Conflicts with ncurses.
+    on_linux do
+      # Conflicts with readline.
       mv man3/"history.3", man3/"history_libedit.3"
-      # Symlink libedit.so.0 to libedit.so.2 for binary compatibility with Debian/Ubuntu.
-      ln_s lib/"libedit.so.0", lib/"libedit.so.2"
     end
   end
 

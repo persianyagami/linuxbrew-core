@@ -1,31 +1,23 @@
 class Microplane < Formula
   desc "CLI tool to make git changes across many repos"
   homepage "https://github.com/Clever/microplane"
-  url "https://github.com/Clever/microplane/archive/v0.0.25.tar.gz"
-  sha256 "1ab714dd01c68aeedf5fb47cc04bd6d2d178cdcd08cfc74d6672c8221c0b0e08"
+  url "https://github.com/Clever/microplane/archive/v0.0.34.tar.gz"
+  sha256 "289b3df07b3847fecb0d815ff552dad1b1b1e4f662eddc898ca7b1e7d81d6d7c"
   license "Apache-2.0"
   head "https://github.com/Clever/microplane.git"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "cd84d0aec16be620d405367c6afb6212fcd18495ccddbfc42594ea4cf14370a8" => :big_sur
-    sha256 "f69c2809ab3d97ae84dc78a8bea4b2f32a7de47630136be624af358e67d2d6bb" => :catalina
-    sha256 "5c03494a3311b7726cd8e894ef69b0d05e0208040c44e9598ab99e5f9b92858d" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "fb8cd7544c9c9801ea665666d9a0abf44fbc9a38c15e4749d2137ab62a4f33ff"
+    sha256 cellar: :any_skip_relocation, big_sur:       "ad84fa0e4efc89cd232632aec23c676ebfc23f787037f0da5a8356dc0b765028"
+    sha256 cellar: :any_skip_relocation, catalina:      "f9e918678833d61cedb4decb86652ccc356665aed0febcc48b30d950bc8c9b71"
+    sha256 cellar: :any_skip_relocation, mojave:        "5105e70832a0200105c87bf33d04e4852d7a01d8eb05ac9d7f7d3816d3f8748a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2439149f7ad75feb2d3bc41479fb626f8916b1e0796eeef71b69ea630b8afc27" # linuxbrew-core
   end
 
-  depends_on "dep" => :build
   depends_on "go" => :build
 
   def install
-    ENV["GOPATH"] = buildpath
-
-    dir = buildpath/"src/github.com/Clever/microplane"
-    dir.install buildpath.children
-    cd "src/github.com/Clever/microplane" do
-      system "make", "install_deps"
-      system "make", "build"
-      bin.install "bin/mp"
-    end
+    system "go", "build", *std_go_args, "-ldflags", "-s -w -X main.version=#{version}", "-o", bin/"mp"
   end
 
   test do

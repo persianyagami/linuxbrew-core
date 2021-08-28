@@ -6,20 +6,16 @@ class Pastebinit < Formula
   license "GPL-2.0"
   revision 3
 
-  livecheck do
-    url :stable
-  end
-
   bottle do
-    cellar :any_skip_relocation
-    sha256 "43c42eb708a8452001802163a22e637ff7685c1e9fbd72b58102a68ccdffaf52" => :big_sur
-    sha256 "f24d4dbd9723f5726c7786af82cd16df86485ea3ae075906531f82d0544ec688" => :catalina
-    sha256 "d2195934de64bf7814790b59d2429b90cb58e492f13f08430958b82ec3bd652d" => :mojave
-    sha256 "4ca0432c7652ab49ee0f61823335d0e0ea70caaf220f4654291406dcb425cd23" => :high_sierra
-    sha256 "e2b65d2fe25cf3a5d8ed4f1ed5687f531c6a90b164567ccaa89d0f0d78fc3370" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "90c20fef3e5c3e0944fadf42e45692288edb5e5ee241a4d936fe509c2e8ec16d"
+    sha256 cellar: :any_skip_relocation, big_sur:       "43c42eb708a8452001802163a22e637ff7685c1e9fbd72b58102a68ccdffaf52"
+    sha256 cellar: :any_skip_relocation, catalina:      "f24d4dbd9723f5726c7786af82cd16df86485ea3ae075906531f82d0544ec688"
+    sha256 cellar: :any_skip_relocation, mojave:        "d2195934de64bf7814790b59d2429b90cb58e492f13f08430958b82ec3bd652d"
+    sha256 cellar: :any_skip_relocation, high_sierra:   "4ca0432c7652ab49ee0f61823335d0e0ea70caaf220f4654291406dcb425cd23"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e2b65d2fe25cf3a5d8ed4f1ed5687f531c6a90b164567ccaa89d0f0d78fc3370" # linuxbrew-core
   end
 
-  depends_on "docbook2x" => :build if OS.mac? # broken on linux
+  depends_on "docbook2x" => :build
   depends_on "python@3.9"
 
   # Remove for next release
@@ -34,10 +30,10 @@ class Pastebinit < Formula
       s.gsub! "/usr/local/etc/pastebin.d", etc/"pastebin.d"
     end
 
-    system "docbook2man", "pastebinit.xml" if OS.mac?
+    system "docbook2man", "pastebinit.xml"
     bin.install "pastebinit"
     etc.install "pastebin.d"
-    man1.install "PASTEBINIT.1" => "pastebinit.1" if OS.mac?
+    man1.install "PASTEBINIT.1" => "pastebinit.1"
     libexec.install %w[po utils]
   end
 

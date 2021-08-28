@@ -1,20 +1,16 @@
 class Libpulsar < Formula
   desc "Apache Pulsar C++ library"
   homepage "https://pulsar.apache.org/"
-  url "https://www.apache.org/dyn/closer.lua?path=pulsar/pulsar-2.7.0/apache-pulsar-2.7.0-src.tar.gz"
-  mirror "https://archive.apache.org/dist/pulsar/pulsar-2.7.0/apache-pulsar-2.7.0-src.tar.gz"
-  sha256 "f1e8168b7f2b8bfc06c84f743eb4f3dfa5f8f376f087c5ef1532f998cf56bab4"
+  url "https://www.apache.org/dyn/closer.lua?path=pulsar/pulsar-2.8.0/apache-pulsar-2.8.0-src.tar.gz"
+  mirror "https://archive.apache.org/dist/pulsar/pulsar-2.8.0/apache-pulsar-2.8.0-src.tar.gz"
+  sha256 "0e161a81c62c7234c1e0c243bb6fe30046ec1cd01472618573ecdc2a73b1163b"
   license "Apache-2.0"
 
-  livecheck do
-    url :stable
-  end
-
   bottle do
-    cellar :any
-    sha256 "05f224f799cc8a8eb1407ff60cc561413b441cb46a603ce7547c8659ab1e9703" => :big_sur
-    sha256 "c5b12dbbe3af5397c3dd6c4c9d7fd34df9fc0be9438dd94b479cd892af955ee8" => :catalina
-    sha256 "964a2f24bb0f57621c8ef283a5e2550ba9b31166d167061a0f15d5ad88383523" => :mojave
+    sha256 cellar: :any,                 arm64_big_sur: "c6ff21f91a74df5c179821426340067bebe045663d8626a1ad4a1c9cb21cb912"
+    sha256 cellar: :any,                 big_sur:       "bc0154f9f3f130b793a9ddbf2ede2c8084b658e8ea3948d15dd90c1068339e60"
+    sha256 cellar: :any,                 catalina:      "bc49897ed00c8229f49cc89ad6a24ea49b0e8e5017e4de129165b66ea3d62da0"
+    sha256 cellar: :any,                 mojave:        "7248e726666cd83133242b715b9e71208337a22c9c56e7ce9fe71fec03b596fc"
   end
 
   depends_on "cmake" => :build
@@ -24,6 +20,8 @@ class Libpulsar < Formula
   depends_on "protobuf"
   depends_on "snappy"
   depends_on "zstd"
+
+  uses_from_macos "curl"
 
   def install
     cd "pulsar-client-cpp" do
@@ -47,7 +45,8 @@ class Libpulsar < Formula
         return 0;
       }
     EOS
-    system ENV.cxx, "test.cc", "-L#{lib}", "-lpulsar", "-o", "test"
+
+    system ENV.cxx, "-std=gnu++11", "test.cc", "-L#{lib}", "-lpulsar", "-o", "test"
     system "./test"
   end
 end

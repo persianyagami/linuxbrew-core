@@ -1,9 +1,10 @@
 class GstPluginsUgly < Formula
   desc "Library for constructing graphs of media-handling components"
   homepage "https://gstreamer.freedesktop.org/"
-  url "https://gstreamer.freedesktop.org/src/gst-plugins-ugly/gst-plugins-ugly-1.18.2.tar.xz"
-  sha256 "a337a022ed472209b38cab5918dc2f4e7a6adc1f4afacd226a6345e5cb668bdb"
+  url "https://gstreamer.freedesktop.org/src/gst-plugins-ugly/gst-plugins-ugly-1.18.4.tar.xz"
+  sha256 "218df0ce0d31e8ca9cdeb01a3b0c573172cc9c21bb3d41811c7820145623d13c"
   license "LGPL-2.0-or-later"
+  revision 1
   head "https://gitlab.freedesktop.org/gstreamer/gst-plugins-ugly.git"
 
   livecheck do
@@ -12,9 +13,10 @@ class GstPluginsUgly < Formula
   end
 
   bottle do
-    sha256 "cb86e77291ae8fddf9970104dd35692dd203700bb7478435eac7b7b69a1d9142" => :big_sur
-    sha256 "95a7a76aecfe472051a07be32cb7b76f8d340ae12f3d8f56fa1546d81bab2348" => :catalina
-    sha256 "a00090d74613bbe4bb3f22c9f2941364f97530ed0160c4888efc868af458969c" => :mojave
+    sha256 arm64_big_sur: "93577cdbd18ee2cbdf026104ad07e9c9ae510c28a487a5fe4fbb18743ff596e8"
+    sha256 big_sur:       "0a6d18fa102bcea7e8e096a8b114fa415a32c2c6cd477fdaa68255ffb119ac28"
+    sha256 catalina:      "3bf8b148e0901057104047b7392c501986096858e287cc4f11299933f1708931"
+    sha256 mojave:        "beb6b703ebad1a546c0ca4a9e9253e20bdb78c3aeba4231fdd1a645ab8fd11dc"
   end
 
   depends_on "meson" => :build

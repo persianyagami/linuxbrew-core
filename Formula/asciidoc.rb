@@ -3,18 +3,23 @@ class Asciidoc < Formula
 
   desc "Formatter/translator for text files to numerous formats. Includes a2x"
   homepage "https://asciidoc.org/"
-  url "https://github.com/asciidoc/asciidoc-py3/archive/9.0.4.tar.gz"
-  sha256 "9e269f336a71e8685d03a00c71b55ca029eed9f7baf1afe67c447be32206b176"
+  url "https://github.com/asciidoc-py/asciidoc-py/archive/9.1.0.tar.gz"
+  sha256 "5056c20157349f8dc74f005b6e88ccbf1078c4e26068876f13ca3d1d7d045fe7"
   license "GPL-2.0-only"
-  head "https://github.com/asciidoc/asciidoc-py3.git"
+  head "https://github.com/asciidoc-py/asciidoc-py.git", branch: "main"
+
+  livecheck do
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
+  end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "a7f6a49939e627eece6cddf4cbb91ae72922e6beb88ae9715cfd479051b3fb4b" => :big_sur
-    sha256 "0d4c6143d618720d9d1907d4a914b0ba685e67ee024859de3afb7fb6f50bbbb5" => :catalina
-    sha256 "23836dcab06fc863b9babf4501179317d6e28899a83f078aca1cac564ef585e2" => :mojave
-    sha256 "e61daf8474cb187643e49c313b839c957dbaecc5944ed43c9b8a8116ff656a5f" => :high_sierra
-    sha256 "b371fb75f0e3c5ad98d313f794061d532aecb1116e5c0dae916bbc2212889b3c" => :x86_64_linux
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "6687327cf31fe69822eb54e8fb1d411bc22237e346020beb69487bc55822583b"
+    sha256 cellar: :any_skip_relocation, big_sur:       "3cae7527216fda7e1e3f46ef2ba9db4bf713c524ee70399afd322200d4bbcd32"
+    sha256 cellar: :any_skip_relocation, catalina:      "84d2a53471facc216cf0b1022e8e57c7b0d7a07be8bbb8af727d55dcbdba2991"
+    sha256 cellar: :any_skip_relocation, mojave:        "f1af645cce45046ab1e15b53676efc14d306e088547db2ee64e2678efdeecc5a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c31b24ec2220dc1babf1c8f0f8ffe940b3764074836d7771124ac48ad75fe0b5" # linuxbrew-core
   end
 
   depends_on "autoconf" => :build
@@ -43,7 +48,7 @@ class Asciidoc < Formula
     ].map { |f| rewrite_shebang detected_python_shebang, f }
 
     # otherwise macOS's xmllint bails out
-    inreplace "Makefile", "-f manpage", "-f manpage -L" if OS.mac?
+    inreplace "Makefile", "-f manpage", "-f manpage -L"
     system "make", "install"
     system "make", "docs"
   end

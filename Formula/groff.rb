@@ -7,26 +7,22 @@ class Groff < Formula
   license "GPL-3.0-or-later"
   revision 1
 
-  livecheck do
-    url :stable
-  end
-
   bottle do
-    sha256 "1e46ef402875ec8cc1bc1fc05b748607822ed6c2a58508dc83d3f0c8cf7f5c4e" => :big_sur
-    sha256 "623edd28279abd071901f92502fd3a388aaf4357113f26b37ee715a9d11d05ab" => :catalina
-    sha256 "4fed5ee8032eb7957bd964b0eb873f8954a4d427f0c602284992daca52e7cb6d" => :mojave
-    sha256 "a4f66aad6f49b4e5f562e79837c4f7a189e908e074f18d8fdcad6df48bba98ac" => :x86_64_linux
+    sha256 arm64_big_sur: "f273750ee87dd64d4ae3ec08f3f6ac83a5e15eb0c2e08f9ebaf488bf9a739f96"
+    sha256 big_sur:       "1e46ef402875ec8cc1bc1fc05b748607822ed6c2a58508dc83d3f0c8cf7f5c4e"
+    sha256 catalina:      "623edd28279abd071901f92502fd3a388aaf4357113f26b37ee715a9d11d05ab"
+    sha256 mojave:        "4fed5ee8032eb7957bd964b0eb873f8954a4d427f0c602284992daca52e7cb6d"
+    sha256 x86_64_linux:  "a4f66aad6f49b4e5f562e79837c4f7a189e908e074f18d8fdcad6df48bba98ac" # linuxbrew-core
   end
 
   depends_on "pkg-config" => :build
-  depends_on "texinfo" => :build
-  depends_on "texinfo" => :build
   depends_on "ghostscript"
   depends_on "netpbm"
   depends_on "psutils"
   depends_on "uchardet"
 
-  uses_from_macos "bison" => :build # for yacc
+  uses_from_macos "bison" => :build
+  uses_from_macos "texinfo" => :build
   uses_from_macos "perl"
 
   on_linux do

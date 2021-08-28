@@ -1,19 +1,21 @@
 class GitLfs < Formula
   desc "Git extension for versioning large files"
   homepage "https://github.com/git-lfs/git-lfs"
-  url "https://github.com/git-lfs/git-lfs/releases/download/v2.13.1/git-lfs-v2.13.1.tar.gz"
-  sha256 "5ba7d945d96ad49492e29edbfd1cce528b2a034fdddbf6e5424e754a4a012029"
+  url "https://github.com/git-lfs/git-lfs/releases/download/v2.13.3/git-lfs-v2.13.3.tar.gz"
+  sha256 "f8bd7a06e61e47417eb54c3a0db809ea864a9322629b5544b78661edab17b950"
   license "MIT"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "ebc56da970278c2f7fd44a73d855c8bdbbb27ecb3526b0e44e59124301300b0b" => :big_sur
-    sha256 "069c9abf9aae2690f9f30ddea080d21aeb78e8cecbceee843d8eefe6e2248551" => :catalina
-    sha256 "a9d3e9326f96e0684eaed9fd9fd992dd9ad9f8e1ff01630d9c73ababe72b654f" => :mojave
-    sha256 "b66ca430e8249f387e6a9726ef2684c9e69a088f3e6b4d166f04053d8f78c61c" => :x86_64_linux
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "def0547e1e83bda58b68b6880f3eb5a0a803df0addfb6e4915b6b76852735195"
+    sha256 cellar: :any_skip_relocation, big_sur:       "db355632f3236b7042d2900b7883edfe476d9fb467e62124bb5864ab2be88415"
+    sha256 cellar: :any_skip_relocation, catalina:      "b4c1b5d14562c7a1e0fbe210dc5e58888dff8437586ffc49425099c546a988b0"
+    sha256 cellar: :any_skip_relocation, mojave:        "0aaead90f98027ec8774eb318a58c6f5bef167342a52b115207ecb878f63e7f5"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9bb1c662e3af970873a01d9e638c5312e37a05c1bf77d7303a255ae7ffba4ddd" # linuxbrew-core
   end
 
   depends_on "go" => :build
+  depends_on "ronn" => :build
   depends_on "ruby" => :build
 
   def install
@@ -22,12 +24,9 @@ class GitLfs < Formula
 
     (buildpath/"src/github.com/git-lfs/git-lfs").install buildpath.children
     cd "src/github.com/git-lfs/git-lfs" do
-      ENV["GEM_HOME"] = ".gem_home"
-      system "gem", "install", "ronn"
-
       system "make", "vendor"
       system "make"
-      system "make", "man", "RONN=.gem_home/bin/ronn"
+      system "make", "man", "RONN=#{Formula["ronn"].bin}/ronn"
 
       bin.install "bin/git-lfs"
       man1.install Dir["man/*.1"]

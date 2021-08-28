@@ -1,8 +1,8 @@
 class Gpgme < Formula
   desc "Library access to GnuPG"
   homepage "https://www.gnupg.org/related_software/gpgme/"
-  url "https://www.gnupg.org/ftp/gcrypt/gpgme/gpgme-1.15.0.tar.bz2"
-  sha256 "0b472bc12c7d455906c8a539ec56da0a6480ef1c3a87aa5b74d7125df68d0e5b"
+  url "https://www.gnupg.org/ftp/gcrypt/gpgme/gpgme-1.16.0.tar.bz2"
+  sha256 "6c8cc4aedb10d5d4c905894ba1d850544619ee765606ac43df7405865de29ed0"
   license "LGPL-2.1-or-later"
 
   livecheck do
@@ -11,12 +11,11 @@ class Gpgme < Formula
   end
 
   bottle do
-    cellar :any
-    sha256 "6de40ec526a4d87f6caba431dc5cb8c48ac490cc31d76f64b9e3f451c27f3ea2" => :big_sur
-    sha256 "804b505d6702fb22c25c93a7832648a23aefc877c4d660ce5c7a9026c9442bc7" => :catalina
-    sha256 "99d0cc2cb9dcd2b7d38bb48627f3b740d483d7f9e64d6fd6690941ecb5731f2b" => :mojave
-    sha256 "02bd3a9334b19890b043256a406bce8c61083fd56a71e4966161de86fd6aa4d8" => :high_sierra
-    sha256 "08c309349e8d0e7b7a56266471f11f96740e0822ff56e400bf318a62a28c6db3" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "a6408468cf32338ff783f685eea507a779b63f21aa1074e8be250088832de2fb"
+    sha256 cellar: :any,                 big_sur:       "93ef1638eedcb613c2d4992917c081409985aba3d20db3a3c5bbd9b02e008ee3"
+    sha256 cellar: :any,                 catalina:      "4d51fe3ce646233005f33c6f53fd50e2111dfa21891b03d4cce9ce3845da2373"
+    sha256 cellar: :any,                 mojave:        "5f69a086be935cd7f1994bc709a1510e5c3182865240bf32c9ef1d7ea8cd82dd"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8ee85a6e11f47227d83f8f467800aaac14cd9fff0a4469c876be7e4a18cc02cf" # linuxbrew-core
   end
 
   depends_on "python@3.9" => [:build, :test]

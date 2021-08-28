@@ -1,10 +1,11 @@
 class Pike < Formula
   desc "Dynamic programming language"
   homepage "https://pike.lysator.liu.se/"
-  url "https://pike.lysator.liu.se/pub/pike/latest-stable/Pike-v8.0.702.tar.gz"
-  sha256 "c47aad2e4f2c501c0eeea5f32a50385b46bda444f922a387a5c7754302f12a16"
+  url "https://pike.lysator.liu.se/pub/pike/latest-stable/Pike-v8.0.1116.tar.gz"
+  mirror "http://deb.debian.org/debian/pool/main/p/pike8.0/pike8.0_8.0.1116.orig.tar.gz"
+  # Homepage has an expired SSL cert as of 16/12/2020, so we add a Debian mirror
+  sha256 "5020063c755bb182177750221013b199198a7f1eb8ff26c1fb879d375c755891"
   license any_of: ["GPL-2.0-only", "LGPL-2.1-only", "MPL-1.1"]
-  revision OS.mac? ? 2 : 3
 
   livecheck do
     url "https://pike.lysator.liu.se/download/pub/pike/latest-stable/"
@@ -12,15 +13,14 @@ class Pike < Formula
   end
 
   bottle do
-    cellar :any
-    sha256 "3c0bea5143c0630461de47b17cf4fc3511c234b0041d430bbbe235f254ba864f" => :big_sur
-    sha256 "5757d1aa50ab2cea5a849c0175c5f7e7d9474be370488be306e67caa2edb7389" => :catalina
-    sha256 "fbecbf5e9013c9ed5bfdd2d0c81b6f6df929b99b3e4e8aa2d9a11dc25f78ac4a" => :mojave
-    sha256 "87b4f7fbfed81dd56f88e50ba8931f40ff3223debd94f3c9492a0ef80e0e2cb0" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "66bef9efce57896b13bfaac552d145d35534e44ab8fe4e3367b8334c10509b34"
+    sha256 cellar: :any_skip_relocation, big_sur:       "15805f34b5fa27d32c8a86cb69459d03300b11b2ec491597264823899f77568f"
+    sha256 cellar: :any_skip_relocation, catalina:      "b34252e2bd9dfea5ffc5e56e10523658ff44ecc5686eabda34ce2c19a22faabc"
+    sha256 cellar: :any_skip_relocation, mojave:        "1eacafb5514b416f75a39a50bdfc697123f66be10a892be1906fa674580f9298"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3f861a7afd0148f58189325de42bbf34cebdce49fd6952355c2055748bfb768c" # linuxbrew-core
   end
 
   depends_on "gmp"
-  depends_on "librsvg"
   depends_on "libtiff"
   depends_on "nettle"
   depends_on "pcre"

@@ -14,12 +14,12 @@ class DocbookXsl < Formula
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "cfdfee3ff9db24a542cd8afd72cd05e67dffd88105b6af3bb1aabd9d48811dd2" => :big_sur
-    sha256 "65a5442556a88a865ef377cb73df0b3edf9ab2240e6f4bb2d71a71eabc74fa26" => :catalina
-    sha256 "65a5442556a88a865ef377cb73df0b3edf9ab2240e6f4bb2d71a71eabc74fa26" => :mojave
-    sha256 "65a5442556a88a865ef377cb73df0b3edf9ab2240e6f4bb2d71a71eabc74fa26" => :high_sierra
-    sha256 "6b52c47bc47c4a19699fb52277f477d27bfb519d9b7e01d94ad6c566cf27f873" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "9604b8989c3cc180c641b00f595e59d887aa85fbd410fb85bf4d459c6fb9f823"
+    sha256 cellar: :any_skip_relocation, big_sur:       "cfdfee3ff9db24a542cd8afd72cd05e67dffd88105b6af3bb1aabd9d48811dd2"
+    sha256 cellar: :any_skip_relocation, catalina:      "65a5442556a88a865ef377cb73df0b3edf9ab2240e6f4bb2d71a71eabc74fa26"
+    sha256 cellar: :any_skip_relocation, mojave:        "65a5442556a88a865ef377cb73df0b3edf9ab2240e6f4bb2d71a71eabc74fa26"
+    sha256 cellar: :any_skip_relocation, high_sierra:   "65a5442556a88a865ef377cb73df0b3edf9ab2240e6f4bb2d71a71eabc74fa26"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "6b52c47bc47c4a19699fb52277f477d27bfb519d9b7e01d94ad6c566cf27f873" # linuxbrew-core
   end
 
   depends_on "docbook"
@@ -37,6 +37,7 @@ class DocbookXsl < Formula
   # see http://www.linuxfromscratch.org/blfs/view/9.1/pst/docbook-xsl.html for this patch
   patch do
     url "http://www.linuxfromscratch.org/patches/blfs/9.1/docbook-xsl-nons-1.79.2-stack_fix-1.patch"
+    mirror "https://raw.githubusercontent.com/Homebrew/formula-patches/5f2d6c1/docbook-xsl/docbook-xsl-nons-1.79.2-stack_fix-1.patch"
     sha256 "a92c39715c54949ba9369add1809527b8f155b7e2a2b2e30cb4b39ee715f2e30"
   end
 
@@ -60,10 +61,6 @@ class DocbookXsl < Formula
     bin.write_exec_script "#{prefix}/docbook-xsl/epub/bin/dbtoepub"
   end
 
-  def xmlcatalog
-    OS.mac? ? "xmlcatalog" : "#{Formula["libxml2"].opt_bin}/xmlcatalog"
-  end
-
   def post_install
     etc_catalog = etc/"xml/catalog"
     ENV["XML_CATALOG_FILES"] = etc_catalog
@@ -76,8 +73,8 @@ class DocbookXsl < Formula
 
       # add/replace catalog entries
       cat_loc = "#{loc}/catalog.xml"
-      system xmlcatalog, "--noout", "--del", cat_loc, etc_catalog
-      system xmlcatalog, "--noout", "--add", "nextCatalog", "", cat_loc, etc_catalog
+      system "xmlcatalog", "--noout", "--del", cat_loc, etc_catalog
+      system "xmlcatalog", "--noout", "--add", "nextCatalog", "", cat_loc, etc_catalog
 
       # add rewrites for the new and old catalog URLs
       rewrites = ["rewriteSystem", "rewriteURI"]
@@ -86,9 +83,9 @@ class DocbookXsl < Formula
         "http://docbook.sourceforge.net/release/#{old_name}",
       ].each do |url_prefix|
         [version.to_s, "current"].each do |ver|
-          system xmlcatalog, "--noout", "--del", "#{url_prefix}/#{ver}", etc_catalog
+          system "xmlcatalog", "--noout", "--del", "#{url_prefix}/#{ver}", etc_catalog
           rewrites.each do |rewrite|
-            system xmlcatalog, "--noout", "--add", rewrite, "#{url_prefix}/#{ver}", loc, etc_catalog
+            system "xmlcatalog", "--noout", "--add", rewrite, "#{url_prefix}/#{ver}", loc, etc_catalog
           end
         end
       end
@@ -96,13 +93,13 @@ class DocbookXsl < Formula
   end
 
   test do
-    system xmlcatalog, "#{etc}/xml/catalog", "https://cdn.docbook.org/release/xsl-nons/current/"
-    system xmlcatalog, "#{etc}/xml/catalog", "https://cdn.docbook.org/release/xsl-nons/#{version}/"
-    system xmlcatalog, "#{etc}/xml/catalog", "https://cdn.docbook.org/release/xsl/current/"
-    system xmlcatalog, "#{etc}/xml/catalog", "https://cdn.docbook.org/release/xsl/#{version}/"
-    system xmlcatalog, "#{etc}/xml/catalog", "http://docbook.sourceforge.net/release/xsl/current/"
-    system xmlcatalog, "#{etc}/xml/catalog", "http://docbook.sourceforge.net/release/xsl/#{version}/"
-    system xmlcatalog, "#{etc}/xml/catalog", "http://docbook.sourceforge.net/release/xsl-ns/current/"
-    system xmlcatalog, "#{etc}/xml/catalog", "http://docbook.sourceforge.net/release/xsl-ns/#{version}/"
+    system "xmlcatalog", "#{etc}/xml/catalog", "https://cdn.docbook.org/release/xsl-nons/current/"
+    system "xmlcatalog", "#{etc}/xml/catalog", "https://cdn.docbook.org/release/xsl-nons/#{version}/"
+    system "xmlcatalog", "#{etc}/xml/catalog", "https://cdn.docbook.org/release/xsl/current/"
+    system "xmlcatalog", "#{etc}/xml/catalog", "https://cdn.docbook.org/release/xsl/#{version}/"
+    system "xmlcatalog", "#{etc}/xml/catalog", "http://docbook.sourceforge.net/release/xsl/current/"
+    system "xmlcatalog", "#{etc}/xml/catalog", "http://docbook.sourceforge.net/release/xsl/#{version}/"
+    system "xmlcatalog", "#{etc}/xml/catalog", "http://docbook.sourceforge.net/release/xsl-ns/current/"
+    system "xmlcatalog", "#{etc}/xml/catalog", "http://docbook.sourceforge.net/release/xsl-ns/#{version}/"
   end
 end

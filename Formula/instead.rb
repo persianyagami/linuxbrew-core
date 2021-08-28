@@ -1,35 +1,39 @@
 class Instead < Formula
   desc "Interpreter of simple text adventures"
-  homepage "https://instead.syscall.ru/"
-  url "https://github.com/instead-hub/instead/archive/3.3.2.tar.gz"
-  sha256 "bdb827f36e693dc7b443e69d4678d24f1ccc20dc093c22f58b8d78192da15f2e"
+  homepage "https://instead.hugeping.ru/"
+  url "https://github.com/instead-hub/instead/archive/3.3.5.tar.gz"
+  sha256 "7a128df2ae6aa5042e69b5945c1463443aea3aa35d8c61e7af5feb7434e60a35"
   license "MIT"
-  revision 2
 
   bottle do
-    sha256 "bd0463eca5582cfb5e6a5db1befaa55a0fa7be8580296fc32b690873fb134e1e" => :big_sur
-    sha256 "cd2c8eaae8f35bcd76dabe29ffbba977913c31b23df407dfcc1959b9946dacc2" => :catalina
-    sha256 "8052e44079c28c8d997e005be8d43844803e8be1d340016608cf28833fc6edb2" => :mojave
-    sha256 "50b88dad069f6ccfa828e81e94e0bd0d4f32015890e44cde4a25ad4e28a2145a" => :x86_64_linux
+    sha256 arm64_big_sur: "e6e268294d2e4b933f453d1aeb5ad801d59ab8ef8144ec399e8a6102e39708ec"
+    sha256 big_sur:       "ffa9dcb750b0f27eef50b6355576611b5f277703b5ff00e14b19902efc41198e"
+    sha256 catalina:      "52a08ffd79ed516f100689cf22dcbb2dc6aac7226a0aa2799db5d71796e66402"
+    sha256 mojave:        "3fe9ec0aff8e487fdb3685c6e00793b8922b5fb80ad62e7a4b48ae4d8b4cf51f"
   end
 
   depends_on "cmake" => :build
-  depends_on "luajit"
+  depends_on "pkg-config" => :build
+  depends_on "gtk+3"
+  depends_on "luajit-openresty"
   depends_on "sdl2"
   depends_on "sdl2_image"
   depends_on "sdl2_mixer"
   depends_on "sdl2_ttf"
 
   def install
+    luajit = Formula["luajit-openresty"]
     mkdir "build" do
       system "cmake", "..", "-DWITH_GTK2=OFF",
                             "-DWITH_LUAJIT=ON",
+                            "-DLUA_INCLUDE_DIR=#{luajit.opt_include}/luajit-2.1",
+                            "-DLUA_LIBRARY=#{luajit.opt_lib}/#{shared_library("libluajit")}",
                             *std_cmake_args
       system "make", "install"
     end
   end
 
   test do
-    assert_match /INSTEAD #{version} /, shell_output("#{bin}/instead -h 2>&1")
+    assert_match "INSTEAD #{version} ", shell_output("#{bin}/instead -h 2>&1")
   end
 end

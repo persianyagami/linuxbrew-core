@@ -1,8 +1,8 @@
 class GstRtspServer < Formula
   desc "RTSP server library based on GStreamer"
   homepage "https://gstreamer.freedesktop.org/modules/gst-rtsp-server.html"
-  url "https://gstreamer.freedesktop.org/src/gst-rtsp-server/gst-rtsp-server-1.18.2.tar.xz"
-  sha256 "973922aba65a1672a131527dee965fb09bab4bb996c351f0ee7f42f0d5b954e2"
+  url "https://gstreamer.freedesktop.org/src/gst-rtsp-server/gst-rtsp-server-1.18.4.tar.xz"
+  sha256 "a46bb8de40b971a048580279d2660e616796f871ad3ed00c8a95fe4d273a6c94"
   license "LGPL-2.0-or-later"
 
   livecheck do
@@ -11,10 +11,11 @@ class GstRtspServer < Formula
   end
 
   bottle do
-    sha256 "b4317689acd1ab2242fbf79485c6e41d3f7b6022f655cc5a1c0051a0e83fa58f" => :big_sur
-    sha256 "6de0097ebaf534fd685c904cea67866f038bfecf37c81f18b002746194d3a73c" => :catalina
-    sha256 "e02cd4c0dcb586239614eb6d7775956933a40661dc9d3863e6c11809463a6085" => :mojave
-    sha256 "532e57504bc209061b317ba36faf464415f82f983f742cdd0fe2c39894b91d89" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "0fd899f6268df8362cadf3f19b92753740301acaf2aa180a4d95f256cb40e4a8"
+    sha256 cellar: :any,                 big_sur:       "2cbafc9f96e6c7b87afac67edaf0c0252205307ee088066f2d3766807ebdc68e"
+    sha256 cellar: :any,                 catalina:      "7528fe1df86bbd0c6702b3e4c843af6509640098c1cd5b5d326941c2006c503a"
+    sha256 cellar: :any,                 mojave:        "1f69a3c5c02d021ebbb7e5a96779f38d15ffa3eef0680d993f3f5c508bbdb0ad"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "67a8b17e2a87a37114fe58c38381d2cbb4a6c80c17818062861eb3204c2acf7e" # linuxbrew-core
   end
 
   depends_on "gobject-introspection" => :build
@@ -42,6 +43,6 @@ class GstRtspServer < Formula
   test do
     gst = Formula["gstreamer"].opt_bin/"gst-inspect-1.0"
     output = shell_output("#{gst} --gst-plugin-path #{lib} --plugin rtspclientsink")
-    assert_match /\s#{version}\s/, output
+    assert_match(/\s#{version}\s/, output)
   end
 end

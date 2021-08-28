@@ -1,25 +1,29 @@
 class Fastlane < Formula
   desc "Easiest way to build and release mobile apps"
   homepage "https://fastlane.tools"
-  url "https://github.com/fastlane/fastlane/archive/2.170.0.tar.gz"
-  sha256 "d3b2f592b01e565d6fcb37199ad1efeb97f1879751995d676b0d66c7b78e1a43"
+  url "https://github.com/fastlane/fastlane/archive/2.192.0.tar.gz"
+  sha256 "e9f193075065c8617f4e52b3dbb0b671aedf76505d639887e961de3483c78a0e"
   license "MIT"
   head "https://github.com/fastlane/fastlane.git"
 
   livecheck do
-    url :head
-    regex(/^([\d.]+)$/i)
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    cellar :any
-    sha256 "5ff85b7514eaa315f2724b158900b4167e7405b308dc506508d974868a286f60" => :big_sur
-    sha256 "fb1646105123846fd3791629a55edc3e90b111c2a7c2b0e999e6d3c234f27ade" => :catalina
-    sha256 "b9e0be03c7c28d5d11d274ae8c0b20a3d96e5619d9bdb6fca788d312a2365070" => :mojave
-    sha256 "ea653d95a7dcce2c4ffe28ae03009e80e5a4e93e098d71791aac94288df5bce7" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "5c53b9140b9639c42b519cca2602dd2db2fccfc28cba339eebcd7896f7dd1a60"
+    sha256 cellar: :any,                 big_sur:       "291bd0b27949b22744f0352126fd86e2629850bd34c46f460830effa300c3e84"
+    sha256 cellar: :any,                 catalina:      "18bf560d6c3e2ede31bd55a1d28c44f537fa3f0face2bed581bcd5cfc4172f0d"
+    sha256 cellar: :any,                 mojave:        "9cb75404df58c541a89d0ceb2a25c6f85d20285d9cac1466162344957c6e533e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3b25be6fa43d68b2323e3b05b24dfaeeb28e01180ca1c4b8dcdeb791d0a6f2bd" # linuxbrew-core
   end
 
   depends_on "ruby"
+
+  on_macos do
+    depends_on "terminal-notifier"
+  end
 
   def install
     ENV["GEM_HOME"] = libexec
@@ -28,14 +32,22 @@ class Fastlane < Formula
     system "gem", "build", "fastlane.gemspec"
     system "gem", "install", "fastlane-#{version}.gem", "--no-document"
 
-    (bin/"fastlane").write <<~EOS
-      #!/bin/bash
-      export PATH="#{Formula["ruby"].opt_bin}:#{libexec}/bin:$PATH"
-      export FASTLANE_INSTALLED_VIA_HOMEBREW="true"
-      GEM_HOME="#{libexec}" GEM_PATH="#{libexec}" \\
-        exec "#{libexec}/bin/fastlane" "$@"
-    EOS
-    chmod "+x", bin/"fastlane"
+    (bin/"fastlane").write_env_script libexec/"bin/fastlane",
+      PATH:                            "#{Formula["ruby"].opt_bin}:#{libexec}/bin:$PATH",
+      FASTLANE_INSTALLED_VIA_HOMEBREW: "true",
+      GEM_HOME:                        libexec.to_s,
+      GEM_PATH:                        libexec.to_s
+
+    # Remove vendored pre-built binary
+    terminal_notifier_dir = libexec.glob("gems/terminal-notifier-*/vendor/terminal-notifier").first
+    (terminal_notifier_dir/"terminal-notifier.app").rmtree
+
+    on_macos do
+      ln_sf(
+        (Formula["terminal-notifier"].opt_prefix/"terminal-notifier.app").relative_path_from(terminal_notifier_dir),
+        terminal_notifier_dir,
+      )
+    end
   end
 
   test do

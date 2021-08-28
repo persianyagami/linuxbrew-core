@@ -1,17 +1,21 @@
 class Pumba < Formula
   desc "Chaos testing tool for Docker"
   homepage "https://github.com/alexei-led/pumba"
-  url "https://github.com/alexei-led/pumba/archive/0.7.7.tar.gz"
-  sha256 "5da828d47d7d46305fc921445ad47d9825a1d54f09b8be8a01ff2095c804fe2d"
+  url "https://github.com/alexei-led/pumba/archive/0.7.8.tar.gz"
+  sha256 "d0f9edf2a5671695de1b81af5f897b76edbbaf4fed036767d45a87bdbcf5eef1"
   license "Apache-2.0"
-  head "https://github.com/alexei-led/pumba.git"
+  head "https://github.com/alexei-led/pumba.git", branch: "master"
+
+  livecheck do
+    url :stable
+    strategy :github_latest
+  end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "1aa7d634a02a62e3c6269e5b0500d53335acb081ce402f685a36b3f3b7d74097" => :big_sur
-    sha256 "d53c5e9fdf7dde30cbbc423b2a4a23b82ebddb70a9f7eae754b9fb3195d82f5b" => :catalina
-    sha256 "85a95a55e3e126c71d0bb2b0c8e6a104bafff5c8af483b21e2f60c670d56cb46" => :mojave
-    sha256 "596e7e165ffcfefd0f16b348ee9dd75c2c4f5e103457c08b39890fa3b1f773fd" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "0d2b57562ed082742216e8576a8d02cbc9301285aac0159909e611795f3e83b4"
+    sha256 cellar: :any_skip_relocation, big_sur:       "6543f05aaa8b1ead7d70a379daca89bce7cdf17f5ba32b751ec6af9d836cba9a"
+    sha256 cellar: :any_skip_relocation, catalina:      "2f68ee710074baa934c3028d8240110053d37c16edb9f813667b879254548d39"
+    sha256 cellar: :any_skip_relocation, mojave:        "0f84af117d6d6dd0224a849875a0cecf27de241654ef7d69fcf76d4bc09dd518"
   end
 
   depends_on "go" => :build
@@ -19,15 +23,10 @@ class Pumba < Formula
   def install
     system "go", "build", "-ldflags", "-s -w -X main.Version=#{version}",
            "-trimpath", "-o", bin/"pumba", "./cmd"
-    prefix.install_metafiles
   end
 
   test do
     output = pipe_output("#{bin}/pumba rm test-container 2>&1")
-    if OS.mac?
-      assert_match "Is the docker daemon running?", output
-    else
-      assert_match "no containers to remove", output
-    end
+    assert_match "Is the docker daemon running?", output
   end
 end

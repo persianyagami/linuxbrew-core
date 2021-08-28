@@ -1,20 +1,23 @@
 class Hpack < Formula
   desc "Modern format for Haskell packages"
   homepage "https://github.com/sol/hpack"
-  url "https://github.com/sol/hpack/archive/0.34.3.tar.gz"
-  sha256 "ca322e3a36852f3aec99969e9ba2f55efba8b6c1538bc1398716833d3b417040"
+  url "https://github.com/sol/hpack/archive/0.34.4.tar.gz"
+  sha256 "65862a5ebef8efe236d44ea54229742766d26fe1e39220b7b98f3486cc0adcaa"
   license "MIT"
   head "https://github.com/sol/hpack.git"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "466512c7e107af8fb86a9c9f99d4d7e503a34d619b2a52638f60664bf52fe1eb" => :big_sur
-    sha256 "042c0f105b04129a0963bc271af9a834d4ca51c30a228db9977ed89449c36435" => :catalina
-    sha256 "a66723dac94a75ca6c70edcfba4446bedad2bbcd66b688bf68e6a3425de75abe" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "e8189942eff2e520bd69abbab6952def3781d2cee4c98e1d97f27cc14e362241"
+    sha256 cellar: :any_skip_relocation, big_sur:       "a2e901e85d547afaead51bf4d2c33d27033c74e2eeb4e6eca418339e4782e3e6"
+    sha256 cellar: :any_skip_relocation, catalina:      "0368b8c4ab5eef0197b563c10852bcd8ab6456d59d6c9e34f48e36e0400803f6"
+    sha256 cellar: :any_skip_relocation, mojave:        "5ebb44b4700c69ba46807cad1a04d43db91f87246818611403dcd7963762ef1d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d095d25eda76e0d24f632a1b40ffb47de264525c36c6a521e5bf56d07be2b85c" # linuxbrew-core
   end
 
   depends_on "cabal-install" => :build
   depends_on "ghc" => :build
+
+  uses_from_macos "zlib"
 
   def install
     system "cabal", "v2-update"

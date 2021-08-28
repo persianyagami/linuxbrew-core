@@ -3,20 +3,22 @@ class Mesa < Formula
 
   desc "Graphics Library"
   homepage "https://www.mesa3d.org/"
-  url "https://mesa.freedesktop.org/archive/mesa-20.3.0.tar.xz"
-  sha256 "2999738e888731531cd62b27519fa37566cc0ea2cd7d4d97f46abaa3e949c630"
+  url "https://mesa.freedesktop.org/archive/mesa-21.2.0.tar.xz"
+  sha256 "0cb3c802f4b8e7699b1602c08c29d06a4d532ab5b8f7a64676c4ca6bb8f4d426"
   license "MIT"
-  head "https://gitlab.freedesktop.org/mesa/mesa.git"
+  head "https://gitlab.freedesktop.org/mesa/mesa.git", branch: "main"
 
   livecheck do
-    url :stable
+    url "https://www.mesa3d.org/news/"
+    regex(/>\s*Mesa v?(\d+(?:\.\d+)+) is released\s*</i)
   end
 
   bottle do
-    sha256 "17102cdc4cb95cfbfdc154a5d0412863c22688caa4978cb1c75c02c1be66d0cc" => :big_sur
-    sha256 "083ebe4e77c62675367764e71cb372eda5d03c09960acd3a56b7dbc1fd5ec5d6" => :catalina
-    sha256 "e32052ed6993ee7fd970122ca2c97b9379e616fe4e74cd9987737f30811ebe3b" => :mojave
-    sha256 "a4e51e1e45f38d51ed77a996a9ba4f83d2a2f95848971f15e30dabfd4b1f3e83" => :x86_64_linux
+    sha256 arm64_big_sur: "65138ca70442cf7485ff98c028864eacced13c7b2fc62146f9026b2e7f501e05"
+    sha256 big_sur:       "6bed8a72c96b4844286c7e9666b8ea0c887891a6b867904900faf6ffd61d875e"
+    sha256 catalina:      "af5a8c808d643c0d64f70e33543a6a9c18c771152fbac4f5b8dad86167c053ed"
+    sha256 mojave:        "7308951bd120ed6de6cb3838cbc358f0b210f61e102ff366cb1b8a5c988b9ded"
+    sha256 x86_64_linux:  "066e8c5709d5cae301b73348f43f72897203286e4b5d7115070ccc58bb68c5b6" # linuxbrew-core
   end
 
   depends_on "meson" => :build
@@ -32,11 +34,12 @@ class Mesa < Formula
 
   uses_from_macos "bison" => :build
   uses_from_macos "flex" => :build
+  uses_from_macos "llvm"
   uses_from_macos "ncurses"
   uses_from_macos "zlib"
 
   on_linux do
-    depends_on "llvm"
+    depends_on "gcc"
     depends_on "lm-sensors"
     depends_on "libelf"
     depends_on "libxfixes"
@@ -45,17 +48,18 @@ class Mesa < Formula
     depends_on "libxv"
     depends_on "libxvmc"
     depends_on "libxxf86vm"
+    depends_on "libva"
+    depends_on "libvdpau"
     depends_on "libdrm"
-    depends_on "linuxbrew/xorg/libomxil-bellagio"
-    depends_on "linuxbrew/xorg/libva-internal"
-    depends_on "linuxbrew/xorg/libvdpau"
-    depends_on "linuxbrew/xorg/wayland"
-    depends_on "linuxbrew/xorg/wayland-protocols"
+    depends_on "wayland"
+    depends_on "wayland-protocols"
   end
 
+  fails_with gcc: "5"
+
   resource "Mako" do
-    url "https://files.pythonhosted.org/packages/72/89/402d2b4589e120ca76a6aed8fee906a0f5ae204b50e455edd36eda6e778d/Mako-1.1.3.tar.gz"
-    sha256 "8195c8c1400ceb53496064314c6736719c6f25e7479cd24c77be3d9361cddc27"
+    url "https://files.pythonhosted.org/packages/5c/db/2d2d88b924aa4674a080aae83b59ea19d593250bfe5ed789947c21736785/Mako-1.1.4.tar.gz"
+    sha256 "17831f0b7087c313c0ffae2bcbbd3c1d5ba9eeac9c38f2eb7b50e8c99fe9d5ab"
   end
 
   resource "glxgears.c" do
@@ -78,16 +82,15 @@ class Mesa < Formula
     ENV.prepend_path "PATH", "#{venv_root}/bin"
 
     mkdir "build" do
-      args = %w[
-        -Db_ndebug=true
-      ]
+      args = ["-Db_ndebug=true"]
 
-      unless OS.mac?
+      on_linux do
         args << "-Dplatforms=x11,wayland"
         args << "-Dglx=auto"
         args << "-Ddri3=true"
         args << "-Ddri-drivers=auto"
         args << "-Dgallium-drivers=auto"
+        args << "-Dgallium-omx=disabled"
         args << "-Degl=true"
         args << "-Dgbm=true"
         args << "-Dopengl=true"
@@ -103,7 +106,7 @@ class Mesa < Formula
       system "ninja", "install"
     end
 
-    unless OS.mac?
+    on_linux do
       # Strip executables/libraries/object files to reduce their size
       system("strip", "--strip-unneeded", "--preserve-dates", *(Dir[bin/"**/*", lib/"**/*"]).select do |f|
         f = Pathname.new(f)

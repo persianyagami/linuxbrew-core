@@ -1,19 +1,22 @@
 class Libvirt < Formula
   desc "C virtualization API"
   homepage "https://www.libvirt.org"
-  url "https://libvirt.org/sources/libvirt-6.10.0.tar.xz"
-  sha256 "30cfc1365b7a62bf08c5254103087fac51c4210343aa958a7d38cedd280ed2aa"
+  url "https://libvirt.org/sources/libvirt-7.6.0.tar.xz"
+  sha256 "8f967106d00aabb3cd692724bdd4a9c09e71cb2245053b98193690ee01766141"
   license all_of: ["LGPL-2.1-or-later", "GPL-2.0-or-later"]
 
   livecheck do
     url "https://libvirt.org/sources/"
-    regex(/href=.*?libvirt[._-]v?([\d.]+)\.t/i)
+    regex(/href=.*?libvirt[._-]v?(\d+(?:\.\d+)+)\.t/i)
   end
 
   bottle do
-    sha256 "0691fb2e0adb30adb37933107a1ac5c34f01656438fa6840dd650fa63ebf93f6" => :big_sur
-    sha256 "e28aaebcf0a86ae8e2906bbd0c228abbe86512184d6d82be01f98e10acc9a2ba" => :catalina
-    sha256 "178e78989b00690c1407d6c2e31703040dc69b7a0af096c18d95619fdedf4136" => :mojave
+    rebuild 1
+    sha256 arm64_big_sur: "8f86ccc81d09112ce826c382bfefb74880c9dabfe186b9c83bf6d935eba1611d"
+    sha256 big_sur:       "5bd53310057ed0d72695cb176005bc8ad1bb320f4cb67c9b74cb1a2582631103"
+    sha256 catalina:      "dd979706fd043654f4393ee331607c325df0ca0012b3eecc8579223cbbd53bfd"
+    sha256 mojave:        "ba7df55e6bcb315e6ab46111a1e4a0824ab72c44888cd01f2d4821860f163dd3"
+    sha256 x86_64_linux:  "6025f51ee5bbf824137f54a6d4353d5047b92c85b382d00f23f7f29b5449bb0a" # linuxbrew-core
   end
 
   head do
@@ -25,14 +28,26 @@ class Libvirt < Formula
   depends_on "perl" => :build
   depends_on "pkg-config" => :build
   depends_on "python@3.9" => :build
-  depends_on "rpcgen" => :build
   depends_on "gettext"
   depends_on "glib"
+  depends_on "gnu-sed"
   depends_on "gnutls"
+  depends_on "grep"
   depends_on "libgcrypt"
   depends_on "libiscsi"
   depends_on "libssh2"
   depends_on "yajl"
+
+  uses_from_macos "curl"
+  uses_from_macos "libxslt"
+
+  on_macos do
+    depends_on "rpcgen" => :build
+  end
+
+  on_linux do
+    depends_on "libtirpc"
+  end
 
   def install
     mkdir "build" do
@@ -50,34 +65,10 @@ class Libvirt < Formula
     end
   end
 
-  plist_options manual: "libvirtd"
-
-  def plist
-    <<~EOS
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-        <dict>
-          <key>EnvironmentVariables</key>
-          <dict>
-            <key>PATH</key>
-            <string>#{HOMEBREW_PREFIX}/bin</string>
-          </dict>
-          <key>Label</key>
-          <string>#{plist_name}</string>
-          <key>ProgramArguments</key>
-          <array>
-            <string>#{sbin}/libvirtd</string>
-            <string>-f</string>
-            <string>#{etc}/libvirt/libvirtd.conf</string>
-          </array>
-          <key>KeepAlive</key>
-          <true/>
-          <key>RunAtLoad</key>
-          <true/>
-        </dict>
-      </plist>
-    EOS
+  service do
+    run [opt_sbin/"libvirtd", "-f", etc/"libvirt/libvirtd.conf"]
+    keep_alive true
+    environment_variables PATH: HOMEBREW_PREFIX/"bin"
   end
 
   test do

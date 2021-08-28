@@ -1,23 +1,24 @@
 class Htop < Formula
   desc "Improved top (interactive process viewer)"
   homepage "https://htop.dev/"
-  url "https://github.com/htop-dev/htop/archive/3.0.3.tar.gz"
-  sha256 "725103929c925a7252b4dedeb29b3a1da86a2f74e96c50eb9ea6c8fec1942cd2"
+  url "https://github.com/htop-dev/htop/archive/3.0.5.tar.gz"
+  sha256 "4c2629bd50895bd24082ba2f81f8c972348aa2298cc6edc6a21a7fa18b73990c"
   license "GPL-2.0-or-later"
   revision 1 unless OS.mac?
   head "https://github.com/htop-dev/htop.git"
 
   livecheck do
-    url :head
+    url :stable
     regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    cellar :any
-    sha256 "2a54d4c1b36e5c02f8ab9aab1252007b84e793cbed9dbc741e71a459b56213d5" => :big_sur
-    sha256 "5e17b2dc3d695878ffb853ce707e7f813957b9e763b6b28efd71071335d74742" => :catalina
-    sha256 "ecd4fef722e7a81727a489de6bed8f2ab37ee8009d98029d60029c11bc2eecbb" => :mojave
-    sha256 "66a349ff2b5706d76ea1d6a43422c6ade77b577842d107c25f9b4a9c510934cc" => :x86_64_linux
+    rebuild 1
+    sha256 cellar: :any,                 arm64_big_sur: "4dd5d67e6a0ce026916e082e834a9a3e8e8e01c4ac3a79a3de29119dd6cc8393"
+    sha256 cellar: :any,                 big_sur:       "21f7d036b92a40bb57dc28c64249f137efcbec7489190944d8c38f940c86df9f"
+    sha256 cellar: :any,                 catalina:      "0b9cb4738ad23eed5e2d24bb2bdc10e662c3b54ba7feb22d798fd9107ace5e21"
+    sha256 cellar: :any,                 mojave:        "7be858d053b14ab834cd1a1832beaf367501639d17c7a43c5cc0e563c025a4af"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "321d0374e65b94b2e8dd81e789d19d04bb35f0d4b9c4e210524a7c9e1d82fe3f" # linuxbrew-core
   end
 
   depends_on "autoconf" => :build
@@ -27,11 +28,15 @@ class Htop < Formula
   depends_on "python@3.9" => :build
   depends_on "ncurses" # enables mouse scroll
 
-  def install
-    ENV.prepend_path "PATH", Formula["python@3.9"].opt_libexec/"bin" unless OS.mac?
+  on_linux do
+    depends_on "lm-sensors"
+  end
 
+  def install
     system "./autogen.sh"
-    system "./configure", "--prefix=#{prefix}"
+    args = ["--prefix=#{prefix}"]
+    on_linux { args << "--enable-sensors" }
+    system "./configure", *args
     system "make", "install"
   end
 

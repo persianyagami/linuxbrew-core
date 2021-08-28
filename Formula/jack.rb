@@ -1,8 +1,8 @@
 class Jack < Formula
   desc "Audio Connection Kit"
   homepage "https://jackaudio.org/"
-  url "https://github.com/jackaudio/jack2/archive/v1.9.16.tar.gz"
-  sha256 "e176d04de94dcaa3f9d32ca1825091e1b938783a78c84e7466abd06af7637d37"
+  url "https://github.com/jackaudio/jack2/archive/v1.9.19.tar.gz"
+  sha256 "9030f4dc11773351b6ac96affd9c89803a5587ebc1b091e5ff866f433327e4b0"
   license "GPL-2.0-or-later"
 
   livecheck do
@@ -11,9 +11,11 @@ class Jack < Formula
   end
 
   bottle do
-    sha256 "8700de5add46350491add58d820108aabb5ab18545a4fab4fa20b2f05287e9ef" => :big_sur
-    sha256 "0c30bbc478e9305530f69fee884640dee62e5613c997dca8c99e736d8c943899" => :catalina
-    sha256 "dc531389d6a167fc2caa078f480272f8048bbf5d85ff4f46c299a42456661360" => :mojave
+    rebuild 1
+    sha256 arm64_big_sur: "ffbab9c78a68d9500801476cc963340ed638795d9d31cf0f20162380216f03b2"
+    sha256 big_sur:       "5fdfbe4b083a1fb96c2a6d66d8a32bff2eda70dd5488b5cd3f75c088f4e2c158"
+    sha256 catalina:      "03952b355f2868cafb1dc5b726ae9910602ae06454ed8f757402cb6c7b540dda"
+    sha256 mojave:        "bb3a77a180f342d3eafc91705996d7346331cbdc36efbb41022433a7dd2084c7"
   end
 
   depends_on "autoconf" => :build
@@ -37,38 +39,11 @@ class Jack < Formula
     system Formula["python@3.9"].opt_bin/"python3", "./waf", "install"
   end
 
-  plist_options manual: "jackd -X coremidi -d coreaudio"
-
-  def plist
-    <<~EOS
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-      <dict>
-        <key>Label</key>
-        <string>#{plist_name}</string>
-        <key>WorkingDirectory</key>
-        <string>#{opt_prefix}</string>
-        <key>EnvironmentVariables</key>
-        <dict>
-          <key>PATH</key>
-          <string>/usr/bin:/bin:/usr/sbin:/sbin:#{HOMEBREW_PREFIX}/bin</string>
-        </dict>
-        <key>ProgramArguments</key>
-        <array>
-          <string>#{opt_bin}/jackd</string>
-          <string>-X</string>
-          <string>coremidi</string>
-          <string>-d</string>
-          <string>coreaudio</string>
-        </array>
-        <key>RunAtLoad</key>
-        <true/>
-        <key>KeepAlive</key>
-        <true/>
-      </dict>
-      </plist>
-    EOS
+  service do
+    run [opt_bin/"jackd", "-X", "coremidi", "-d", "coreaudio"]
+    keep_alive true
+    working_dir opt_prefix
+    environment_variables PATH: "/usr/bin:/bin:/usr/sbin:/sbin:#{HOMEBREW_PREFIX}/bin"
   end
 
   test do
@@ -83,7 +58,7 @@ class Jack < Formula
     end
     midi_sink = IO.popen "#{bin}/jack_midi_dump #{sink_name}"
     sleep 1
-    system "#{bin}/jack_connect #{source_name}:out #{sink_name}:input"
+    system "#{bin}/jack_connect", "#{source_name}:out", "#{sink_name}:input"
     sleep 1
     Process.kill "TERM", midi_sink.pid
 

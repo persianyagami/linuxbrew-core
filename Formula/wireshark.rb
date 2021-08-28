@@ -1,11 +1,11 @@
 class Wireshark < Formula
   desc "Graphical network analyzer and capture tool"
   homepage "https://www.wireshark.org"
-  url "https://www.wireshark.org/download/src/all-versions/wireshark-3.4.1.tar.xz"
-  mirror "https://1.na.dl.wireshark.org/src/wireshark-3.4.1.tar.xz"
-  sha256 "f8165211f5b4a4f6708df73ef9be51df917927f2da78348b32d3a6eb5fc458a3"
+  url "https://www.wireshark.org/download/src/all-versions/wireshark-3.4.8.tar.xz"
+  mirror "https://1.eu.dl.wireshark.org/src/all-versions/wireshark-3.4.8.tar.xz"
+  sha256 "58a7fa8dfe2010a8c8b7dcf66438c653e6493d47eb936ba48ef49d4aa4dbd725"
   license "GPL-2.0-or-later"
-  head "https://code.wireshark.org/review/wireshark.git"
+  head "https://gitlab.com/wireshark/wireshark.git", branch: "master"
 
   livecheck do
     url "https://www.wireshark.org/download.html"
@@ -13,9 +13,11 @@ class Wireshark < Formula
   end
 
   bottle do
-    sha256 "20a564de5a3e02761f7ccb4adeb752f21b1f5828e93195d970f26eb9ba962cb7" => :big_sur
-    sha256 "0d703466ed67f0071bf3bec9a6243a9b3a959c48c612fbc10fe9caba3bc02e90" => :catalina
-    sha256 "b1a95843dda464ba3f82316220981f91b6d6475ec6445e4e39ddfb68d2ba3b3d" => :mojave
+    sha256 arm64_big_sur: "427982aa8c88d9e7a249a6a6f083f3426a91a6b522729ce3ac35a888b240dc26"
+    sha256 big_sur:       "8cbb32962f6026090dd4bdab653df16313f2676f33da89ee6522a5eb4502f6d7"
+    sha256 catalina:      "c898ed4af93b66f82f163916ea3aff9dfb91a81cdb3edaa6cef66c3362957dd1"
+    sha256 mojave:        "b45273d9ad31f2bd02c724c3583b279d5fe267d081e819d4bd4dceb5f49ad636"
+    sha256 x86_64_linux:  "c4889382a2714842f0e8465e4128ff0b268ded82e918912dbb8f275e306e7054"
   end
 
   depends_on "cmake" => :build
@@ -26,7 +28,7 @@ class Wireshark < Formula
   depends_on "libmaxminddb"
   depends_on "libsmi"
   depends_on "libssh"
-  depends_on "lua@5.1"
+  depends_on "lua"
   depends_on "nghttp2"
 
   uses_from_macos "bison" => :build
@@ -40,8 +42,8 @@ class Wireshark < Formula
       -DBUILD_wireshark_gtk=OFF
       -DENABLE_PORTAUDIO=OFF
       -DENABLE_LUA=ON
-      -DLUA_INCLUDE_DIR=#{Formula["lua@5.1"].opt_include}/lua-5.1
-      -DLUA_LIBRARY=#{Formula["lua@5.1"].opt_lib}/liblua5.1.dylib
+      -DLUA_INCLUDE_DIR=#{Formula["lua"].opt_include}/lua
+      -DLUA_LIBRARY=#{Formula["lua"].opt_lib}/liblua.dylib
       -DCARES_INCLUDE_DIR=#{Formula["c-ares"].opt_include}
       -DGCRYPT_INCLUDE_DIR=#{Formula["libgcrypt"].opt_include}
       -DGNUTLS_INCLUDE_DIR=#{Formula["gnutls"].opt_include}
@@ -53,6 +55,7 @@ class Wireshark < Formula
       -DBUILD_wireshark=OFF
       -DENABLE_APPLICATION_BUNDLE=OFF
       -DENABLE_QT5=OFF
+      -DCMAKE_INSTALL_NAME_DIR:STRING=#{lib}
     ]
 
     system "cmake", *args, "."

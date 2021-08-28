@@ -1,16 +1,16 @@
 class Nghttp2 < Formula
   desc "HTTP/2 C Library"
   homepage "https://nghttp2.org/"
-  url "https://github.com/nghttp2/nghttp2/releases/download/v1.42.0/nghttp2-1.42.0.tar.xz"
-  sha256 "c5a7f09020f31247d0d1609078a75efadeccb7e5b86fc2e4389189b1b431fe63"
+  url "https://github.com/nghttp2/nghttp2/releases/download/v1.44.0/nghttp2-1.44.0.tar.xz"
+  sha256 "5699473b29941e8dafed10de5c8cb37a3581edf62ba7d04b911ca247d4de3c5d"
   license "MIT"
-  revision 1
 
   bottle do
-    sha256 "3d0437a63bcc51ec17d456847bcc0a624be2e00755ecc96b8445bc15020ff413" => :big_sur
-    sha256 "ddc63177feae52a5d07ec0f5793a8dcb5a344f0bdd4f4ba0633dacfd8249b0be" => :catalina
-    sha256 "e7a509ec209f20e204f82009b2dec7667e6a28958d018d8f1ee0fefbe4b73999" => :mojave
-    sha256 "48012f0e4ad147b1f724ef14082232094b02da641a4a11a9b084ef4f4e4f89ba" => :x86_64_linux
+    sha256 arm64_big_sur: "457a010c631153515c73fe61432b1bc5f43f47256b51fd91c499a72c238f63f0"
+    sha256 big_sur:       "8db30133ceaeeb92c004d98f43d8142c499c018654dea07aae604201037af848"
+    sha256 catalina:      "4029dae4ea56be84955735e6d1e9694d2bbbbbf85ffc3d0ce751d6c7d3333d74"
+    sha256 mojave:        "e545859a65c983367e439d642988533a4d9c3e664a06049c29fb770c9fafdc7d"
+    sha256 x86_64_linux:  "030dcffbdbe8b3495f6ede4b1dff3e5dd65a943a35413f14e69932c44a6a4ac7" # linuxbrew-core
   end
 
   head do
@@ -30,13 +30,13 @@ class Nghttp2 < Formula
   uses_from_macos "libxml2"
   uses_from_macos "zlib"
 
-  unless OS.mac?
+  on_linux do
+    # Fix: shrpx_api_downstream_connection.cc:57:3: error:
+    # array must be initialized with a brace-enclosed initializer
+    # https://github.com/nghttp2/nghttp2/pull/1269
     patch do
-      # Fix: shrpx_api_downstream_connection.cc:57:3: error:
-      # array must be initialized with a brace-enclosed initializer
-      url "https://gist.githubusercontent.com/iMichka/5dda45fbad3e70f52a6b4e7dfd382969/raw/" \
-          "19797e17926922bdd1ef21a47e162d8be8e2ca65/nghttp2?full_index=1"
-      sha256 "0759d448d4b419911c12fa7d5cbf1df2d6d41835c9077bf3accf9eac58f24f12"
+      url "https://github.com/nghttp2/nghttp2/commit/829258e7038fe7eff849677f1ccaeca3e704eb67.patch?full_index=1"
+      sha256 "c4bcf5cf73d5305fc479206676027533bb06d4ff2840eb672f6265ba3239031e"
     end
   end
 

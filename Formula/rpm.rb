@@ -1,21 +1,22 @@
 class Rpm < Formula
   desc "Standard unix software packaging tool"
   homepage "https://rpm.org/"
-  url "http://ftp.rpm.org/releases/rpm-4.15.x/rpm-4.15.1.tar.bz2"
-  mirror "https://ftp.osuosl.org/pub/rpm/releases/rpm-4.15.x/rpm-4.15.1.tar.bz2"
-  sha256 "ddef45f9601cd12042edfc9b6e37efcca32814e1e0f4bb8682d08144a3e2d230"
-  revision 2
+  url "http://ftp.rpm.org/releases/rpm-4.16.x/rpm-4.16.1.3.tar.bz2"
+  mirror "https://ftp.osuosl.org/pub/rpm/releases/rpm-4.16.x/rpm-4.16.1.3.tar.bz2"
+  sha256 "513dc7f972b6e7ccfc9fc7f9c01d5310cc56ee853892e4314fa2cad71478e21d"
+  license "GPL-2.0-only"
   version_scheme 1
 
   livecheck do
-    url "https://github.com/rpm-software-management/rpm.git"
-    regex(/rpm[._-]v?(\d+(?:\.\d+)+)-release/i)
+    url "https://rpm.org/download.html"
+    regex(/href=.*?rpm[._-]v?(\d+(?:\.\d+)+)\.t/i)
   end
 
   bottle do
-    sha256 "0ab53d077ad1a661161e45dc2af8c7a3767808d3efa14e736346d2001d8bd002" => :big_sur
-    sha256 "b8ff31d0e3a8404442c6ab8cab9d6970f53960cb58002a812e1fde9fc0bdc47c" => :catalina
-    sha256 "84f9e5185d8aa8a711ec5065380fab393eb6288b470d0f8af68affc9727304c0" => :mojave
+    sha256 big_sur:      "cb96a7acd3064a24034996032a19c451f03ad1fede1c6a672331869220c4bc80"
+    sha256 catalina:     "3f7de90218b2fbf8c42e63a4ae14f50244e058aff631e795197ac69e287a1d09"
+    sha256 mojave:       "239cee186295db10924b8bf891a20c36169002d551389f934dec8b107df03ed6"
+    sha256 x86_64_linux: "47339e6b27849b4bdc339f21468ca70e49f7321cbf2cb0ce4e19acada061cbd7" # linuxbrew-core
   end
 
   depends_on "berkeley-db"
@@ -61,12 +62,16 @@ class Rpm < Formula
                           "__GIT=/usr/bin/git",
                           "__LD=/usr/bin/ld"
     system "make", "install"
+
+    on_macos do
+      inreplace lib/"rpm/macros", "#{HOMEBREW_SHIMS_PATH}/mac/super/", ""
+    end
   end
 
   def post_install
     (var/"lib/rpm").mkpath
 
-    if OS.mac?
+    on_macos do
       # Attempt to fix expected location of GPG to a sane default.
       inreplace lib/"rpm/macros", "/usr/bin/gpg2", HOMEBREW_PREFIX/"bin/gpg"
     end

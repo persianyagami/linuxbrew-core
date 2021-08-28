@@ -7,13 +7,10 @@ class Predictionio < Formula
   license "Apache-2.0"
   revision 1
 
-  livecheck do
-    url :stable
-  end
-
-  bottle :unneeded
+  deprecate! date: "2020-09-01", because: :unmaintained
 
   depends_on "apache-spark"
+  depends_on arch: :x86_64 # openjdk@8 is not supported on ARM
   depends_on "elasticsearch@6"
   depends_on "hadoop"
   depends_on "hbase"
@@ -26,8 +23,8 @@ class Predictionio < Formula
     (bin/"pio").write_env_script libexec/"bin/pio", Language::Java.java_home_env("1.8")
 
     inreplace libexec/"conf/pio-env.sh" do |s|
-      s.gsub! /#\s*ES_CONF_DIR=.+$/, "ES_CONF_DIR=#{Formula["elasticsearch@6"].opt_prefix}/config"
-      s.gsub! /SPARK_HOME=.+$/, "SPARK_HOME=#{Formula["apache-spark"].opt_prefix}"
+      s.gsub!(/#\s*ES_CONF_DIR=.+$/, "ES_CONF_DIR=#{Formula["elasticsearch@6"].opt_prefix}/config")
+      s.gsub!(/SPARK_HOME=.+$/, "SPARK_HOME=#{Formula["apache-spark"].opt_prefix}")
     end
   end
 end

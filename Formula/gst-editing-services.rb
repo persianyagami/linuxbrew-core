@@ -1,8 +1,8 @@
 class GstEditingServices < Formula
   desc "GStreamer Editing Services"
   homepage "https://gstreamer.freedesktop.org/modules/gst-editing-services.html"
-  url "https://gstreamer.freedesktop.org/src/gst-editing-services/gst-editing-services-1.18.2.tar.xz"
-  sha256 "25ac7cd252a9bcb9ae179eca0b52fc9cf5384c1df16adab4d87bd84b3f9a625f"
+  url "https://gstreamer.freedesktop.org/src/gst-editing-services/gst-editing-services-1.18.4.tar.xz"
+  sha256 "4687b870a7de18aebf50f45ff572ad9e0138020e3479e02a6f056a0c4c7a1d04"
   license "LGPL-2.0-or-later"
 
   livecheck do
@@ -11,9 +11,11 @@ class GstEditingServices < Formula
   end
 
   bottle do
-    sha256 "dd9f24b2a74ed89bab046a3e93af2386c5158635658f9a7c789dd4a1c3f9fce0" => :big_sur
-    sha256 "a164c36336638e554d27741b1dfb0488f83cc2c11ab02ee658df2f10350b96ac" => :catalina
-    sha256 "8572a52cccb815e67f0ddcae4be0a2bcbfd8f10f1dc7636f71b7b7bc12898317" => :mojave
+    sha256 arm64_big_sur: "22be5c42f2f8d13852d3fe7a1d48bff59cbca21b9163a7d9c361d2830acef909"
+    sha256 big_sur:       "2f5ec6f0fa4f143367006e9c84a77206b554f362b0010478bd13248d9562cde5"
+    sha256 catalina:      "2b3b2e79dd2432db081ac4b8b6561edc587ce08b6abcba9eb74bbc25c7b9d9ae"
+    sha256 mojave:        "199d6eb47c8ff8469c7397b97c263b99357d72916437cb41c3d70c3ec8e0f3ab"
+    sha256 x86_64_linux:  "17a690a0ea7863d01f3b51af53e224841b78bd657a63925f9ade3efb63d4439f" # linuxbrew-core
   end
 
   depends_on "gobject-introspection" => :build

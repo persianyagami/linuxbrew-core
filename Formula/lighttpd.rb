@@ -1,9 +1,10 @@
 class Lighttpd < Formula
   desc "Small memory footprint, flexible web-server"
   homepage "https://www.lighttpd.net/"
-  url "https://download.lighttpd.net/lighttpd/releases-1.4.x/lighttpd-1.4.56.tar.xz"
-  sha256 "e4ce84cd79e8ae8ba193c7a7cc79c4afba9a076b443ef9f8d4bcd13a3354df77"
+  url "https://download.lighttpd.net/lighttpd/releases-1.4.x/lighttpd-1.4.59.tar.xz"
+  sha256 "fb953db273daef08edb6e202556cae8a3d07eed6081c96bd9903db957d1084d5"
   license "BSD-3-Clause"
+  revision 1
 
   livecheck do
     url "https://download.lighttpd.net/lighttpd/releases-1.4.x/"
@@ -11,10 +12,11 @@ class Lighttpd < Formula
   end
 
   bottle do
-    sha256 "b700eb47f9013e9f8fcd2f805defc4013a0816681ea2f48fa6eb798c2ee1d03f" => :big_sur
-    sha256 "83b756bc1071609769a8cad1e0dad05d1548860e3f9001b2a3bc82753b5bf7e0" => :catalina
-    sha256 "2d672ca9fa4fa82db0d1761b686e913a9d158ee393666219fe7acc3ef1ac34dd" => :mojave
-    sha256 "9f4495855c1542ed286b34581e2875863cba5a1656fd1ee7702a9be91c82b23e" => :x86_64_linux
+    sha256 arm64_big_sur: "90126bdf4f218c93f4e798d2bf1fae4b0df1cc9c5a72f12f64ad30196447f2ba"
+    sha256 big_sur:       "d76f607afaac9310f3a40d72e88b852b7ca58a587e6cb53c741f65c542398e1e"
+    sha256 catalina:      "411c12216cef3a44baef0cd0cea7442a036def56085ec8cce38fc5152ee4cd5d"
+    sha256 mojave:        "6b828d77deca242fb203b73e64ee419b9f8d490a6448d04142933fec985964e3"
+    sha256 x86_64_linux:  "e36f634ea317d26b3ab77a056e45d9f0ef5aaa8a88cb7d5b7738ed9392d6408e" # linuxbrew-core
   end
 
   depends_on "autoconf" => :build

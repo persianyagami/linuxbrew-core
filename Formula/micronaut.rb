@@ -1,28 +1,31 @@
 class Micronaut < Formula
   desc "Modern JVM-based framework for building modular microservices"
   homepage "https://micronaut.io/"
-  url "https://github.com/micronaut-projects/micronaut-starter/archive/v2.2.1.tar.gz"
-  sha256 "be537f6da16ddd6d2925fe870df2d87f250cec3936cd2077ab31ad6e3f491999"
+  url "https://github.com/micronaut-projects/micronaut-starter/archive/v2.5.11.tar.gz"
+  sha256 "1b55906c208b15354e4b7cff58a3c6d4df9097d23d8c8055ecd5bf39315e5a94"
   license "Apache-2.0"
 
   livecheck do
     url :stable
-    strategy :github_latest
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "1434c2fca1c9972d2f37a2a0fa8c991a32a597ba01633d2c8c5a018f7d2790ee" => :big_sur
-    sha256 "1c856d0b6ee5c23a910ddd5b149a6bb742232f35fb3d6973f2e9270c65cc9026" => :catalina
-    sha256 "c99928829b56cb4277f6c3dd9aefe5b0006e815626aadd03cb41ce73789a3815" => :mojave
-    sha256 "e70b82446eb106f5c3eeca1d24a131590f9140fd60fd6acb152fd6247b4d1706" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "bfb6024542007b56ab90871dd1a4c7040a146939d3c71430213989a6de313364"
+    sha256 cellar: :any_skip_relocation, big_sur:       "3aee5964dc81df9cc1b1fc697ddf9b640f44da2ddf15f0800fb60078d918b8f1"
+    sha256 cellar: :any_skip_relocation, catalina:      "54e0cfead37aa6cbe94c1e57c462511d59c4ef1dbf22e4c7e00be4e9f5453877"
+    sha256 cellar: :any_skip_relocation, mojave:        "a333cea13aaac477d86b7c97ad52a6a81e05adf2a8f422f6361ed832e355185b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "20e6a8a6d169411ec845515da12b2746f01ebd25e863b25d6c7a65ce31359805" # linuxbrew-core
   end
 
-  depends_on "gradle" => :build
-  depends_on "openjdk"
+  if Hardware::CPU.arm?
+    depends_on "openjdk@11"
+  else
+    depends_on "openjdk"
+  end
 
   def install
-    system "gradle", "micronaut-cli:assemble", "-x", "test"
+    system "./gradlew", "micronaut-cli:assemble", "-x", "test"
 
     mkdir_p libexec/"bin"
     mv "starter-cli/build/exploded/bin/mn", libexec/"bin/mn"

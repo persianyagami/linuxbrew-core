@@ -2,48 +2,47 @@ class Erlang < Formula
   desc "Programming language for highly scalable real-time systems"
   homepage "https://www.erlang.org/"
   # Download tarball from GitHub; it is served faster than the official tarball.
-  url "https://github.com/erlang/otp/archive/OTP-23.1.5.tar.gz"
-  sha256 "31719b8681e7f9ad6f30e329a0a0e5c4dd23dea858021573395fcdbea0d7702c"
+  url "https://github.com/erlang/otp/releases/download/OTP-24.0.5/otp_src_24.0.5.tar.gz"
+  sha256 "a5fec674b11d0a2b888963157a9de60fc384be27ff1a2175cd20708a5b9aa97d"
   license "Apache-2.0"
-  head "https://github.com/erlang/otp.git"
 
   livecheck do
-    url :head
-    regex(/OTP[._-]v?(\d+(?:\.\d+)+)$/i)
+    url :stable
+    regex(/^OTP[._-]v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    cellar :any
-    sha256 "372f900edd831fe853a85d09c0c1951458c61270ddb023137d561dad0371f461" => :big_sur
-    sha256 "1318f6c495fc4063d2091d4eb8fe23841006c46d63955dcd87eadb7608bf00a3" => :catalina
-    sha256 "42167291ab2480f7b5a9dd5787cb72f2e740857dc6126b0b48eed50a274171d7" => :mojave
+    sha256 cellar: :any,                 arm64_big_sur: "c24a800044ebc42d8844b4e31b81000a0ee07f7109fb76983134d00adfdc271a"
+    sha256 cellar: :any,                 big_sur:       "7795a804b581ad2e0685ecc3b3897d5ac332992bd48b7cad5548da2d45a98c61"
+    sha256 cellar: :any,                 catalina:      "199e559ec28f6e0d636b36b1c06048b92ed0ba2b5cb3c69dd697dfca139f2818"
+    sha256 cellar: :any,                 mojave:        "e44aefc02d6b38885ffa8069f9fcf9cfb4ed09bb5bf9f07772ff2504de809101"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8f6433b4ea3b5b9672b64997d0141d5017c33f0c2a6b2b76a54b88e7c21f3dab" # linuxbrew-core
   end
 
-  depends_on "autoconf" => :build
-  depends_on "automake" => :build
-  depends_on "libtool" => :build
-  depends_on "openssl@1.1"
-  depends_on "wxmac" # for GUI apps like observer
+  head do
+    url "https://github.com/erlang/otp.git"
 
-  uses_from_macos "m4" => :build
+    depends_on "autoconf" => :build
+    depends_on "automake" => :build
+    depends_on "libtool" => :build
+  end
+
+  depends_on "openssl@1.1"
+  depends_on "wxwidgets" # for GUI apps like observer
 
   resource "html" do
-    url "https://www.erlang.org/download/otp_doc_html_23.1.tar.gz"
-    mirror "https://fossies.org/linux/misc/otp_doc_html_23.1.tar.gz"
-    sha256 "0e0075f174db2f9b5a0f861263062942e5a721c40ec747356e482e3be2fb8931"
+    url "https://www.erlang.org/download/otp_doc_html_24.0.tar.gz"
+    mirror "https://fossies.org/linux/misc/otp_doc_html_24.0.tar.gz"
+    sha256 "6ceaa2cec97fa5a631779544a3c59afe9e146084e560725b823c476035716e73"
   end
-
-  # Fix for Big Sur, remove in next version
-  # https://github.com/erlang/otp/pull/2865
-  patch :DATA
 
   def install
     # Unset these so that building wx, kernel, compiler and
-    # other modules doesn't fail with an unintelligable error.
+    # other modules doesn't fail with an unintelligible error.
     %w[LIBS FLAGS AFLAGS ZFLAGS].each { |k| ENV.delete("ERL_#{k}") }
 
     # Do this if building from a checkout to generate configure
-    system "./otp_build", "autoconf" if File.exist? "otp_build"
+    system "./otp_build", "autoconf" unless File.exist? "configure"
 
     args = %W[
       --disable-debug
@@ -51,7 +50,6 @@ class Erlang < Formula
       --prefix=#{prefix}
       --enable-dynamic-ssl-lib
       --enable-hipe
-      --enable-sctp
       --enable-shared-zlib
       --enable-smp-support
       --enable-threads
@@ -115,17 +113,3 @@ class Erlang < Formula
     assert_match "factorial 42 = 1405006117752879898543142606244511569936384000000000", shell_output("./factorial 42")
   end
 end
-__END__
-diff --git a/make/configure.in b/make/configure.in
-index bf6ee284343..898aa40c4a0 100644
---- a/make/configure.in
-+++ b/make/configure.in
-@@ -398,7 +398,7 @@ if test $CROSS_COMPILING = no; then
- 	       [1-9][0-9].[0-9])
- 	          int_macosx_version=`echo $macosx_version | sed 's|\([^\.]*\)\.\([^\.]*\)|\10\200|'`;;
- 	       [1-9][0-9].[0-9].[0-9])
--	          int_macosx_version=`echo $macosx_version | sed 's|\([^\.]*\)\.\([^\.]*\)\.\([^\.]*\)|\1\2\3|'`;;
-+	          int_macosx_version=`echo $macosx_version | sed 's|\([^\.]*\)\.\([^\.]*\)\.\([^\.]*\)|\10\20\3|'`;;
- 	       [1-9][0-9].[1-9][0-9])
- 	          int_macosx_version=`echo $macosx_version | sed 's|\([^\.]*\)\.\([^\.]*\)|\1\200|'`;;
- 	       [1-9][0-9].[1-9][0-9].[0-9])

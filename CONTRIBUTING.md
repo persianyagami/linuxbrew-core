@@ -8,6 +8,8 @@ Patches to fix issues particular to Linux should not affect the behaviour of the
 
 First time contributing to Homebrew? Read our [Code of Conduct](https://github.com/Homebrew/.github/blob/HEAD/CODE_OF_CONDUCT.md#code-of-conduct).
 
+Ensure your commits follow the [commit style guide](https://docs.brew.sh/Formula-Cookbook#commit).
+
 ### To report a bug
 
 * run `brew update` (twice)
@@ -18,7 +20,10 @@ First time contributing to Homebrew? Read our [Code of Conduct](https://github.c
 ### To submit a version upgrade for the `foo` formula
 
 * check if the same upgrade has been already submitted by [searching the open pull requests for `foo`](https://github.com/Homebrew/homebrew-core/pulls?utf8=✓&q=is%3Apr+is%3Aopen+foo).
-* `brew bump-formula-pr --strict foo` with `--url=...` and `--sha256=...` or `--tag=...` and `--revision=...` arguments.
+* `brew bump-formula-pr --strict foo` with one of the following:
+  * `--url=...` and `--sha256=...`
+  * `--tag=...` and `--revision=...`
+  * `--version=...`
 
 ### To add a new formula for `foo` version `2.3.4` from `$URL`
 
@@ -33,8 +38,8 @@ Once you've addressed any potential feedback and a member of the Homebrew org ha
 ### To contribute a fix to the `foo` formula
 
 If you are already well versed in the use of `git`, then you can find the local
-copy of the `homebrew-core` repository in this directory
-(`$(brew --prefix)/Homebrew/Library/Taps/homebrew/homebrew-core/`), modify the formula there
+copy of the `homebrew-core` repository in this directory:
+`$(brew --repository homebrew/core)`. Modify the formula there using `brew edit foo`
 leaving the section `bottle do ... end` unchanged, and prepare a pull request
 as you usually do.  Before submitting your pull request, be sure to test it
 with these commands:

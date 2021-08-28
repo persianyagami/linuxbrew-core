@@ -2,8 +2,8 @@ class Flux < Formula
   desc "Lightweight scripting language for querying databases"
   homepage "https://www.influxdata.com/products/flux/"
   url "https://github.com/influxdata/flux.git",
-      tag:      "v0.98.0",
-      revision: "c40321a5a49949ec65906064251e419fdee4a2ef"
+      tag:      "v0.126.0",
+      revision: "5daaedac25dfa11cf577e9a662e59e5c721f80ed"
   license "MIT"
   head "https://github.com/influxdata/flux.git"
 
@@ -13,20 +13,26 @@ class Flux < Formula
   end
 
   bottle do
-    cellar :any
-    sha256 "367caf1fccf26f51eacae8f3b196b4e1379291eb8319154e7c2975d0c4d7864a" => :big_sur
-    sha256 "9778ae0370bf3af6c75d122fc34cc256c443b375924036dd9010b4300cfdce84" => :catalina
-    sha256 "2020fabfca64466ddc2d60afd7b41c67a33e7c85dddc3a6ff768943ee6cc6568" => :mojave
-    sha256 "cac89e76cf5fbecb76d3d13065c8a6130af6aaf70a8bae656ecb3e72fbd9bc91" => :x86_64_linux
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "8058fe7c0a930c5a0f93ab1a1d3c3524b1c7e06edc5a7f4f26ca1c20e2a0274d"
+    sha256 cellar: :any,                 big_sur:       "d0fa7eff1f68a3bf56b4e4d933689eca65e2b6dbcf56ee0f459141ccf0a67ad3"
+    sha256 cellar: :any,                 catalina:      "57280d055bf98d6f8dc7b5ad96582dbe550e6c68eb8f672345db1910f6b87036"
+    sha256 cellar: :any,                 mojave:        "db623af5b425e866861c679124c096827c7ca93110dfe4509f3debc7aea82e8b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d435527015c1966551d25664cb912ca29dc1744268a8d681832a4570a816970f" # linuxbrew-core
   end
 
   depends_on "go" => :build
   depends_on "rust" => :build
 
   on_linux do
-    depends_on "llvm" => :build
     depends_on "pkg-config" => :build
-    depends_on "ragel" => :build
+  end
+
+  # Support go 1.17, remove when upstream patch is merged/released
+  # https://github.com/influxdata/flux/pull/3982
+  patch do
+    url "https://github.com/influxdata/flux/commit/233c875bcb7d071d47149b0730d1cb5f15eb6a5a.patch?full_index=1"
+    sha256 "fadb3ee0dc5efec615b6ffc4338f9a0947d42b58406b393587754fab0196ca62"
   end
 
   def install
@@ -34,14 +40,7 @@ class Flux < Formula
     system "go", "build", "./cmd/flux"
     bin.install %w[flux]
     include.install "libflux/include/influxdata"
-    on_macos do
-      lib.install "libflux/target/x86_64-apple-darwin/release/libflux.dylib"
-      lib.install "libflux/target/x86_64-apple-darwin/release/libflux.a"
-    end
-    on_linux do
-      lib.install "libflux/target/x86_64-unknown-linux-gnu/release/libflux.so"
-      lib.install "libflux/target/x86_64-unknown-linux-gnu/release/libflux.a"
-    end
+    lib.install Dir["libflux/target/*/release/libflux.{dylib,a,so}"]
   end
 
   test do

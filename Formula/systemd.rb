@@ -3,10 +3,12 @@ class Systemd < Formula
   homepage "https://wiki.freedesktop.org/www/Software/systemd/"
   url "https://github.com/systemd/systemd/archive/v246.tar.gz"
   sha256 "4268bd88037806c61c5cd1c78d869f7f20bf7e7368c63916d47b5d1c3411bd6f"
-  head "https://github.com/systemd/systemd.git"
+  license all_of: ["GPL-2.0-or-later", "LGPL-2.1-or-later"]
+  head "https://github.com/systemd/systemd.git", branch: "main"
 
   bottle do
-    sha256 "bd50f07866cf8875f079d7dab3ee0f176fc154ef42ce3a3879ca0a722eac3e96" => :x86_64_linux
+    rebuild 1
+    sha256 x86_64_linux: "063ae7cfdf081f72c3d6bfbec87e1a95a1e0f90da0e33c6e232b5a8796ab9a4c" # linuxbrew-core
   end
 
   depends_on "coreutils" => :build
@@ -16,29 +18,22 @@ class Systemd < Formula
   depends_on "intltool" => :build
   depends_on "libgpg-error" => :build
   depends_on "libtool" => :build
+  depends_on "libxslt" => :build
+  depends_on "m4" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
   depends_on "pkg-config" => :build
+  depends_on "rsync" => :build
+  depends_on "expat"
   depends_on "libcap"
   depends_on :linux
   depends_on "lz4"
   depends_on "openssl@1.1"
   depends_on "util-linux" # for libmount
   depends_on "xz"
-
-  uses_from_macos "libxslt" => :build
-  uses_from_macos "m4" => :build
-  uses_from_macos "expat"
+  depends_on "zstd"
 
   def install
-    ENV.prepend_create_path "PERL5LIB", libexec/"lib/perl5"
-
-    # Needed by intltool (xml::parser)
-    ENV.prepend_path "PERL5LIB", "#{Formula["intltool"].libexec}/lib/perl5"
-
-    # Fix compilation error: file ./man/custom-html.xsl line 24 element import
-    ENV["XML_CATALOG_FILES"] = "#{etc}/xml/catalog"
-
     args = %W[
       --prefix=#{prefix}
       --libdir=lib
@@ -51,6 +46,7 @@ class Systemd < Formula
       -Dcreate-log-dirs=false
       -Dhwdb=false
       -Dlz4=true
+      -Dgcrypt=false
     ]
 
     mkdir "build" do
@@ -61,6 +57,6 @@ class Systemd < Formula
   end
 
   test do
-    system "#{bin}/systemd-path"
+    assert_match "temporary: /tmp", shell_output("#{bin}/systemd-path")
   end
 end

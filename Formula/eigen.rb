@@ -1,17 +1,18 @@
 class Eigen < Formula
   desc "C++ template library for linear algebra"
   homepage "https://eigen.tuxfamily.org/"
-  url "https://gitlab.com/libeigen/eigen/-/archive/3.3.9/eigen-3.3.9.tar.gz"
-  sha256 "7985975b787340124786f092b3a07d594b2e9cd53bbfe5f3d9b1daee7d55f56f"
+  url "https://gitlab.com/libeigen/eigen/-/archive/3.4/eigen-3.4.0.tar.gz"
+  sha256 "575d079f9fb56806f605b90fd85fbaeb4a3fb31b573fbbe1ab2fed3b5f88d8fe"
   license "MPL-2.0"
   head "https://gitlab.com/libeigen/eigen.git"
 
+  livecheck do
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
+  end
+
   bottle do
-    cellar :any_skip_relocation
-    sha256 "c3305d00c64e0bd6f53e45858b92be3d72827c02b2e2f71d4edd01f1efaa1080" => :big_sur
-    sha256 "172a99d2e904ece3409ae56304beb77ff638313e52b7f1eb00ce58d8a11a3a68" => :catalina
-    sha256 "dada92aa488d06af18fbf589a46c490a5b9090ae75d0027d5dae109ddad792e5" => :mojave
-    sha256 "a31bd4cbbed6653186e5f54c81f318b6eab0c5c70d29b665d545fd9df661be35" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "87b2664bdc6ec98850643d1149ab53c57b9f6c228cabe23f724b0ff331492fca" # linuxbrew-core
   end
 
   depends_on "cmake" => :build

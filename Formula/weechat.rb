@@ -1,17 +1,17 @@
 class Weechat < Formula
   desc "Extensible IRC client"
   homepage "https://www.weechat.org"
-  url "https://weechat.org/files/src/weechat-3.0.tar.xz"
-  sha256 "6cb7d25a363b66b835f1b9f29f3580d6f09ac7d38505b46a62c178b618d9f1fb"
+  url "https://weechat.org/files/src/weechat-3.2.tar.xz"
+  sha256 "39a8adf374e80653c9dd2be06870341594ea081b3a9c3690132e556abf9d87a8"
   license "GPL-3.0-or-later"
-  revision 1
-  head "https://github.com/weechat/weechat.git"
+  head "https://github.com/weechat/weechat.git", branch: "master"
 
   bottle do
-    sha256 "098515df462ca8a6b2bc0d4330cf785c174a2c9566d5d4f2098a9b13e2cbcfa7" => :big_sur
-    sha256 "52c3a9d539a96b5c72c87884f6a7e9fcc03fd6155ce67bf24084e9f3a3fadccf" => :catalina
-    sha256 "17019246880560ec4d5f1754a53ca1fe1d9a35cf97184f93a7fe2f9586ba135c" => :mojave
-    sha256 "f081f5a84f9fd406d4c002b8ff79e3d851f2b57348008ecbf81421607f68c6cd" => :x86_64_linux
+    sha256 arm64_big_sur: "fbd66c10bc0224c5d21fbfb08c96f96d9ae2c014945fea2e1298ec0fff0b4030"
+    sha256 big_sur:       "0261a4b52e5fd25067fc2d9af3af59090cadd466c36cd69fcf7a635fffcf0bd6"
+    sha256 catalina:      "4d939d2a34065cdae47590d50b6b2aa3c7595b79af0957cb7535c7ba25ee0255"
+    sha256 mojave:        "d9af6b42a994c3a8ee5632563dd5cc285395d0dcaa908f7b928ce5c1e3e845d7"
+    sha256 x86_64_linux:  "84f4215107e3e47e3afd8b167f62efc05bc7e0ca14b010e89b5ee6f2acac14f6" # linuxbrew-core
   end
 
   depends_on "asciidoctor" => :build
@@ -21,7 +21,6 @@ class Weechat < Formula
   depends_on "gettext"
   depends_on "gnutls"
   depends_on "libgcrypt"
-  depends_on "libiconv" if OS.mac?
   depends_on "lua"
   depends_on "ncurses"
   depends_on "perl"
@@ -31,6 +30,10 @@ class Weechat < Formula
   uses_from_macos "curl"
   uses_from_macos "tcl-tk"
 
+  on_macos do
+    depends_on "libiconv"
+  end
+
   def install
     args = std_cmake_args + %W[
       -DENABLE_MAN=ON
@@ -39,6 +42,10 @@ class Weechat < Formula
       -DENABLE_JAVASCRIPT=OFF
       -DENABLE_PHP=OFF
     ]
+
+    # Fix error: '__declspec' attributes are not enabled
+    # See https://github.com/weechat/weechat/issues/1605
+    args << "-DCMAKE_C_FLAGS=-fdeclspec" if ENV.compiler == :clang
 
     # Fix system gem on Mojave
     ENV["SDKROOT"] = ENV["HOMEBREW_SDKROOT"]

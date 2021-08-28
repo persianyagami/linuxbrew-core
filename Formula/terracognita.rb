@@ -1,16 +1,17 @@
 class Terracognita < Formula
   desc "Reads from existing Cloud Providers and generates Terraform code"
   homepage "https://github.com/cycloidio/terracognita"
-  url "https://github.com/cycloidio/terracognita/archive/v0.5.1.tar.gz"
-  sha256 "2385d976ace57ca3eac76321be1dc2be70763817586d7d19540a98765018fd07"
+  url "https://github.com/cycloidio/terracognita/archive/v0.6.4.tar.gz"
+  sha256 "b9282055bf2235e0f8b9fbc1ae31c22909986ee3b3df5cc64e644b34f6513485"
   license "MIT"
-  head "https://github.com/cycloidio/terracognita.git"
+  head "https://github.com/cycloidio/terracognita.git", branch: "master"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "e1e553599bb43ed4da4c27b1c44b269bb46425644c6c50101b4742996c2da4b2" => :big_sur
-    sha256 "650b2e9035df64ec6bc9a6712b84e220f93a51efaac53fbe650a985b427eef2e" => :catalina
-    sha256 "2f5be55a454464e18b554c5bc2861b78f6c65b491e488caa6be484267bdf24e5" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "2cafed794c34f72a5e390a1bdf821798d33c55c567c6b4fa1348d800f3584711"
+    sha256 cellar: :any_skip_relocation, big_sur:       "7cf78bf712f39334a49d05faed61c57c5ae431b2da03e2978462c51c6108133a"
+    sha256 cellar: :any_skip_relocation, catalina:      "ebe755ce13ebff04cacce0edf79b3af170c490c53265ef2fd3ef0ac87a3359da"
+    sha256 cellar: :any_skip_relocation, mojave:        "2b38f5cdbd101cc038bfc6ec0570c9b989ae358e7ed604134e9bd41a8155b275"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "900ff8642dee9bb7b06c777c95d570ecf7a0e23613c149a3c5c7fbe3ac5d5498" # linuxbrew-core
   end
 
   depends_on "go" => :build
@@ -23,7 +24,8 @@ class Terracognita < Formula
   test do
     assert_match "v#{version}", shell_output("#{bin}/terracognita version")
 
-    assert_match "Error: the flag \"access-key\" is required", shell_output("#{bin}/terracognita aws 2>&1", 1)
+    assert_match "Error: one of --module, --hcl  or --tfstate are required",
+      shell_output("#{bin}/terracognita aws 2>&1", 1)
 
     assert_match "aws_instance", shell_output("#{bin}/terracognita aws resources")
   end

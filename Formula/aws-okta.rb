@@ -1,21 +1,22 @@
 class AwsOkta < Formula
   desc "Authenticate with AWS using your Okta credentials"
   homepage "https://github.com/segmentio/aws-okta"
-  url "https://github.com/segmentio/aws-okta/archive/v1.0.8.tar.gz"
-  sha256 "85c97294eac8cd5f3d47b2d74244c7a397787206e3eb19e875c879b3718c8c59"
+  url "https://github.com/segmentio/aws-okta/archive/v1.0.11.tar.gz"
+  sha256 "444a84cd9c81097a7c462f806605193c5676879133255cfa0f610b7d14756b65"
   license "MIT"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "bbb99b6513adc118d36c9b595f0a8247770524bc7d0ecec8ddaf690def141bf4" => :big_sur
-    sha256 "d041c7fec9fed2a7bc7c58b43a469b322eeca5982ecb87d7b3076b9f7cce02c7" => :catalina
-    sha256 "bd6804f95fa77a2d9c7d8e322385c9e91474f6fd1a247aa0dc3786b872db42ab" => :mojave
-    sha256 "6e92296d94f7cf752df9120f3a2ef92886de41aee43ecf91c426532ab80952aa" => :high_sierra
-    sha256 "18e6b0b73270489120ab511a0c04e030400b6b5cea38a3c2e1831395fe223222" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "6de4fd8fa42cddba3a914ed99123469230646bc2ac2598ff40fd0d0c9bf51efe"
+    sha256 cellar: :any_skip_relocation, big_sur:       "178f359eaabc71c8a677f89e1acb35fe73ae35ba4010a06876bdb630b66878b2"
+    sha256 cellar: :any_skip_relocation, catalina:      "2edc4ebb817ff4f0a3188a0c0eea6416ce2a83a6d9b5cc5b3969034ee65e27ca"
+    sha256 cellar: :any_skip_relocation, mojave:        "910418c2dd89b78a7d665cdd8082d9941de433c6c8db800ce0515dfb6c1eb25b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "58c9a49a4f7a27c1ef8b4a60999ce66bbff62817571db92ac14bb88a6725dda9" # linuxbrew-core
   end
 
+  # See https://github.com/segmentio/aws-okta/issues/278
+  deprecate! date: "2020-01-20", because: :deprecated_upstream
+
   depends_on "go" => :build
-  depends_on "govendor" => :build
 
   on_linux do
     depends_on "pkg-config" => :build
