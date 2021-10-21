@@ -3,6 +3,7 @@ class Xqilla < Formula
   homepage "https://xqilla.sourceforge.io/"
   url "https://downloads.sourceforge.net/project/xqilla/XQilla-2.3.4.tar.gz"
   sha256 "292631791631fe2e7eb9727377335063a48f12611d641d0296697e0c075902eb"
+  license "Apache-2.0"
 
   livecheck do
     url :stable
@@ -10,15 +11,15 @@ class Xqilla < Formula
   end
 
   bottle do
-    cellar :any
     rebuild 1
-    sha256 "ac66706739f52be905422e387435524387fdec6ca86243aad5b8be446182d59a" => :big_sur
-    sha256 "3e01ca81220688c9680e3c23c0f7434f415e2b1e7b2e812f514a540eb51b50cd" => :catalina
-    sha256 "93ae09129c45ee7b1a4ecfe996c305791e06833c1e73b604b33282e5ea90248a" => :mojave
-    sha256 "38579e6ab1b6f6801ca5404cc79fcd972f395b9dd2e981672889b3eac5441c86" => :high_sierra
-    sha256 "0f1ef8f2aa1349b723062426a3e44fba2821bcf93316bacabf4c5e2948093bc4" => :sierra
-    sha256 "4326ec876d3e05647320c4ab55824c37531af997cc723f303fac4c4b40153753" => :el_capitan
-    sha256 "18e7b349da94d52a40be41747e69fd4d8aa64fa668aee85e31b047257ae01a89" => :x86_64_linux
+    sha256 cellar: :any, arm64_big_sur: "1b8493188f6fc779948193c1ae7cc803e85a4a18c32464c039448a27f830d9fe"
+    sha256 cellar: :any, big_sur:       "ac66706739f52be905422e387435524387fdec6ca86243aad5b8be446182d59a"
+    sha256 cellar: :any, catalina:      "3e01ca81220688c9680e3c23c0f7434f415e2b1e7b2e812f514a540eb51b50cd"
+    sha256 cellar: :any, mojave:        "93ae09129c45ee7b1a4ecfe996c305791e06833c1e73b604b33282e5ea90248a"
+    sha256 cellar: :any, high_sierra:   "38579e6ab1b6f6801ca5404cc79fcd972f395b9dd2e981672889b3eac5441c86"
+    sha256 cellar: :any, sierra:        "0f1ef8f2aa1349b723062426a3e44fba2821bcf93316bacabf4c5e2948093bc4"
+    sha256 cellar: :any, el_capitan:    "4326ec876d3e05647320c4ab55824c37531af997cc723f303fac4c4b40153753"
+    sha256 cellar: :any, x86_64_linux:  "18e7b349da94d52a40be41747e69fd4d8aa64fa668aee85e31b047257ae01a89" # linuxbrew-core
   end
 
   depends_on "xerces-c"
@@ -51,11 +52,10 @@ class Xqilla < Formula
         return 0;
       }
     EOS
-    system ENV.cxx, "-std=c++11", "-I#{include}",
-           "-I#{Formula["xerces-c"].opt_include}",
-           testpath/"test.cpp", "-o", testpath/"test",
-           "-L#{lib}", "-lxqilla",
-           "-L#{Formula["xerces-c"].opt_lib}", "-lxerces-c"
+    system ENV.cxx, "-std=c++11", testpath/"test.cpp", "-o", testpath/"test",
+                    "-I#{include}", "-I#{Formula["xerces-c"].opt_include}",
+                    "-L#{lib}", "-lxqilla",
+                    "-L#{Formula["xerces-c"].opt_lib}", "-lxerces-c"
     system testpath/"test"
   end
 end

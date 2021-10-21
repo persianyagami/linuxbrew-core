@@ -1,24 +1,32 @@
 class Qbs < Formula
   desc "Build tool for developing projects across multiple platforms"
   homepage "https://wiki.qt.io/Qbs"
-  url "https://download.qt.io/official_releases/qbs/1.17.0/qbs-src-1.17.0.tar.gz"
-  sha256 "03470d0b9447fafc70b8edb6e7486887245f1b43b746db7ccf6fbfcd594e8631"
-  head "https://code.qt.io/qbs/qbs.git"
+  url "https://download.qt.io/official_releases/qbs/1.20.1/qbs-src-1.20.1.tar.gz"
+  sha256 "3a3b486a68bc00a670101733cdcdce647cfdc36588366d8347bc28fd11cc6a0b"
+  license :cannot_represent
+  head "https://code.qt.io/qbs/qbs.git", branch: "master"
 
-  bottle do
-    cellar :any
-    sha256 "c310533a55b77a648ca1fd2f7934df6deb0a67db339e21fa6800de8cc675b5c8" => :big_sur
-    sha256 "50301f8b2764bf22f993d9d4a5b4e2d3e1747a17445c2c685042d9ec3671d465" => :catalina
-    sha256 "98afdec76371d446d067c2976534c2d85afcb760d43fe2f497a2f91386a01eac" => :mojave
-    sha256 "6885e386eefa2f4ea74785b30e528652ccf49a1b0877d4f2ec9f945937384f23" => :high_sierra
+  livecheck do
+    url "https://download.qt.io/official_releases/qbs/"
+    regex(%r{href=["']?v?(\d+(?:\.\d+)+)/?["' >]}i)
   end
 
-  depends_on "qt"
+  bottle do
+    sha256 cellar: :any, arm64_big_sur: "92aac9bdcf321990f97af795af823b02b0f3e747e32b96e2f55f2be34ba5e31f"
+    sha256 cellar: :any, big_sur:       "c3d85f2b1e1f08d4f1eafa5635f892d2fd30929b61b78a350904f2e94eb5ccb4"
+    sha256 cellar: :any, catalina:      "13e3ffaf58f1778c57fd83eb8da7949dfadd639a25ca259fab7197411cf16cdb"
+    sha256 cellar: :any, mojave:        "7e224f3dc560b76aef993ed1b72c8dd51a839928fa3351e77cec37b333b3d534"
+  end
+
+  depends_on "cmake" => :build
+  depends_on "qt@5"
 
   def install
-    system "qmake", "qbs.pro", "QBS_INSTALL_PREFIX=#{prefix}", "CONFIG+=qbs_disable_rpath"
-    system "make"
-    system "make", "install", "INSTALL_ROOT=/"
+    qt5 = Formula["qt@5"].opt_prefix
+    system "cmake", ".", "-DQt5_DIR=#{qt5}/lib/cmake/Qt5", "-DQBS_ENABLE_RPATH=NO",
+                         *std_cmake_args
+    system "cmake", "--build", "."
+    system "cmake", "--install", "."
   end
 
   test do

@@ -1,11 +1,9 @@
 class Phpmd < Formula
   desc "PHP Mess Detector"
   homepage "https://phpmd.org"
-  url "https://github.com/phpmd/phpmd/releases/download/2.9.1/phpmd.phar"
-  sha256 "e3648204e9b010f44203acaed5d03e38a91d75d31dae7c7a1048e2614fbea564"
+  url "https://github.com/phpmd/phpmd/releases/download/2.10.2/phpmd.phar"
+  sha256 "5d16d2571ed029ce94a8dfcec2f50a280f9c896a1454eb93014474841861aa01"
   license "BSD-3-Clause"
-
-  bottle :unneeded
 
   def install
     bin.install "phpmd.phar" => "phpmd"
@@ -22,7 +20,7 @@ class Phpmd < Formula
       }
     EOS
 
-    assert_match /Avoid unused parameters such as '\$name'\.$/,
+    assert_match "Avoid unused parameters such as '$name'.",
       shell_output("#{bin}/phpmd --ignore-violations-on-exit src/HelloWorld/Greetings.php text unusedcode")
   end
 end

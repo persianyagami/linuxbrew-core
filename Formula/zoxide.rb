@@ -1,23 +1,25 @@
 class Zoxide < Formula
   desc "Shell extension to navigate your filesystem faster"
   homepage "https://github.com/ajeetdsouza/zoxide"
-  url "https://github.com/ajeetdsouza/zoxide/archive/v0.5.0.tar.gz"
-  sha256 "62b7a2ced73d5ac0a183b3855d54d6619166b4d8d8c74299bb610265ccc4b193"
+  url "https://github.com/ajeetdsouza/zoxide/archive/v0.7.7.tar.gz"
+  sha256 "6c190f84e4d4c22fef6948b06afd451d67c558d5afee5225745fbcbe256b0194"
   license "MIT"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "2d39de2508929c51d9d5e8e188a1752fa72b71fc2119e1cd9edae56cfc63fbfb" => :big_sur
-    sha256 "0752c35a480b33fe21e6b336ebfd192b913817d649de9baf1e7d1b69e84f3a83" => :catalina
-    sha256 "e9070115cff363740372b028958e590405663813526d77cfbf40b3b0abb9b9d0" => :mojave
-    sha256 "9c85724a7f8272fa6fb29cd894ec78bcf4034178d88fd37cd332dec0ce34de30" => :high_sierra
-    sha256 "4df970e31a3f573d60f64d5301f74ba9dc7cf505e7075f1a5329f31501d8df3c" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "0aea21ce70cda5cafef9cb089b0a478ce7ebc7ba6efcbdae76743029cae4693c"
+    sha256 cellar: :any_skip_relocation, big_sur:       "4105ea85bff355e1d200743c370cf1fa1711027117724a647e1f9c00d070b2f2"
+    sha256 cellar: :any_skip_relocation, catalina:      "fddfc327e08b33e3e21e923300d88d1434422341e33b0c4c97727234626ac95a"
+    sha256 cellar: :any_skip_relocation, mojave:        "7fcf42d57714522557e3fec0de3bec943d493a853806232b201e0df34999412f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2c33cc1d43aa94fb44b870d49f8da0d5d78191faa3645face1defc4d123bf62c" # linuxbrew-core
   end
 
   depends_on "rust" => :build
 
   def install
     system "cargo", "install", *std_cargo_args
+    bash_completion.install "contrib/completions/zoxide.bash" => "zoxide"
+    zsh_completion.install "contrib/completions/_zoxide"
+    fish_completion.install "contrib/completions/zoxide.fish"
   end
 
   test do

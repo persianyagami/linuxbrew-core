@@ -2,34 +2,36 @@ class Cppad < Formula
   desc "Differentiation of C++ Algorithms"
   homepage "https://www.coin-or.org/CppAD"
   # Stable versions have numbers of the form 201x0000.y
-  url "https://github.com/coin-or/CppAD/archive/20200000.3.tar.gz"
-  sha256 "b37f3bc13d1e653828fefec604260d93224dc66a5f70da5500bc7bf2ba13c3d3"
+  url "https://github.com/coin-or/CppAD/archive/20210000.8.tar.gz"
+  sha256 "465a462329fb62110c4799577178d1f28d8c0083b385b7ea08ac82bb98873844"
   license "EPL-2.0"
   version_scheme 1
-  head "https://github.com/coin-or/CppAD.git"
+  head "https://github.com/coin-or/CppAD.git", branch: "master"
 
   livecheck do
-    url :head
+    url :stable
     regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "eaf51d282b9812ddc697f9e606e6f17b2a728f5b670885c8dc0e26f2b2f896a1" => :big_sur
-    sha256 "4ef0d734cddee5d7dfde8398b8b295cc35100424639db041816459636de3087f" => :catalina
-    sha256 "948e5a9ae91c50297d528c87b1f38afcd15f4e6b6f162ce7ddffa2f43b329143" => :mojave
-    sha256 "d74b4ab769dccd4537ef03dd28fea858b81ee2938df776e5d45a23069c57c142" => :high_sierra
-    sha256 "3f24f827195344fe1e1a9eca220cca50b3a7417553c1e4d6ffce7f9ed46e9b96" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "f1e290d82781bd8a6eb2d834141f9c02bb7006ae26113bedf3ff518eaf6c93bf"
+    sha256 cellar: :any,                 big_sur:       "52998109aba462d55b4dc2dcf3a1d3bde03ed13b0f736985d8725fff163f6b01"
+    sha256 cellar: :any,                 catalina:      "9cedc9b79c879b310618c4f423ab4ec40d5e44b668c95e83c701e0fcc63ecb47"
+    sha256 cellar: :any,                 mojave:        "531ea9476520b4ebaa94a2cdc73d5e668d47ea042d6130f745f9dc8323d67c52"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "abc33e6644cb69e9e44eed423b746287b3582d487d150903975346bb3bdf48fd" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
 
   def install
+    ENV.cxx11
+
     mkdir "build" do
       system "cmake", "..", *std_cmake_args,
                       "-Dcppad_prefix=#{prefix}"
       system "make", "install"
     end
+
     pkgshare.install "example"
   end
 
@@ -46,7 +48,7 @@ class Cppad < Formula
       }
     EOS
 
-    system ENV.cxx, "#{pkgshare}/example/general/acos.cpp", "-I#{include}",
+    system ENV.cxx, "#{pkgshare}/example/general/acos.cpp", "-std=c++11", "-I#{include}",
                     "test.cpp", "-o", "test"
     system "./test"
   end

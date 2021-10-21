@@ -1,66 +1,64 @@
 class Ghc < Formula
   desc "Glorious Glasgow Haskell Compilation System"
   homepage "https://haskell.org/ghc/"
-  url "https://downloads.haskell.org/~ghc/8.10.1/ghc-8.10.1-src.tar.xz"
-  sha256 "4e3b07f83a266b3198310f19f71e371ebce97c769b14f0d688f4cbf2a2a1edf5"
-  license "BSD-3-Clause"
-  revision 2
+  url "https://downloads.haskell.org/~ghc/8.10.7/ghc-8.10.7-src.tar.xz"
+  sha256 "e3eef6229ce9908dfe1ea41436befb0455fefb1932559e860ad4c606b0d03c9d"
+  # We bundle a static GMP so GHC inherits GMP's license
+  license all_of: [
+    "BSD-3-Clause",
+    any_of: ["LGPL-3.0-or-later", "GPL-2.0-or-later"],
+  ]
 
   livecheck do
-    url :stable
+    url "https://www.haskell.org/ghc/download.html"
+    regex(/href=.*?download[._-]ghc[._-][^"' >]+?\.html[^>]*?>\s*?v?(8(?:\.\d+)+)\s*?</i)
   end
 
   bottle do
-    sha256 "36daf8d12bf15ea04e12e9df4dc8a21de5ed01b39a3fd32ef3663ddb44a459fc" => :big_sur
-    sha256 "1fc15705e5b9a24ca773d2df745345e75496ec3f227ea518d9945d6e1add6e18" => :catalina
-    sha256 "cf8e2755d55d2a6479e4cebbee041ff63bece9bbae7d514c0b7601f6542b8081" => :mojave
-    sha256 "40e2b31e3390cf784dedcd4357362bee577b6a5c1d911f5c072828fe01f42e8f" => :high_sierra
-    sha256 "98d149359e56a7570c97f0722838851534275da7998d96d32bcf1baad5428d50" => :x86_64_linux
-  end
-
-  head do
-    url "https://gitlab.haskell.org/ghc/ghc.git", branch: "ghc-8.10"
-
-    depends_on "autoconf" => :build
-    depends_on "automake" => :build
-    depends_on "libtool" => :build
-
-    resource "cabal" do
-      url "https://hackage.haskell.org/package/cabal-install-3.2.0.0/cabal-install-3.2.0.0.tar.gz"
-      sha256 "a0555e895aaf17ca08453fde8b19af96725da8398e027aa43a49c1658a600cb0"
-    end
+    sha256 cellar: :any,                 arm64_big_sur: "dc95f7ac96f96622d0ba846d38355f944e16a4c06304a12f5549dde9de422c3d"
+    sha256                               big_sur:       "c008431d9fdd2d56c97cd22134c776c9e2c3f322a4e8ebb9bb5808750c7ce1c2"
+    sha256                               catalina:      "9d7309d7f86d20b3c1d7c3ec74f7c77b060910b52d3550c2f6f17312da0d0d47"
+    sha256                               mojave:        "6f23a42bf1ad6b4ef103c29c09033117e27dbd85f752cdcdc33220cfd505c445"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "fe219b2a21779af52268d3cf2f4aacfb5bf02071e544cb5a9946de7e640fc426" # linuxbrew-core
   end
 
   depends_on "python@3.9" => :build
   depends_on "sphinx-doc" => :build
+  depends_on "llvm" if Hardware::CPU.arm?
 
-  unless OS.mac?
-    depends_on "m4" => :build
-    depends_on "ncurses"
+  uses_from_macos "m4" => :build
+  uses_from_macos "ncurses"
 
-    # This dependency is needed for the bootstrap executables.
+  on_macos do
+    resource "gmp" do
+      url "https://ftp.gnu.org/gnu/gmp/gmp-6.2.1.tar.xz"
+      mirror "https://gmplib.org/download/gmp/gmp-6.2.1.tar.xz"
+      mirror "https://ftpmirror.gnu.org/gmp/gmp-6.2.1.tar.xz"
+      sha256 "fd4829912cddd12f84181c3451cc752be224643e87fac497b69edddadc49b4f2"
+    end
+  end
+
+  on_linux do
     depends_on "gmp" => :build
   end
 
-  resource "gmp" do
-    url "https://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.xz"
-    mirror "https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz"
-    mirror "https://ftpmirror.gnu.org/gmp/gmp-6.1.2.tar.xz"
-    sha256 "87b565e89a9a684fe4ebeeddb8399dce2599f9c9049854ca8c0dfbdea0e21912"
-  end
-
-  # https://www.haskell.org/ghc/download_ghc_8_10_1.html#macosx_x86_64
+  # https://www.haskell.org/ghc/download_ghc_8_10_7.html#macosx_x86_64
   # "This is a distribution for Mac OS X, 10.7 or later."
   # A binary of ghc is needed to bootstrap ghc
   resource "binary" do
     on_macos do
-      url "https://downloads.haskell.org/~ghc/8.10.1/ghc-8.10.1-x86_64-apple-darwin.tar.xz"
-      sha256 "65b1ca361093de4804a7e40b3e68178e1ef720f84f743641ec8d95e56a45b3a8"
+      if Hardware::CPU.intel?
+        url "https://downloads.haskell.org/~ghc/8.10.7/ghc-8.10.7-x86_64-apple-darwin.tar.xz"
+        sha256 "287db0f9c338c9f53123bfa8731b0996803ee50f6ee847fe388092e5e5132047"
+      else
+        url "https://downloads.haskell.org/ghc/8.10.7/ghc-8.10.7-aarch64-apple-darwin.tar.xz"
+        sha256 "dc469fc3c35fd2a33a5a575ffce87f13de7b98c2d349a41002e200a56d9bba1c"
+      end
     end
 
     on_linux do
-      url "https://downloads.haskell.org/~ghc/8.10.1/ghc-8.10.1-x86_64-deb9-linux.tar.xz"
-      sha256 "d1cf7886f27af070f3b7dbe1975a78b43ef2d32b86362cbe953e79464fe70761"
+      url "https://downloads.haskell.org/~ghc/8.10.7/ghc-8.10.7-x86_64-deb9-linux.tar.xz"
+      sha256 "ced9870ea351af64fb48274b81a664cdb6a9266775f1598a79cbb6fdd5770a23"
     end
   end
 
@@ -69,59 +67,42 @@ class Ghc < Formula
     ENV["LD"] = "ld"
     ENV["PYTHON"] = Formula["python@3.9"].opt_bin/"python3"
 
-    # Build a static gmp rather than in-tree gmp, otherwise all ghc-compiled
-    # executables link to Homebrew's GMP.
-    gmp = libexec/"integer-gmp"
+    args = %w[--enable-numa=no]
+    if OS.mac?
+      # Build a static gmp rather than in-tree gmp, otherwise all ghc-compiled
+      # executables link to Homebrew's GMP.
+      gmp = libexec/"integer-gmp"
 
-    # GMP *does not* use PIC by default without shared libs so --with-pic
-    # is mandatory or else you'll get "illegal text relocs" errors.
-    resource("gmp").stage do
-      args = if OS.mac?
-        "--build=#{Hardware.oldest_cpu}-apple-darwin#{OS.kernel_version.major}"
-      else
-        "--build=core2-linux-gnu"
+      # GMP *does not* use PIC by default without shared libs so --with-pic
+      # is mandatory or else you'll get "illegal text relocs" errors.
+      resource("gmp").stage do
+        cpu = Hardware::CPU.arm? ? "aarch64" : Hardware.oldest_cpu
+        system "./configure", "--prefix=#{gmp}", "--with-pic", "--disable-shared",
+                              "--build=#{cpu}-apple-darwin#{OS.kernel_version.major}"
+        system "make"
+        system "make", "install"
       end
-      system "./configure", "--prefix=#{gmp}", "--with-pic", "--disable-shared",
-                            *args
-      system "make"
-      system "make", "install"
-    end
 
-    args = ["--with-gmp-includes=#{gmp}/include",
-            "--with-gmp-libraries=#{gmp}/lib"]
-
-    unless OS.mac?
-      # Fix error while loading shared libraries: libgmp.so.10
-      ln_s Formula["gmp"].lib/"libgmp.so", gmp/"lib/libgmp.so.10"
-      ENV.prepend_path "LD_LIBRARY_PATH", gmp/"lib"
-      # Fix /usr/bin/ld: cannot find -lgmp
-      ENV.prepend_path "LIBRARY_PATH", gmp/"lib"
-      # Fix ghc-stage2: error while loading shared libraries: libncursesw.so.5
-      ln_s Formula["ncurses"].lib/"libncursesw.so", gmp/"lib/libncursesw.so.5"
-      # Fix ghc-stage2: error while loading shared libraries: libtinfo.so.5
-      ln_s Formula["ncurses"].lib/"libtinfo.so", gmp/"lib/libtinfo.so.5"
-      # Fix ghc-pkg: error while loading shared libraries: libncursesw.so.6
-      ENV.prepend_path "LD_LIBRARY_PATH", Formula["ncurses"].lib
+      args = ["--with-gmp-includes=#{gmp}/include",
+              "--with-gmp-libraries=#{gmp}/lib"]
     end
 
     resource("binary").stage do
-      # Change the dynamic linker and RPATH of the binary executables.
-      if OS.linux? && Formula["glibc"].any_version_installed?
-        keg = Keg.new(prefix)
-        ["ghc/stage2/build/tmp/ghc-stage2"].concat(Dir["libraries/*/dist-install/build/*.so",
-            "rts/dist/build/*.so*", "utils/*/dist*/build/tmp/*"]).each do |s|
-          file = Pathname.new(s)
-          keg.change_rpath(file, Keg::PREFIX_PLACEHOLDER, HOMEBREW_PREFIX.to_s) if file.dynamic_elf?
-        end
-      end
-
       binary = buildpath/"binary"
 
-      system "./configure", "--prefix=#{binary}", *args
+      binary_args = args
+      if OS.linux?
+        binary_args << "--with-gmp-includes=#{Formula["gmp"].opt_include}"
+        binary_args << "--with-gmp-libraries=#{Formula["gmp"].opt_lib}"
+      end
+
+      system "./configure", "--prefix=#{binary}", *binary_args
       ENV.deparallelize { system "make", "install" }
 
       ENV.prepend_path "PATH", binary/"bin"
     end
+
+    args << "--with-intree-gmp" if OS.linux?
 
     system "./configure", "--prefix=#{prefix}", *args
     system "make"
@@ -129,6 +110,8 @@ class Ghc < Formula
     ENV.deparallelize { system "make", "install" }
     Dir.glob(lib/"*/package.conf.d/package.cache") { |f| rm f }
     Dir.glob(lib/"*/package.conf.d/package.cache.lock") { |f| rm f }
+
+    bin.env_script_all_files libexec/"bin", PATH: "$PATH:#{Formula["llvm"].opt_bin}" if Hardware::CPU.arm?
   end
 
   def post_install

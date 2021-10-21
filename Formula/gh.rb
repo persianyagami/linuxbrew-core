@@ -1,9 +1,11 @@
 class Gh < Formula
   desc "GitHub command-line tool"
   homepage "https://github.com/cli/cli"
-  url "https://github.com/cli/cli/archive/v1.3.1.tar.gz"
-  sha256 "5e5dca830aa5012fa1851513c10c0a5de4d3f38c16a172928b1d8e9dd9c75957"
+  url "https://github.com/cli/cli/archive/v2.1.0.tar.gz"
+  sha256 "4b353b121a0f3ddf5046f0a1ae719a0539e0cddef27cc78a1b33ad7d1d22c007"
   license "MIT"
+
+  head "https://github.com/cli/cli.git", branch: "trunk"
 
   livecheck do
     url :stable
@@ -11,19 +13,22 @@ class Gh < Formula
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "6f01868e74ff2082b19d5000502206875d86cd54cf5a6c2f503ead46d48a38ac" => :big_sur
-    sha256 "ec0ae34ee04b4f9e0ffe813957ae5fd0fd28b895dbb327d0244e97d0e992d87f" => :catalina
-    sha256 "924ff3e546d4f0eec09a4dd8679d1a74f99f771a9f00bf0a7b130d2ffd0b0e1a" => :mojave
-    sha256 "3a6dc7e6d09a3c714dc9e82ad19ddf79f812d9cdf805210841125684fbfac9e5" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "0c8a4aa91eb91928477e578168a32866098bd9d4dbca17caf39cf1b921925039"
+    sha256 cellar: :any_skip_relocation, big_sur:       "62c1fa920d386d9cf5893643830319abad097e39d798e966c102c64a79f2b859"
+    sha256 cellar: :any_skip_relocation, catalina:      "002847accc5930067182092649b6976cbbae09e84c70d9389f25bde1b9dd2ff3"
+    sha256 cellar: :any_skip_relocation, mojave:        "242f3cdea693b1f5eb0896120367d9c2db1051b8b475ae48571f9479bba066ed"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0df8a2a2e73cedb7775e4c2b38edf81ff28424e708812b1c471179723c82b08e" # linuxbrew-core
   end
 
   depends_on "go" => :build
 
   def install
-    ENV["GH_VERSION"] = version.to_s
-    ENV["GO_LDFLAGS"] = "-s -w"
-    system "make", "bin/gh", "manpages"
+    with_env(
+      "GH_VERSION" => version.to_s,
+      "GO_LDFLAGS" => "-s -w -X main.updaterEnabled=cli/cli",
+    ) do
+      system "make", "bin/gh", "manpages"
+    end
     bin.install "bin/gh"
     man1.install Dir["share/man/man1/gh*.1"]
     (bash_completion/"gh").write `#{bin}/gh completion -s bash`

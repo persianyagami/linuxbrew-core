@@ -1,17 +1,16 @@
 class Libolm < Formula
   desc "Implementation of the Double Ratchet cryptographic ratchet"
   homepage "https://gitlab.matrix.org/matrix-org/olm"
-  url "https://gitlab.matrix.org/matrix-org/olm/-/archive/3.2.1/olm-3.2.1.tar.gz"
-  sha256 "d947d9570345e68696668cb855f1a6a7141b7b89cbcc15a08b1fae18535c4c45"
+  url "https://gitlab.matrix.org/matrix-org/olm/-/archive/3.2.6/olm-3.2.6.tar.gz"
+  sha256 "9b61bd9182bb0ae0c5a800a8b0496b69600a0a22e3a21fce0aad119d2b1c99ae"
   license "Apache-2.0"
 
   bottle do
-    cellar :any
-    sha256 "0634af436ccc158ea8ba3e15a53df9b3677b88db950691aaf1174189a925c8a5" => :big_sur
-    sha256 "850ca4e75b42221ea5ec4ed0ffb845b9f9d032f711b6ceb600d85813e81d50a3" => :catalina
-    sha256 "09cad39ec7953a8f3d0c9848673490624153107f1fce18db4a489147fa1170bf" => :mojave
-    sha256 "efe5613af63cc93f582b0e6f6dbe81ec9863d49dc347bf354e202ed8c9ed3ed6" => :high_sierra
-    sha256 "e8a4243407292468665a86f6a07a5aeae8bf581231147f562dad03052adde0fc" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "a0d40c19dde560b6c429ede66a7c549f46c36f58872a055e6fcacb24b565d72f"
+    sha256 cellar: :any,                 big_sur:       "9b0fa6f2b8bcf26a480b43cf8fd38bdd474f2296d1a13a378228468811ba3876"
+    sha256 cellar: :any,                 catalina:      "dbc06704bf32fedbfd2c8aad88ba9d504e44d055c553d22677298ec877f40c8a"
+    sha256 cellar: :any,                 mojave:        "be9653954751491a58c54ea5f9c0e6284af4975a8d09f0c4248d14ec735e0d5b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3fcdb358514800ef0cf2248b20b36e57ee1faf258936514a05b2d821e5322bfd" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
@@ -35,8 +34,9 @@ class Libolm < Formula
         void * utility_buffer = malloc(::olm_utility_size());
         ::OlmUtility * utility = ::olm_utility(utility_buffer);
 
-        uint8_t output[43];
+        uint8_t output[44];
         ::olm_sha256(utility, "Hello, World", 12, output, 43);
+        output[43] = '\0';
         cout << output;
         return 0;
       }

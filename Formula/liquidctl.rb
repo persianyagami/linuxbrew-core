@@ -2,26 +2,32 @@ class Liquidctl < Formula
   include Language::Python::Virtualenv
 
   desc "Cross-platform tool and drivers for liquid coolers and other devices"
-  homepage "https://github.com/jonasmalacofilho/liquidctl"
-  url "https://files.pythonhosted.org/packages/48/7e/fd5faf6a0174c1e19d373bac108de164acf930d7ea7277359759ddcdc5a4/liquidctl-1.4.2.tar.gz"
-  sha256 "39da5f5bcae1cbd91e42e78fdb19f4f03b6c1a585addc0b268e0c468e76f1a3c"
+  homepage "https://github.com/liquidctl/liquidctl"
+  url "https://files.pythonhosted.org/packages/e4/f5/745cc14e5748de5d5ac3ccc1a0a9ee5e0e73858aafcc863514ce88956c0b/liquidctl-1.7.2.tar.gz"
+  sha256 "b2337e0ca3bd36de1cbf581510aacfe23183d7bb176ad0dd43904be213583de3"
   license "GPL-3.0-or-later"
-  head "https://github.com/jonasmalacofilho/liquidctl.git"
-
-  livecheck do
-    url :stable
-  end
+  head "https://github.com/liquidctl/liquidctl.git", branch: "main"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "11692b4a1fdb37656b1f12d19de09f936e5d46826023542d37b90207d5ffa2f0" => :big_sur
-    sha256 "9d778fb003ff7d1b91cede65b520f5abea02d1f0e10ccad399c1fbd098a70f74" => :catalina
-    sha256 "3ba78e39d57d4ae090e0766ffde00051a231f7f0e72be9a3f22c0e85c653d136" => :mojave
-    sha256 "762878d11756d60697258c1b7044ecd420df56bd720d6834547ed22b7596d813" => :high_sierra
+    sha256 cellar: :any,                 arm64_big_sur: "f328324cba24b07779199d88ce405d2f6a8a4e023021f71cb8b745b698cd675c"
+    sha256 cellar: :any,                 big_sur:       "bad09035eeea790c15be5d4f888e5e7d289f2e6d826af9e5e568907275503d70"
+    sha256 cellar: :any,                 catalina:      "c20cb061748d4bcc952ed77ab148ca73a4bed576bbe5e1c9b7595eca9a74f8e0"
+    sha256 cellar: :any,                 mojave:        "68edf5e0b19b017ab73a4381525ea5cc9b365c4284ea6ea80e00c09cbbdd7299"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "55a9c04dbe2227042aaa33c4a4adbc6e843fcf3ca2f75c2e8c27813f994965f3" # linuxbrew-core
   end
 
+  depends_on "hidapi"
   depends_on "libusb"
-  depends_on "python@3.9"
+  depends_on "python@3.10"
+
+  on_linux do
+    depends_on "i2c-tools"
+  end
+
+  resource "colorlog" do
+    url "https://files.pythonhosted.org/packages/c2/42/f7a7d8eaa3420fcfc7b85c423c0800b0f2eb2241c780705f0952eafd0171/colorlog-6.5.0.tar.gz"
+    sha256 "cf62a8e389d5660d0d22be17937b25b9abef9497ddc940197d1773aa1f604339"
+  end
 
   resource "docopt" do
     url "https://files.pythonhosted.org/packages/a2/55/8f8cab2afd404cf578136ef2cc5dfb50baa1761b68c9da1fb1e4eed343c9/docopt-0.6.2.tar.gz"
@@ -29,13 +35,13 @@ class Liquidctl < Formula
   end
 
   resource "hidapi" do
-    url "https://files.pythonhosted.org/packages/52/4b/0d0fac70bd0a04949113a9ca50ba7b2344f547b9d85b0e7e5eded19d7d50/hidapi-0.10.0.post1.tar.gz"
-    sha256 "27c04d42a7187becf7a8309d4846aa4f235ac8b7dafd758335b109f5cbd3b962"
+    url "https://files.pythonhosted.org/packages/99/9b/5c41756461308a5b2d8dcbcd6eaa2f1c1bc60f0a6aa743b58cab756a92e1/hidapi-0.10.1.tar.gz"
+    sha256 "a1170b18050bc57fae3840a51084e8252fd319c0fc6043d68c8501deb0e25846"
   end
 
   resource "pyusb" do
-    url "https://files.pythonhosted.org/packages/12/9b/8f5be839753667c39fe522162bea7f8121f28ba49c5ad1e5681681967c79/pyusb-1.1.0.tar.gz"
-    sha256 "d69ed64bff0e2102da11b3f49567256867853b861178689671a163d30865c298"
+    url "https://files.pythonhosted.org/packages/d9/6e/433a5614132576289b8643fe598dd5d51b16e130fd591564be952e15bb45/pyusb-1.2.1.tar.gz"
+    sha256 "a4cc7404a203144754164b8b40994e2849fde1cfff06b08492f12fff9d9de7b9"
   end
 
   def install
@@ -43,13 +49,26 @@ class Liquidctl < Formula
     ENV["DIST_NAME"] = "homebrew"
     ENV["DIST_PACKAGE"] = "liquidctl #{version}"
 
-    virtualenv_install_with_resources
+    venv = virtualenv_create(libexec, "python3")
+
+    resource("hidapi").stage do
+      inreplace "setup.py" do |s|
+        s.gsub! "/usr/include/libusb-1.0", "#{Formula["libusb"].opt_include}/libusb-1.0"
+        s.gsub! "/usr/include/hidapi", "#{Formula["hidapi"].opt_include}/hidapi"
+      end
+      system libexec/"bin/python3", *Language::Python.setup_install_args(libexec), "--with-system-hidapi"
+    end
+
+    venv.pip_install resources.reject { |r| r.name == "hidapi" }
+    venv.pip_install_and_link buildpath
 
     man_page = buildpath/"liquidctl.8"
     # setting the is_macos register to 1 adjusts the man page for macOS
-    inreplace man_page, ".nr is_macos 0", ".nr is_macos 1"
+    inreplace man_page, ".nr is_macos 0", ".nr is_macos 1" if OS.mac?
     man.mkpath
     man8.install man_page
+
+    (lib/"udev/rules.d").install Dir["extra/linux/*.rules"] if OS.linux?
   end
 
   test do

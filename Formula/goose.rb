@@ -1,30 +1,22 @@
 class Goose < Formula
   desc "Go Language's command-line interface for database migrations"
   homepage "https://github.com/pressly/goose"
-  url "https://github.com/pressly/goose/archive/v2.6.0.tar.gz"
-  sha256 "389953f40e567fd92090fd29d60e1baec576e6432e689f11ef54e6493502383a"
+  url "https://github.com/pressly/goose/archive/v3.2.0.tar.gz"
+  sha256 "ce77bbea92565d3aeeec4a751dd4755c730a60f968eb1926850f041bf602e1e5"
   license "MIT"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "906fbc0f90c83707d12893293874bd3b60c8861ee4f1e3ddb1a40b10476827d4" => :big_sur
-    sha256 "c61983ec470b8ca810e5f4d084ed1c03518281290e0e0f873efd0a703fdd3657" => :catalina
-    sha256 "121541b4371c54909eb3d0e3c20c99d60166ce4eab54521e6e8e2a42f0c4e71e" => :mojave
-    sha256 "0e8c6ed483b244eac2370dad2d7fa59a6a7f1075305577553aac66463c7b0062" => :high_sierra
-    sha256 "c8de282b2486ea10080e3a21c15c909facd38a77069f907e835a1721d06ac8bb" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "c1cab5758f96a33f14423bb465613a53339c54f1f3c6adf86568c06084b4245e"
+    sha256 cellar: :any_skip_relocation, big_sur:       "dc23abcdbea2aef77700ab3662add810975f49d052500d1b6d04364546811b11"
+    sha256 cellar: :any_skip_relocation, catalina:      "1671caff48bfb3e34f346d2441fe4327211394bd9fc3f51e26d97b4666a91aa8"
+    sha256 cellar: :any_skip_relocation, mojave:        "de5429253c76841e33941d9197355447b9755c5a06bd158356af9e31208b3372"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "92a783c135d866ab72462ebaf7ea00bd2571a9c5272d3e1e75d8b84758327fba" # linuxbrew-core
   end
 
-  depends_on "dep" => :build
   depends_on "go" => :build
 
   def install
-    ENV["GOPATH"] = buildpath
-    (buildpath/"src/github.com/pressly/goose").install buildpath.children
-    cd "src/github.com/pressly/goose" do
-      system "dep", "ensure"
-      system "go", "build", "-o", bin/"goose", ".../cmd/goose"
-      prefix.install_metafiles
-    end
+    system "go", "build", *std_go_args(ldflags: "-s -w"), "./cmd/goose"
   end
 
   test do

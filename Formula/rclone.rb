@@ -1,29 +1,25 @@
 class Rclone < Formula
   desc "Rsync for cloud storage"
   homepage "https://rclone.org/"
-  url "https://github.com/rclone/rclone/archive/v1.53.3.tar.gz"
-  sha256 "46fb317057ada21add1fa683a004e1ad5b2a1523c381f59b40ed1b18f2856ad0"
+  url "https://github.com/rclone/rclone/archive/v1.56.2.tar.gz"
+  sha256 "a5b0b7dfe17d9ec74e3a33415eec4331c61d800d8823621e61c6164e8f88c567"
   license "MIT"
-  revision 1
-  head "https://github.com/rclone/rclone.git"
+  head "https://github.com/rclone/rclone.git", branch: "master"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "9893c01fd98887fdb8a3f0172aa9f1c0c45772ef66745a035b2d59ed783a5a48" => :big_sur
-    sha256 "7e0ac710208b82b5c40da947adebc35a97159d5ef6dae9bb77d5f9e147888a68" => :catalina
-    sha256 "fb4f008464eeec2bc8351ae821109ab762bf67aa604952e5d362288af67d9b46" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "957e720c43d34dab552b432aa5b7e1c1f8248fcc710636bb7d0f9ffc04865539"
+    sha256 cellar: :any_skip_relocation, big_sur:       "33790b4ad68970d136d97859a771bd12ea17eba644c70a64ac8f848e7adbefa2"
+    sha256 cellar: :any_skip_relocation, catalina:      "89eba48543a11570324e2a96e56b0962486969fd34ea07ff41fb278769dfe2f8"
+    sha256 cellar: :any_skip_relocation, mojave:        "4d4d8134ca7c9cd27cf242fafac39c1ab90fa51ac592d47d02c1a87b9e0daf26"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e53ec3ae829bd6f86f8d83d332ecdedd53e1bc16646e3b815cc85b3fc8002c5c" # linuxbrew-core
   end
 
   depends_on "go" => :build
 
   def install
-    args = *std_go_args
-    on_macos do
-      args += ["-tags", "brew"]
-    end
-    system "go", "build",
-      "-ldflags", "-s -X github.com/rclone/rclone/fs.Version=v#{version}",
-      *args
+    args = *std_go_args(ldflags: "-s -w -X github.com/rclone/rclone/fs.Version=v#{version}")
+    args += ["-tags", "brew"] if OS.mac?
+    system "go", "build", *args
     man1.install "rclone.1"
     system bin/"rclone", "genautocomplete", "bash", "rclone.bash"
     system bin/"rclone", "genautocomplete", "zsh", "_rclone"
@@ -39,7 +35,7 @@ class Rclone < Formula
 
   test do
     (testpath/"file1.txt").write "Test!"
-    system "#{bin}/rclone", "copy", testpath/"file1.txt", testpath/"dist"
+    system bin/"rclone", "copy", testpath/"file1.txt", testpath/"dist"
     assert_match File.read(testpath/"file1.txt"), File.read(testpath/"dist/file1.txt")
   end
 end

@@ -1,19 +1,29 @@
 class Re2 < Formula
   desc "Alternative to backtracking PCRE-style regular expression engines"
   homepage "https://github.com/google/re2"
-  url "https://github.com/google/re2/archive/2020-11-01.tar.gz"
-  version "20201101"
-  sha256 "8903cc66c9d34c72e2bc91722288ebc7e3ec37787ecfef44d204b2d6281954d7"
+  url "https://github.com/google/re2/archive/2021-09-01.tar.gz"
+  version "20210901"
+  sha256 "42a2e1d56b5de252f5d418dc1cc0848e9e52ca22b056453988b18c6195ec7f8d"
   license "BSD-3-Clause"
-  head "https://github.com/google/re2.git"
+  head "https://github.com/google/re2.git", branch: "main"
+
+  # The `strategy` block below is used to massage upstream tags into the
+  # YYYYMMDD format used in the `version`. This is necessary for livecheck
+  # to be able to do proper `Version` comparison.
+  livecheck do
+    url :stable
+    regex(/^(\d{2,4}-\d{2}-\d{2})$/i)
+    strategy :git do |tags, regex|
+      tags.map { |tag| tag[regex, 1]&.gsub(/\D/, "") }.compact
+    end
+  end
 
   bottle do
-    cellar :any
-    sha256 "02fed353151f3d3d936af926e1fcd18cd68ca0e51694eb48acccbc5280316ce2" => :big_sur
-    sha256 "3775e06cd4478f7ef90cfe76bbd01d051c8ba2b646fd84601e307a8c0e2ec7de" => :catalina
-    sha256 "621f2bcea8c2f42d3ddb2de7f3df669259b5818763290d7b957c6bd406102a45" => :mojave
-    sha256 "6be4625dab709d29564e85823b24c668c1b7fe061365d443ac4956f4ad3135fc" => :high_sierra
-    sha256 "f353f95539f7c5aaa02fe953bde11b8427f346a3cdf09cae299a94e8510a5496" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "2737e7f164fc5e71e47395e657e49c642299169187035bf580da377758d79f2a"
+    sha256 cellar: :any,                 big_sur:       "37d27091caac14f59c8ec254572ae6bf4381b58bdd789d2dfce6335cceec283c"
+    sha256 cellar: :any,                 catalina:      "34301adc3ba86bcc2cf7c0b97bc8310a7db2a0b89a8245bcf4b7c06c2c07bd6e"
+    sha256 cellar: :any,                 mojave:        "2799d3471e7a1c34a9548073d20c18a989b279341b626b4b4402350f95298c76"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "96f4d34ec5439d0fb3d8c135e0b95ddb7bd9d11e600161431c0aecff35afc059" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
@@ -40,8 +50,8 @@ class Re2 < Formula
         return 0;
       }
     EOS
-    system ENV.cxx, "-std=c++11",
-           "test.cpp", "-I#{include}", "-L#{lib}", "-pthread", "-lre2", "-o", "test"
+    system ENV.cxx, "-std=c++11", "test.cpp", "-o", "test",
+                    "-I#{include}", "-L#{lib}", "-lre2"
     system "./test"
   end
 end

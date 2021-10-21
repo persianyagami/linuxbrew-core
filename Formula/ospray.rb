@@ -1,10 +1,10 @@
 class Ospray < Formula
   desc "Ray-tracing-based rendering engine for high-fidelity visualization"
   homepage "https://www.ospray.org/"
-  url "https://github.com/ospray/ospray/archive/v2.2.0.tar.gz"
-  sha256 "7078cc7c7a6e709589f8cb15a150947bb1b93f00d08f8a2ef3f5e368d57a3797"
+  url "https://github.com/ospray/ospray/archive/v2.7.1.tar.gz"
+  sha256 "4e7bd8145e19541c04f5d949305f19a894d85a827f567d66ae2eb11a760a5ace"
   license "Apache-2.0"
-  head "https://github.com/ospray/ospray.git"
+  head "https://github.com/ospray/ospray.git", branch: "master"
 
   livecheck do
     url :stable
@@ -12,10 +12,10 @@ class Ospray < Formula
   end
 
   bottle do
-    cellar :any
-    sha256 "5864de5d8882033c9d4b5ebe4b396d39096b4fac4b03218c29ae1b2a80347cfd" => :big_sur
-    sha256 "f6b816e4ce29195586af8305a27bcb49f366bf08cc761ee85deb8eb69165f897" => :catalina
-    sha256 "044aa16b8c07c9188a242d12f1ca809844bfaf2606777427dfd761d611135642" => :mojave
+    sha256 cellar: :any, arm64_big_sur: "b24fc8e15d0b9ac94b421eba9dec5249440a2f44a673d5bf81cbee6ff1d356e4"
+    sha256 cellar: :any, big_sur:       "13f2bfec1ce74a5e9d650a8b46cea4b3d9232aff4cb8fd57ec265a312d6a340d"
+    sha256 cellar: :any, catalina:      "b6ed14e7d54a1666f84a90624c597b28e649019d6aa6e7cad20ddd8449e9837e"
+    sha256 cellar: :any, mojave:        "704e28f5998d58975baa97d28029623440b3fe4e060d91035f9230ccd5390e09"
   end
 
   depends_on "cmake" => :build
@@ -25,13 +25,13 @@ class Ospray < Formula
   depends_on "tbb"
 
   resource "rkcommon" do
-    url "https://github.com/ospray/rkcommon/archive/v1.4.2.tar.gz"
-    sha256 "2d1c0046cf583d3040fc9bb3b8ddcb1a2262d3f48aebd0973e6bd6cabb487f9e"
+    url "https://github.com/ospray/rkcommon/archive/v1.7.0.tar.gz"
+    sha256 "b24d063541ccbfd69e6d77485b509d1bbffd9744e735dbd9bd8647eb8751c5b7"
   end
 
   resource "openvkl" do
-    url "https://github.com/openvkl/openvkl/archive/v0.10.0.tar.gz"
-    sha256 "b75caabd5e0211e8c29dd9bd04a74c9ed30a1a72413c486206144c25fd31afff"
+    url "https://github.com/openvkl/openvkl/archive/v1.0.1.tar.gz"
+    sha256 "55a7c2b1dcf4641b523ae999e3c1cded305814067d6145cc8911e70a3e956ba6"
   end
 
   def install
@@ -39,8 +39,8 @@ class Ospray < Formula
       r.stage do
         mkdir "build" do
           system "cmake", "..", *std_cmake_args,
-                                "-DBUILD_EXAMPLES=OFF",
-                                "-DBUILD_TESTING=OFF"
+                                "-DCMAKE_INSTALL_NAME_DIR=#{lib}",
+                                "-DBUILD_EXAMPLES=OFF"
           system "make"
           system "make", "install"
         end
@@ -48,8 +48,7 @@ class Ospray < Formula
     end
 
     args = std_cmake_args + %W[
-      -DCMAKE_INSTALL_NAME_DIR=#{opt_lib}
-      -DCMAKE_INSTALL_RPATH=#{opt_lib}
+      -DCMAKE_INSTALL_NAME_DIR=#{lib}
       -DOSPRAY_ENABLE_APPS=OFF
       -DOSPRAY_ENABLE_TESTING=OFF
       -DOSPRAY_ENABLE_TUTORIALS=OFF

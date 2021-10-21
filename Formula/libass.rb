@@ -1,17 +1,16 @@
 class Libass < Formula
   desc "Subtitle renderer for the ASS/SSA subtitle format"
   homepage "https://github.com/libass/libass"
-  url "https://github.com/libass/libass/releases/download/0.15.0/libass-0.15.0.tar.xz"
-  sha256 "9f09230c9a0aa68ef7aa6a9e2ab709ca957020f842e52c5b2e52b801a7d9e833"
+  url "https://github.com/libass/libass/releases/download/0.15.2/libass-0.15.2.tar.xz"
+  sha256 "1be2df9c4485a57d78bb18c0a8ed157bc87a5a8dd48c661961c625cb112832fd"
   license "ISC"
 
   bottle do
-    cellar :any
-    sha256 "e95df755d6236cb7a56140c4bc12faad1d87023d23412b9f245bbda60073bf00" => :big_sur
-    sha256 "427b18a8c9c8c5331553c0e814bf4e4c6f965cc53715d89a0ad3ba66b8e231c4" => :catalina
-    sha256 "64f2a67f35510fe088f3e6e18075d5e08e93081d958fcee6b65ee29ab3b730ad" => :mojave
-    sha256 "881db49f437027abdae60f4c849097b720216bcfa197589aea373b5f3451f9ef" => :high_sierra
-    sha256 "6761a8d9bd4879982b6233241f74990addac23b6adf847041fa4ca515f983f0e" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "03a65a8977885e70b3072ed5b3cbb51178a140107932715f47fee5ee5b574d83"
+    sha256 cellar: :any,                 big_sur:       "d11e2972aa5ae2e763cf4101712fac61421082db4d47720a8adc17b8a3e84a27"
+    sha256 cellar: :any,                 catalina:      "b5f4cf1923f523dcc6faccd7d886c9677555c99d74f0bba2ea6f7aeaccd5511a"
+    sha256 cellar: :any,                 mojave:        "046012d55a33f84e483ac1e080c5698e0b2040b6385b6806ca7867226b91654f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "95e453427bba31a08dfc4908ed2454c2478b687fca0c8be3cf573f01e0e73d0e" # linuxbrew-core
   end
 
   head do
@@ -34,9 +33,13 @@ class Libass < Formula
 
   def install
     system "autoreconf", "-i" if build.head?
-    system "./configure", "--disable-dependency-tracking",
-                          "--prefix=#{prefix}",
-                          *("--disable-fontconfig" if OS.mac?)
+    args = %W[
+      --disable-dependency-tracking
+      --prefix=#{prefix}
+    ]
+    # libass uses coretext on macOS, fontconfig on Linux
+    args << "--disable-fontconfig" if OS.mac?
+    system "./configure", *args
     system "make", "install"
   end
 

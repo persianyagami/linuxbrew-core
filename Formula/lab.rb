@@ -1,17 +1,17 @@
 class Lab < Formula
   desc "Git wrapper for GitLab"
   homepage "https://zaquestion.github.io/lab"
-  url "https://github.com/zaquestion/lab/archive/v0.17.2.tar.gz"
-  sha256 "467cb35793c4129e7da68e4c63ef5ee96e9ca43f933c88758e90850f0d6c77b9"
+  url "https://github.com/zaquestion/lab/archive/v0.23.0.tar.gz"
+  sha256 "8f20d5f1931e9b5daa0aa2d30fc3176d82dcca91b368905a1e1c05e2b36254b9"
   license "CC0-1.0"
   head "https://github.com/zaquestion/lab.git"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "23d80095f9432435323f48a778cdd0c9a318afd2bacad9556ac6763be5d31ee8" => :big_sur
-    sha256 "15c50154f5322e57c48f0242cb5d234922d5dced1eae5b1aed6071c1133a203e" => :catalina
-    sha256 "11715b31f5ed38d3e84af0530b354ac86027b08bf89f8f0ec27509b0a1f7c408" => :mojave
-    sha256 "08c8bc4ad5de8a819b4d9741bb9c94a923b5373d834d9d88b044053aa5596b24" => :high_sierra
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "8fc0866043b2825d9c6cd55768c6dbf6a5252ee81cf08d1ec972f2f0c63e75f9"
+    sha256 cellar: :any_skip_relocation, big_sur:       "cf2122351ee8c417e167b9266f396d71c1bf076376920b00bfabea8b66d36be5"
+    sha256 cellar: :any_skip_relocation, catalina:      "831ebd5e87cfe24b4867a3a08b4c3714a050cb100ef4138d338c3d4e947ec026"
+    sha256 cellar: :any_skip_relocation, mojave:        "50e3df561e2df7c25b663adb7428cff384adde8f58129d1848b674200c132522"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "103f4ef8df39bd5fef22d6867c010fe6369da47c467bf67924aaf07f33464841" # linuxbrew-core
   end
 
   depends_on "go" => :build
@@ -41,6 +41,6 @@ class Lab < Formula
     %w[haunted house].each { |f| touch testpath/f }
     system "git", "add", "haunted", "house"
     system "git", "commit", "-a", "-m", "Initial Commit"
-    assert_equal "haunted\nhouse", shell_output("#{bin}/lab ls-files").strip
+    assert_match "haunted\nhouse", shell_output("#{bin}/lab ls-files").strip
   end
 end

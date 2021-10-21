@@ -1,16 +1,16 @@
 class Grpcui < Formula
   desc "Interactive web UI for gRPC, along the lines of postman"
   homepage "https://github.com/fullstorydev/grpcui"
-  url "https://github.com/fullstorydev/grpcui/archive/v1.1.0.tar.gz"
-  sha256 "1a7c0eac76805350ccf38d6db77ed959a04f7a4a76c60897decca21a2ff49933"
+  url "https://github.com/fullstorydev/grpcui/archive/v1.2.0.tar.gz"
+  sha256 "20d109dc9f91ad2ca8e185ac60e9d36ece56282dd65ee9cf735322471ca0fe40"
   license "MIT"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "316b3929786b948f6d18d580c3bf9d59a414bba3acac1520017972af55cddca0" => :big_sur
-    sha256 "c6c62dbe114c2bb1de1a0c19d7845bdf2fe758e1810721772888776332a28897" => :catalina
-    sha256 "9f5c2e8b3bdc9e0d4609819503f4a10de72cba88b7fb4aa614e5c315975f7436" => :mojave
-    sha256 "af7abe614d2e96ce599ec1683ad9ec94c51daaf5d72613ad9c4bdedb7c9a4495" => :high_sierra
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "27ae7af8edc3278d10d292346dac4e506b5327be13798e61043b6abed02bf180"
+    sha256 cellar: :any_skip_relocation, big_sur:       "71a0cdc312f8bfdb46c7b7e3bc79679df597221a83cda19a758510d48f913a44"
+    sha256 cellar: :any_skip_relocation, catalina:      "61bf96a0bf8953c2e44f56152dfb1206d05cdeada7b4c6673ada05a0eafe948a"
+    sha256 cellar: :any_skip_relocation, mojave:        "9b1eb0f2f5331431d94108aa040a85dfa4aa573d2742d4ea70caf31740185a16"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8ff5bb71c7f93d0cf773c33a110c91562e73ecc0aa5ac231e512106b99211ed5" # linuxbrew-core
   end
 
   depends_on "go" => :build
@@ -21,6 +21,7 @@ class Grpcui < Formula
 
   test do
     host = "no.such.host.dev"
-    assert_match "#{host}: no such host", shell_output("#{bin}/grpcui #{host}:999 2>&1", 1)
+    output = shell_output("#{bin}/grpcui #{host}:999 2>&1", 1)
+    assert_match(/Failed to dial target host "#{Regexp.escape(host)}:999":.*: no such host/, output)
   end
 end

@@ -1,34 +1,27 @@
 class Urdfdom < Formula
   desc "Unified Robot Description Format (URDF) parser"
   homepage "https://wiki.ros.org/urdf/"
-  url "https://github.com/ros/urdfdom/archive/1.0.4.tar.gz"
-  sha256 "8f3d56b0cbc4b84436d8baf4c8346cd2ee7ffb257bba5ddd9892c41bf516edc4"
-  revision 2
+  url "https://github.com/ros/urdfdom/archive/3.0.0.tar.gz"
+  sha256 "3c780132d9a0331eb2116ea5dac6fa53ad2af86cb09f37258c34febf526d52b4"
+  license "BSD-3-Clause"
 
   livecheck do
     url :stable
-    regex(/^v?(\d+(?:\.\d+)+)$/i)
+    strategy :github_latest
   end
 
   bottle do
-    cellar :any
-    sha256 "72d208357f1a48a20ede8d70006a7d743e5409cd1e7f682468cbc88d7fbd8314" => :big_sur
-    sha256 "1a4cf15eac5ab20085f401c827511eddd6075f2d4511f9b4a72c7388d587a91b" => :catalina
-    sha256 "8f9f55abf13706344949050a7fb077e4394daef2556a09b03deef1481eef432f" => :mojave
-    sha256 "a80e9b0bb93db5384993499150c28c883cc1f839e4e9fa7e933bf85067be1818" => :high_sierra
-    sha256 "43d705373ba79db2aa725c1f903766aae5fbde000a044409dce1d3fe6e91ab89" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "144123d35146a73b2faa6a41d05d5660efbc35d8d19b23bffad4bbe4335a4f26"
+    sha256 cellar: :any,                 big_sur:       "61bdf95fadfdd5ec951efe254a57068f50037e6ee8a5f9e2a46333aca445c283"
+    sha256 cellar: :any,                 catalina:      "75b9eb3c4cbc6a1f7ba49d9c664895f6b523d1c72c4a0829858e4cb85f36e5b1"
+    sha256 cellar: :any,                 mojave:        "2b50fa0f77d4e0255488e1978f7550d007ac16da5caf7b74b73553673a15d0b4"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "77520ee4cc2d29f980b74dbe5edc2eacf0a3305fcb5d687a8009a0298f7ee1e5" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
   depends_on "console_bridge"
   depends_on "tinyxml"
   depends_on "urdfdom_headers"
-
-  patch do
-    # Fix for finding console_bridge 1.0
-    url "https://github.com/ros/urdfdom/commit/6faba176d41cf39114785a3e029013f941ed5a0e.patch?full_index=1"
-    sha256 "7aa3fdd462b47326bac6f8f94187be18459dcbad568cefb239625103d7b31239"
-  end
 
   def install
     ENV.cxx11

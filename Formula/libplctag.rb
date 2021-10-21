@@ -1,8 +1,8 @@
 class Libplctag < Formula
   desc "Portable and simple API for accessing AB PLC data over Ethernet"
   homepage "https://github.com/libplctag/libplctag"
-  url "https://github.com/libplctag/libplctag/archive/v2.1.21.tar.gz"
-  sha256 "6409dcca5d47dc65fd67ba9b84ddc4a001c2108826b3c29109a983e56429bb77"
+  url "https://github.com/libplctag/libplctag/archive/v2.4.0.tar.gz"
+  sha256 "1849f23bc436bfa83feaf719b9af887ac79a99064816b0a52fa88acde7e6b0b2"
   license any_of: ["LGPL-2.0-or-later", "MPL-2.0"]
 
   livecheck do
@@ -11,11 +11,11 @@ class Libplctag < Formula
   end
 
   bottle do
-    cellar :any
-    sha256 "c2ec604baf5a893508ae8a45fc2af74efd0abb22aaba2119743e00c8c8685858" => :big_sur
-    sha256 "d45af9651866466b70b2c5c6479d7681d216230ef6b7c892c0450edeedb5714c" => :catalina
-    sha256 "56a3926222b479954123f5e922d09d0ec71817f7afbbfcffac57a31daa2eee29" => :mojave
-    sha256 "78106acfd2d1a8d597fdf0d508606366f7bca9fbd600ebb62e7418238dc6af7b" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "01289ea1a8db82adbe4bd9cf2e99a42fcf77d29a54f3db5b91341c5918afa95b"
+    sha256 cellar: :any,                 big_sur:       "6e02a23c1ecfc5bbe739638611de63e29da6c8515e72c812a7144b5c62209542"
+    sha256 cellar: :any,                 catalina:      "aac1f8fa13bb852e84752bb6a922a6ebd77cc62b7ec682281c6640e42ac0f66c"
+    sha256 cellar: :any,                 mojave:        "254d1b51b49e10089ce00123ede7310783bfa6a6f37609c42cc17d58596279ce"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1bdbe8a3361b5827851d40a7348a89c573270adc21361a3a32668eec3c05087d" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
@@ -37,11 +37,7 @@ class Libplctag < Formula
         return 0;
       }
     EOS
-    system ENV.cc, "test.c",
-                   *("-pthread" unless OS.mac?),
-                   *("-I#{include}" unless OS.mac?),
-                   *("-Wl,-rpath=#{lib}" unless OS.mac?),
-                   "-L#{lib}", "-lplctag", "-o", "test"
+    system ENV.cc, "test.c", "-L#{lib}", "-lplctag", "-o", "test"
     system "./test"
   end
 end

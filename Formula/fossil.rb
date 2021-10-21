@@ -1,26 +1,25 @@
 class Fossil < Formula
   desc "Distributed software configuration management"
-  homepage "https://www.fossil-scm.org/"
-  url "https://www.fossil-scm.org/index.html/uv/fossil-src-2.13.tar.gz"
-  sha256 "d933d3e0710eed3de5ee23bf8d2677419c4d4a8cd30b61f7161d9071d63a73f5"
+  homepage "https://www.fossil-scm.org/home/"
+  url "https://fossil-scm.org/home/tarball/version-2.17/fossil-src-2.17.tar.gz"
+  sha256 "5c7f1c73f7b5e2af24e10e40f0e07391909c1230b9e284a9d548059e7f377dbf"
   license "BSD-2-Clause"
   head "https://www.fossil-scm.org/", using: :fossil
 
   livecheck do
-    url "https://www.fossil-scm.org/index.html/uv/download.js"
-    regex(/"title": *?"Version (\d+(?:\.\d+)+)\s*?\(/i)
+    url "https://www.fossil-scm.org/home/uv/download.js"
+    regex(/"title":\s*?"Version (\d+(?:\.\d+)+)\s*?\(/i)
   end
 
   bottle do
-    cellar :any
-    sha256 "b457dfa340e0880a1f782372556d892b3bd76b71515abb8535745270781f1cb7" => :big_sur
-    sha256 "660528f6b90d429f05434f5c8d1c7ac8a6c5df0bf6ea94f3bcdb6095365df7da" => :catalina
-    sha256 "d756776b71f3fb2d0ddf99defd245142d2bac68450444133fd969433d2808e12" => :mojave
-    sha256 "9e8925d6033240a79da02222aa272de41daea0e45cf67b54117f1f0cb42ab6be" => :high_sierra
+    sha256 cellar: :any,                 arm64_big_sur: "465292116e1bb204aefa96b56c1350c08af43c2963975ef7a06a71f278637858"
+    sha256 cellar: :any,                 big_sur:       "e4ab11e3b0739b51fa4ce5ef8b020df84704c2050a52b1a89a804008ad9fb9d8"
+    sha256 cellar: :any,                 catalina:      "c2464646ca8502f36e67f1a0730d93192e6ddf0eb1b113690c1a64689f4a8d4e"
+    sha256 cellar: :any,                 mojave:        "a0b10c2b031c7c54b51bf919fcd1d79c0f7047804851192af34b4d2c1e377bc8"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b8b5b3ad3e442b166240b72299c66eb22b989d47b5e06ca96a13e2527be1dc48" # linuxbrew-core
   end
 
   depends_on "openssl@1.1"
-
   uses_from_macos "zlib"
 
   def install
@@ -32,7 +31,7 @@ class Fossil < Formula
       "--disable-fusefs",
     ]
 
-    args << if OS.mac? && MacOS.sdk_path_if_needed
+    args << if MacOS.sdk_path_if_needed
       "--with-tcl=#{MacOS.sdk_path}/System/Library/Frameworks/Tcl.framework"
     else
       "--with-tcl-stubs"
@@ -44,9 +43,6 @@ class Fossil < Formula
   end
 
   test do
-    # fix for CircleCI, where fossil cannot detect the user it is
-    # running as
-    args = %w[-A alice] unless ENV["USER"]
-    system "#{bin}/fossil", "init", *args, "test"
+    system "#{bin}/fossil", "init", "test"
   end
 end

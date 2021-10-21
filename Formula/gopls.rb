@@ -1,8 +1,8 @@
 class Gopls < Formula
   desc "Language server for the Go language"
   homepage "https://github.com/golang/tools/tree/master/gopls"
-  url "https://github.com/golang/tools/archive/gopls/v0.5.5.tar.gz"
-  sha256 "08d477a7c35021ec5d8950e25e1fcac86d7ec0ce8a421c20d932029e00efb1d8"
+  url "https://github.com/golang/tools/archive/gopls/v0.7.2.tar.gz"
+  sha256 "7c4d5fab07890106b337cd292485bccc0fcf82da7ce246ac3fc55914aaf9d140"
   license "BSD-3-Clause"
 
   livecheck do
@@ -12,11 +12,11 @@ class Gopls < Formula
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "8eae69564bfa8cfed1029f7a34b5f7133ce2842271cae300b5e291eaca1c83b6" => :big_sur
-    sha256 "4fc207319168895d23299c5c461134391479d70781b6ed7f148526f8dc430bb0" => :catalina
-    sha256 "f1ee8e73a322e36be90cabe8fa6558c641733baf0148c4b27163fb6afea07a02" => :mojave
-    sha256 "f666bfeeb15a3a757de357b633f11d461e26152a987fb00aad7ad0077a8cbff1" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "d3da9c6aedca9fd37c9022c8a7545a00e4d63ff33a9aaf6806bbd30ba4fc4724"
+    sha256 cellar: :any_skip_relocation, big_sur:       "7217383324ca5d77ade1972e8357377bc2526913f7b2da3fd5a7021b649bb799"
+    sha256 cellar: :any_skip_relocation, catalina:      "9d61076699f6cdf086bcc8104fc355f87158799261739956d85960994c6b028d"
+    sha256 cellar: :any_skip_relocation, mojave:        "1e771496411197bac6386a0e6977e2cdbb6d5655a62e5e7126a0c3e6bd1b6496"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "dcf8e757e34afba03062e8d719576ec14fb5f4a0a19fbcd868babb130d429656" # linuxbrew-core
   end
 
   depends_on "go" => :build
@@ -31,7 +31,7 @@ class Gopls < Formula
     output = shell_output("#{bin}/gopls api-json")
     output = JSON.parse(output)
 
-    assert_equal "gopls.generate", output["Commands"][0]["Command"]
-    assert_equal "false", output["Options"]["Debugging"][0]["Default"]
+    assert_equal "gopls.add_dependency", output["Commands"][0]["Command"]
+    assert_equal "buildFlags", output["Options"]["User"][0]["Name"]
   end
 end

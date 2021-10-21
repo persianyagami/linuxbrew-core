@@ -1,8 +1,8 @@
 class Tintin < Formula
   desc "MUD client"
   homepage "https://tintin.mudhalla.net/"
-  url "https://github.com/scandum/tintin/releases/download/2.02.05/tintin-2.02.05.tar.gz"
-  sha256 "63a70052122d24d69d7bc012395745f1a0412dffd456a8e8aab85704d44bd5a1"
+  url "https://github.com/scandum/tintin/releases/download/2.02.12/tintin-2.02.12.tar.gz"
+  sha256 "b6f9fd4f2c1e7cdc8cff4172d7a80014961b0394380ced9182209dc34d781a00"
   license "GPL-3.0-or-later"
 
   livecheck do
@@ -11,12 +11,11 @@ class Tintin < Formula
   end
 
   bottle do
-    cellar :any
-    sha256 "a69c772325b8928eedd4ff78ec5cb4323f69b4db40fcc359df9c7f17b472d5ca" => :big_sur
-    sha256 "4eefe2f0705d71ad16e7b8a9f1e8fd842491802872e922464596397279733cc4" => :catalina
-    sha256 "7c12735502e074ad90cd25dc7baefa6af0a9f2aa5b3d21107710f49f0f8e06fd" => :mojave
-    sha256 "c2bb4a0a89b2c1706c5491bf6b62ab14e321822b23bc0c29cc33e6cfd7f1ece4" => :high_sierra
-    sha256 "98970948dcc80a94e55e4a69d094d871cefee85ce783e1e4e6835aa00dcf04f5" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "73d0bbde0e88409ccc7a46c0aea1df8fd50c627f35d9e90fe3f2fa9d2c07467b"
+    sha256 cellar: :any,                 big_sur:       "a2c52474736bbf2789f2595d045b9257c92fd547d8943ed023fc14d99e96cd52"
+    sha256 cellar: :any,                 catalina:      "38f0217f785c1218c73f2dfd066d27e551d6f4930108a8b69524b5f11b19010e"
+    sha256 cellar: :any,                 mojave:        "23d1eaf2dd6b6a14b167353b6edcbf6934c58b5c105451e44377a30b29e46f48"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e61815e3d0602667ddac1ba5eec6601f051baf43d267b9f2fec6ecfbea74eb2e" # linuxbrew-core
   end
 
   depends_on "gnutls"

@@ -2,11 +2,11 @@ class Juju < Formula
   desc "DevOps management tool"
   homepage "https://juju.is/"
   url "https://github.com/juju/juju.git",
-      tag:      "juju-2.8.6",
-      revision: "5d0442d3e15952bfc0ce059cb43ef7949ca71aaa"
+      tag:      "juju-2.9.16",
+      revision: "b84c5592b1036265aa1ce28b1e40b79c3886a21a"
   license "AGPL-3.0-only"
-  revision 1
   version_scheme 1
+  head "https://github.com/juju/juju.git"
 
   livecheck do
     url :stable
@@ -14,26 +14,19 @@ class Juju < Formula
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "5aaabdd93f04979ca322804b7e5f748eca3d725b4e7e0edd9bbbfde555a374ef" => :big_sur
-    sha256 "81166cd79c3370366659e16fb9e3dac22319be350225654d302659dd54a4dcf5" => :catalina
-    sha256 "3a49f2c755bb81a4625dca0f41172eaf367b8a41e8bc943f021112c07894cffb" => :mojave
-    sha256 "070ba77ebb019779621290d2e8fd136605de3532f2b5696897a678e045bb9bfc" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "488790b4c784ddd3937a0b081f6e5e7c431b13824aaeb897ca667877c32faaea"
+    sha256 cellar: :any_skip_relocation, big_sur:       "7ec0328625b55c1f6617a070a57ac2b21c87ce3d285486458e6aff541109b1af"
+    sha256 cellar: :any_skip_relocation, catalina:      "7df94ba4cd676d09967c4809c603723b80a5b8c796132736a7a335af283658da"
+    sha256 cellar: :any_skip_relocation, mojave:        "020fa17eb67e6bf18fdc37c0fa42aae456c7ef4afb147063a6d5c82da4920659"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7a5e8a994802ce99d201ebaf5e24cd0f1f05fadd87a6d3037c679785e0dd654a" # linuxbrew-core
   end
 
   depends_on "go" => :build
 
-  # Fixed in next 2.8.x release.
-  patch do
-    url "https://github.com/juju/juju/commit/29afb4b7fdbaa70a3e1a2c596e46a0c7962303a4.patch?full_index=1"
-    sha256 "edb6337d7bb75ae053eecbcf5704a4165130241b302832484ece19b5183c3ca7"
-  end
-
   def install
-    git_commit = Utils.safe_popen_read("git", "rev-parse", "HEAD").chomp
     ld_flags = %W[
       -s -w
-      -X version.GitCommit=#{git_commit}
+      -X version.GitCommit=#{Utils.git_head}
       -X version.GitTreeState=clean
     ]
     system "go", "build", *std_go_args,

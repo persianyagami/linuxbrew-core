@@ -1,9 +1,14 @@
 class IncludeWhatYouUse < Formula
   desc "Tool to analyze #includes in C and C++ source files"
   homepage "https://include-what-you-use.org/"
-  url "https://include-what-you-use.org/downloads/include-what-you-use-0.14.src.tar.gz"
-  sha256 "43184397db57660c32e3298a6b1fd5ab82e808a1f5ab0591d6745f8d256200ef"
   license "NCSA"
+  revision 2
+
+  stable do
+    url "https://include-what-you-use.org/downloads/include-what-you-use-0.16.src.tar.gz"
+    sha256 "8d6fc9b255343bc1e5ec459e39512df1d51c60e03562985e0076036119ff5a1c"
+    depends_on "llvm@12" # include-what-you-use 0.16 is compatible with llvm 12.0
+  end
 
   # This omits the 3.3, 3.4, and 3.5 versions, which come from the older
   # version scheme like `Clang+LLVM 3.5` (25 November 2014). The current
@@ -15,23 +20,25 @@ class IncludeWhatYouUse < Formula
   end
 
   bottle do
-    sha256 "045a0b40290cc8da9122eef0a51c8badbd972ae1a90a3bf101f9e26f90fb6b25" => :catalina
-    sha256 "4624e7bc1b0c8775db0ab2a48c6bdafcf51dea562e3e9f227940746db375c783" => :mojave
-    sha256 "8ae01240a58564995908d2ffae8a87cf678be65511b36ad29da804ba93509aa9" => :high_sierra
-    sha256 "e81f30f2dff4eab75b64600a6eb3e94aefcaef433083b047bc219c2567c7682b" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "8b4ba730248b474d711ded0a5c713fcf303f5fed1cc476f201cb66dd4aeebd3f"
+    sha256 cellar: :any,                 big_sur:       "4abf6a45d2f3215a71340ebf920af51b6737dd49b536d1c030bab31860616d23"
+    sha256 cellar: :any,                 catalina:      "d7cf6d888dd73d6bf28ea4b455e749d5532ee2647b1168a575efa8107f6831d7"
+    sha256 cellar: :any,                 mojave:        "c2024ce23c44b1a084f144cf378fb56d9c5af4b52eca7502fc7c7961ffa82ed7"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0279d02e1b199d12a988c0c9a294e27d16c3ff8366d45f943d09d47a4e07d708" # linuxbrew-core
+  end
+
+  head do
+    url "https://github.com/include-what-you-use/include-what-you-use.git", branch: "master"
+    depends_on "llvm"
   end
 
   depends_on "cmake" => :build
-  depends_on "llvm@9" # include-what-you-use 0.14 is compatible with llvm 9.0
 
   uses_from_macos "ncurses"
   uses_from_macos "zlib"
-  depends_on "gcc" => :build unless OS.mac? # libstdc++
 
-  # patch to make the build work with llvm9
-  patch do
-    url "https://github.com/include-what-you-use/include-what-you-use/commit/576c30a31ec3f6592a0fd68b0d19cb0880203569.patch?full_index=1"
-    sha256 "afcc5bdf1377e36feacd699c194ef8e6645c8590d79f8cb15a57b43fa03c9102"
+  def llvm
+    deps.map(&:to_formula).find { |f| f.name.match? "^llvm" }
   end
 
   def install
@@ -41,7 +48,7 @@ class IncludeWhatYouUse < Formula
     # and is not configurable, is also located under libexec.
     args = std_cmake_args + %W[
       -DCMAKE_INSTALL_PREFIX=#{libexec}
-      -DCMAKE_PREFIX_PATH=#{Formula["llvm@9"].opt_lib}
+      -DCMAKE_PREFIX_PATH=#{llvm.opt_lib}
     ]
 
     mkdir "build" do
@@ -59,11 +66,10 @@ class IncludeWhatYouUse < Formula
     # formula. This would be indicated by include-what-you-use failing to
     # locate stddef.h and/or stdlib.h when running the test block below.
     # https://clang.llvm.org/docs/LibTooling.html#libtooling-builtin-includes
-    mkdir_p libexec/"lib/clang/#{Formula["llvm@9"].version}"
-    cp_r Formula["llvm@9"].opt_lib/"clang/#{Formula["llvm@9"].version}/include",
-      libexec/"lib/clang/#{Formula["llvm@9"].version}"
-    mkdir_p libexec/"include"
-    cp_r Formula[OS.mac? ? "llvm@9" : "gcc"].opt_include/"c++", libexec/"include"
+    (libexec/"lib").mkpath
+    ln_sf (llvm.opt_lib/"clang").relative_path_from(libexec/"lib"), libexec/"lib"
+    (libexec/"include").mkpath
+    ln_sf (llvm.opt_include/"c++").relative_path_from(libexec/"include"), libexec/"include"
   end
 
   test do

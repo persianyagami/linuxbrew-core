@@ -1,26 +1,22 @@
 class XcbProto < Formula
   desc "X.Org: XML-XCB protocol descriptions for libxcb code generation"
   homepage "https://www.x.org/"
-  url "https://xcb.freedesktop.org/dist/xcb-proto-1.14.tar.gz"
-  sha256 "1c3fa23d091fb5e4f1e9bf145a902161cec00d260fabf880a7a248b02ab27031"
+  url "https://xorg.freedesktop.org/archive/individual/proto/xcb-proto-1.14.1.tar.xz"
+  sha256 "f04add9a972ac334ea11d9d7eb4fc7f8883835da3e4859c9afa971efdf57fcc3"
   license "MIT"
-  revision OS.mac? ? 2 : 3
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "25981c40536a924beb9c3a21b95367ef489185ded08031e635472510408d110f" => :big_sur
-    sha256 "c32a3d3a2fac9a68d5dafe02a75300c05beaa3151f1fbfafad5e718ce26e1553" => :catalina
-    sha256 "e6faf01ae0757a6f2f49f05fb2262a36d0d39f61687b710cbfe368829856b0f2" => :mojave
-    sha256 "de7af3536a1c9a33bd74567f22200e66a6541933506aec0dff275c490109d539" => :high_sierra
-    sha256 "563cdc2afbb564b8a46e3a4299e89e405659e812abe68646c82ad847f1e12503" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "b46e6d4bc878650fdf3a3e7b1ec9b9d9e80cf7d40d347d7ef8f9a244ff656fa1"
+    sha256 cellar: :any_skip_relocation, big_sur:       "b46e6d4bc878650fdf3a3e7b1ec9b9d9e80cf7d40d347d7ef8f9a244ff656fa1"
+    sha256 cellar: :any_skip_relocation, catalina:      "b46e6d4bc878650fdf3a3e7b1ec9b9d9e80cf7d40d347d7ef8f9a244ff656fa1"
+    sha256 cellar: :any_skip_relocation, mojave:        "24b88c1bf0f5ecc407136ed7139f0690167be335688c0c59990f2d393b6f75aa"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "91468a8a7ee6a2272b740f140b15ee8c9c6b93e2d7e42c6cc7b9404e86748a8f" # linuxbrew-core
   end
 
   depends_on "pkg-config" => [:build, :test]
   depends_on "python@3.9" => :build
 
   def install
-    inreplace "xcbgen/align.py", "from fractions import gcd", "from math import gcd"
-
     args = %W[
       --prefix=#{prefix}
       --sysconfdir=#{etc}

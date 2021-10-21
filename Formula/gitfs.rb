@@ -6,30 +6,25 @@ class Gitfs < Formula
   url "https://github.com/presslabs/gitfs/archive/0.5.2.tar.gz"
   sha256 "921e24311e3b8ea3a5448d698a11a747618ee8dd62d5d43a85801de0b111cbf3"
   license "Apache-2.0"
-  revision OS.mac? ? 5 : 7
+  revision OS.mac? ? 7 : 9
   head "https://github.com/presslabs/gitfs.git"
 
   bottle do
-    cellar :any
-    sha256 "c8c83c94da3b5f1dc480eec0ede90bf678eee59a97bb54a64cf94555d9c57752" => :catalina
-    sha256 "189008579b9d28a9084536f62101051648b64a78cd6faf780b3f40041becc188" => :mojave
-    sha256 "218c5f19bcecb33e4f18c19cf0f56ce6d9628d4cfad9f095fbb1071af3cd79c2" => :high_sierra
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "fd4a7656a5b75affe826c5a149fb193f13ebbeffc01f2b749526445eb632e302" # linuxbrew-core
   end
-
-  deprecate! date: "2020-11-10", because: "requires FUSE"
 
   depends_on "libgit2"
-  if OS.mac?
-    depends_on :osxfuse
-  else
-    depends_on "libfuse"
-  end
   depends_on "python@3.9"
 
   uses_from_macos "libffi"
 
+  on_macos do
+    disable! date: "2021-04-08", because: "requires closed-source macFUSE"
+  end
+
   on_linux do
     depends_on "pkg-config" => :build
+    depends_on "libfuse"
   end
 
   resource "atomiclong" do
@@ -53,8 +48,15 @@ class Gitfs < Formula
   end
 
   resource "pygit2" do
-    url "https://files.pythonhosted.org/packages/1d/c4/e0ba65178512a724a86b39565d7f9286c16d7f8e45e2f665973065c4a495/pygit2-1.1.1.tar.gz"
-    sha256 "9255d507d5d87bf22dfd57997a78908010331fc21f9a83eca121a53f657beb3c"
+    url "https://files.pythonhosted.org/packages/6b/23/a8c5b726a58282fe2cadcc63faaddd4be147c3c8e0bd38b233114adf98fd/pygit2-1.6.1.tar.gz"
+    sha256 "c3303776f774d3e0115c1c4f6e1fc35470d15f113a7ae9401a0b90acfa1661ac"
+
+    # libgit2 1.3 support
+    # https://github.com/libgit2/pygit2/pull/1089
+    patch do
+      url "https://raw.githubusercontent.com/Homebrew/formula-patches/54d3a0d1f241fdd4e9229312ced0d8da85d964b1/pygit2/libgit2-1.3.0.patch"
+      sha256 "4d501c09d6642d50d89a1a4d691980e3a4a2ebcb6de7b45d22cce16a451b9839"
+    end
   end
 
   resource "six" do
@@ -77,12 +79,20 @@ class Gitfs < Formula
   end
 
   def caveats
+    on_macos do
+      return <<~EOS
+        The reasons for disabling this formula can be found here:
+          https://github.com/Homebrew/homebrew-core/pull/64491
+
+        An external tap may provide a replacement formula. See:
+          https://docs.brew.sh/Interesting-Taps-and-Forks
+      EOS
+    end
+
     <<~EOS
       gitfs clones repos in /var/lib/gitfs. You can either create it with
       sudo mkdir -m 1777 /var/lib/gitfs or use another folder with the
       repo_path argument.
-
-      Also make sure OSXFUSE is properly installed by running brew info osxfuse.
     EOS
   end
 

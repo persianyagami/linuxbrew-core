@@ -5,9 +5,13 @@ class Libmnl < Formula
   sha256 "171f89699f286a5854b72b91d06e8f8e3683064c5901fb09d954a9ab6f551f81"
   license "LGPL-2.1-or-later"
 
+  livecheck do
+    url "https://www.netfilter.org/projects/libmnl/downloads.html"
+    regex(/href=.*?libmnl[._-]v?(\d+(?:\.\d+)+)\.t/i)
+  end
+
   bottle do
-    cellar :any_skip_relocation
-    sha256 "b2ea8cee83f8849eb17544ebe72cd17316433cdbf18f9401dab2382bdcf41091" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "b2ea8cee83f8849eb17544ebe72cd17316433cdbf18f9401dab2382bdcf41091" # linuxbrew-core
   end
 
   depends_on :linux

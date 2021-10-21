@@ -6,21 +6,17 @@ class AwsShell < Formula
   url "https://files.pythonhosted.org/packages/01/31/ee166a91c865a855af4f15e393974eadf57762629fc2a163a3eb3f470ac5/aws-shell-0.2.2.tar.gz"
   sha256 "fd1699ea5f201e7cbaacaeb34bf1eb88c8fe6dc6b248bce1b3d22b3e099a41e5"
   license "Apache-2.0"
-
-  livecheck do
-    url :stable
-  end
+  revision 1
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "aee32db7e96f9239cf9bbb10d59589f9f890757efc73aab1f186dc2989fe211c" => :big_sur
-    sha256 "d8f0c4ef68861caf28dd575f0f5999a512df996aee959c340fa9d0a7d60dcac0" => :catalina
-    sha256 "140dd82c2a4222400fed642d61b13b2b6e4afe76edc4c49a877b3124775e382a" => :mojave
-    sha256 "2c963b5ee92cdf2a8c272aba8f37b878018794a84ef523532e19b3b55fa9770b" => :high_sierra
-    sha256 "6acff3c8c3b3b854632f6540ce4a23c1f279cf757687d9d9bfe5e59a37d0633d" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "45382f49fe45fde97fafbbd7742fb87d8e0551a59559d4f93558c3f7e9faff49"
+    sha256 cellar: :any_skip_relocation, big_sur:       "10a2ca9388c9c1dab3f9e591e2ac86139cbd9e50b4becce0ba2f28d23cc51b8a"
+    sha256 cellar: :any_skip_relocation, catalina:      "1197cb3c8f0a0450cc1759075a123c5e4c4fab3b22aef31de1e1c386cbba1d1b"
+    sha256 cellar: :any_skip_relocation, mojave:        "05da4e2dd7b13c80aa43dcc6d722be02599f6e22a2b0937282cdd9134240188d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "34bbad8a498742f238b300d658798bf83ba4d692a3596d5a7613346399557994" # linuxbrew-core
   end
 
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   resource "awscli" do
     url "https://files.pythonhosted.org/packages/8d/49/278de10b22bba018b0ab657fcc28862a38543f8abd3e215018db6b742326/awscli-1.18.157.tar.gz"

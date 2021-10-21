@@ -6,20 +6,19 @@ class Pius < Formula
   url "https://github.com/jaymzh/pius/archive/v3.0.0.tar.gz"
   sha256 "3454ade5540687caf6d8b271dd18eb773a57ab4f5503fc71b4769cc3c5f2b572"
   license "GPL-2.0"
-  revision OS.mac? ? 2 : 3
-  head "https://github.com/jaymzh/pius.git"
+  revision OS.mac? ? 3 : 4
+  head "https://github.com/jaymzh/pius.git", branch: "master"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "4a5deabe6e56424603556f18ccee09a5d2e71f63cbb5a7963faf541556de0f87" => :big_sur
-    sha256 "ef07a9e877e3774888c7e27378362744448590daee47bba22ab463f4a90660be" => :catalina
-    sha256 "3cfa04458840eab00f16c10a34dceb55783dd9d52178fab890d32e70fab5ee1f" => :mojave
-    sha256 "fbbecdabd75369b65e0c00c3b2ccdb91f34c643e73a3c81eaa4bc6474f5783e9" => :high_sierra
-    sha256 "14d81751f01fe416bcc38531c81a4e96cf3a687936051c1273229b3e966c03b4" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "0e0124059b6b127d2b562f64beacff812f23d2736d0d839472b4db761b1f2032"
+    sha256 cellar: :any_skip_relocation, big_sur:       "d456a15477875e8973b2964c50a0e2a6ce032331d92ae4b8ffee13e74324ab00"
+    sha256 cellar: :any_skip_relocation, catalina:      "d456a15477875e8973b2964c50a0e2a6ce032331d92ae4b8ffee13e74324ab00"
+    sha256 cellar: :any_skip_relocation, mojave:        "d456a15477875e8973b2964c50a0e2a6ce032331d92ae4b8ffee13e74324ab00"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "10f9164c379e62ef4bed6e854e58b27e0523ed3fcd9ee27297c3b704dca05414" # linuxbrew-core
   end
 
   depends_on "gnupg"
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   def install
     # Replace hardcoded gpg path (WONTFIX)

@@ -2,8 +2,8 @@ class Ipfs < Formula
   desc "Peer-to-peer hypermedia protocol"
   homepage "https://ipfs.io/"
   url "https://github.com/ipfs/go-ipfs.git",
-      tag:      "v0.7.0",
-      revision: "ea77213e31ef2b3cad81d40bf82bb9baef3ea7b6"
+      tag:      "v0.10.0",
+      revision: "64b532fbb14145557dda7cb7986daea1e156f76d"
   license all_of: [
     "MIT",
     any_of: ["MIT", "Apache-2.0"],
@@ -11,50 +11,30 @@ class Ipfs < Formula
   head "https://github.com/ipfs/go-ipfs.git"
 
   livecheck do
-    url :head
+    url :stable
     regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "b5b83542ce69104ccd4cc5c3b24b04f9901da8ffb0f7f59ab29b1b0cc0b3a2c9" => :big_sur
-    sha256 "efa0829574ec0c1bb8191c3bfa0b5f146ad6a52123e6ac7aa66b318a5b2ef8a0" => :catalina
-    sha256 "155e275561f4602feab774ea6519d61cab1bfb61a8fe33af94c8b8e5e5754d47" => :mojave
-    sha256 "0bb55579cf672cba14ddc8e8bb52c1db3ec691a9bc4d07935cc1f4021e7403b4" => :high_sierra
-    sha256 "bd161c917a907977c260bb1307c13a9529a70a0b6b2de5dd84f053463cf1cbe9" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "976419cbae8a7d319812f22f21067bc3ed592d984d91e09a2a5eb6b92ec3c702"
+    sha256 cellar: :any_skip_relocation, big_sur:       "8c9e173c657f3286c06d0456c8f603b3c3a2f13664a960a7b62cf8f1e1aa253d"
+    sha256 cellar: :any_skip_relocation, catalina:      "83669d4ead8a9837e27cb08abc146d9b61ebb39169744e02a1253a09bbf1e74d"
+    sha256 cellar: :any_skip_relocation, mojave:        "2921ea76d75fc514b74c0230f8f2a7ea909a63d84543a03776e1dbbc50f35e18"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0696ffb55c2f637b06a2afc690c138c288d2b4d0954191d5825d0232f4b22bfc" # linuxbrew-core
   end
 
-  depends_on "go@1.14" => :build
+  depends_on "go" => :build
 
   def install
-    ENV["GOPATH"] = buildpath
-    (buildpath/"src/github.com/ipfs/go-ipfs").install buildpath.children
-    cd("src/github.com/ipfs/go-ipfs") { system "make", "install" }
-    bin.install "bin/ipfs"
+    system "make", "build"
+    bin.install "cmd/ipfs/ipfs"
 
-    cd("src/github.com/ipfs/go-ipfs") { bash_completion.install "misc/completion/ipfs-completion.bash" }
+    bash_output = Utils.safe_popen_read(bin/"ipfs", "commands", "completion", "bash")
+    (bash_completion/"ipfs-completion.bash").write bash_output
   end
 
-  plist_options manual: "ipfs daemon"
-
-  def plist
-    <<~EOS
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-      <dict>
-        <key>Label</key>
-        <string>#{plist_name}</string>
-        <key>ProgramArguments</key>
-        <array>
-          <string>#{opt_bin}/ipfs</string>
-          <string>daemon</string>
-        </array>
-        <key>RunAtLoad</key>
-        <true/>
-      </dict>
-      </plist>
-    EOS
+  service do
+    run [opt_bin/"ipfs", "daemon"]
   end
 
   test do

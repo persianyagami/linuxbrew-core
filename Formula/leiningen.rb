@@ -1,30 +1,29 @@
 class Leiningen < Formula
   desc "Build tool for Clojure"
   homepage "https://github.com/technomancy/leiningen"
-  url "https://github.com/technomancy/leiningen/archive/2.9.5.tar.gz"
-  sha256 "a29b45966e5cc1a37d5dc07fe436ed7cb172c88c53d44a049956ff53a096d43e"
+  url "https://github.com/technomancy/leiningen/archive/2.9.7.tar.gz"
+  sha256 "ab2bae41dde4b5abbf34db00f7c3cca592ed73c38e831aaf31c942bbe4e18d34"
   license "EPL-1.0"
   head "https://github.com/technomancy/leiningen.git"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "f9aface1f4c962c0e00bf8300b33eb453734972dc11cc299c1ca0851de7b1940" => :big_sur
-    sha256 "7c29f1583ec0deb5b873547b3d9366d9d90f00728dd24e52d2538d5131f0dedb" => :catalina
-    sha256 "c1df069aa1d80a6005c7536a88ecb28440c1a8d1e8b82314784f63f033002831" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "8803a05aa24fe499ab379d4b02287c9f93579b818edd04e4dd4297564859df43"
+    sha256 cellar: :any_skip_relocation, big_sur:       "8803a05aa24fe499ab379d4b02287c9f93579b818edd04e4dd4297564859df43"
+    sha256 cellar: :any_skip_relocation, catalina:      "8803a05aa24fe499ab379d4b02287c9f93579b818edd04e4dd4297564859df43"
+    sha256 cellar: :any_skip_relocation, mojave:        "8803a05aa24fe499ab379d4b02287c9f93579b818edd04e4dd4297564859df43"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2ed6a7e5716c2767ed17a91144edd06a926a31e6868e45743bc74313cb07530e" # linuxbrew-core
   end
 
   depends_on "openjdk"
 
   resource "jar" do
-    url "https://github.com/technomancy/leiningen/releases/download/2.9.5/leiningen-2.9.5-standalone.zip", using: :nounzip
-    sha256 "df490c98bfe8d667bc5d83b80238528877234c285d0d48f61a4c8743c2db1eea"
+    url "https://github.com/technomancy/leiningen/releases/download/2.9.7/leiningen-2.9.7-standalone.jar"
+    sha256 "82f01414acecddbb0ebd6d571505bb671a6fd093236bcdac2468cfe5f2eaa802"
   end
 
   def install
+    libexec.install resource("jar")
     jar = "leiningen-#{version}-standalone.jar"
-    resource("jar").stage do
-      libexec.install "leiningen-#{version}-standalone.zip" => jar
-    end
 
     # bin/lein autoinstalls and autoupdates, which doesn't work too well for us
     inreplace "bin/lein-pkg" do |s|

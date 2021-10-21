@@ -1,17 +1,17 @@
 class Fizz < Formula
   desc "C++14 implementation of the TLS-1.3 standard"
   homepage "https://github.com/facebookincubator/fizz"
-  url "https://github.com/facebookincubator/fizz/releases/download/v2020.11.09.00/fizz-v2020.11.09.00.tar.gz"
-  sha256 "1ca0905483cdde22402340b8a7efcc3d99027c641eabe01ef16b3fd3e4e42fde"
+  url "https://github.com/facebookincubator/fizz/releases/download/v2021.10.11.00/fizz-v2021.10.11.00.tar.gz"
+  sha256 "0c3b49458408f52263c30ab32796665e5a4950eaa017e9f8fd26f51c5bea189f"
   license "BSD-2-Clause"
   head "https://github.com/facebookincubator/fizz.git"
 
   bottle do
-    cellar :any
-    sha256 "92283b7eda8acb4e93b3c57298b373fe29a4bfefeb49b4c6048e2ac96802db5c" => :big_sur
-    sha256 "f8d9f5ada2fc2a4fa5721792e1ba9a646972409493966a5758a7e048deabf543" => :catalina
-    sha256 "73b9492251604090341e307c35384a144c2577e7d1da65d024d25b303d9e79d5" => :mojave
-    sha256 "3e6ab422390157aee21dd56c031ea960132541c66724a323b904dc2abb67e184" => :high_sierra
+    sha256 cellar: :any,                 arm64_big_sur: "d607def8116de0d330e5256a561093cebb1576d500187f2d1868317a742229cf"
+    sha256 cellar: :any,                 big_sur:       "a90a7576d55320e42e89df54d70d034ee19ec98ce0575e5417b308541a56d19f"
+    sha256 cellar: :any,                 catalina:      "3ec41b4e214e113606cd874e23f606c5413104555983d72cdee651b025afe0e8"
+    sha256 cellar: :any,                 mojave:        "46256e39c743c7383067f948995182dde198f97d9e1569e1a71cea288cbe2d14"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d673c9060f52841b84fc0b9bbbba543ea566bbcff157e118c24cfda20305ba61" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
@@ -28,9 +28,18 @@ class Fizz < Formula
   depends_on "snappy"
   depends_on "zstd"
 
+  on_linux do
+    depends_on "gcc"
+  end
+
+  fails_with gcc: "5"
+
   def install
+    args = []
+    args << "-DLIBRT_LIBRARY=/usr/lib/x86_64-linux-gnu/librt.so" if OS.linux?
+
     mkdir "fizz/build" do
-      system "cmake", "..", "-DBUILD_TESTS=OFF", "-DBUILD_SHARED_LIBS=ON", *std_cmake_args
+      system "cmake", "..", "-DBUILD_TESTS=OFF", "-DBUILD_SHARED_LIBS=ON", *std_cmake_args, *args
       system "make"
       system "make", "install"
     end

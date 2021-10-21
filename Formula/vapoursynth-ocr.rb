@@ -1,46 +1,52 @@
 class VapoursynthOcr < Formula
   desc "VapourSynth filters - Tesseract OCR filter"
-  homepage "http://www.vapoursynth.com"
-  url "https://github.com/vapoursynth/vapoursynth/archive/R52.tar.gz"
-  sha256 "4d5dc7950f4357da695d29708bc98013bc3e0bd72fc5d697f8c91ce3c4a4b2ac"
-  license "ISC"
-  head "https://github.com/vapoursynth/vapoursynth.git"
+  homepage "https://www.vapoursynth.com"
+  url "https://github.com/vapoursynth/vs-ocr/archive/R1.tar.gz"
+  sha256 "a551354c78fdbe9bcaf29f9a29ee9a7d257ed74d1b6a8403049fcd57855fa0f4"
+  license "MIT"
+  version_scheme 1
 
-  bottle do
-    cellar :any
-    sha256 "823ad4d448f1ee19d8ba111a6e36a4ac3f1b0064cea6e3ab6e30c0a8f15c6a91" => :big_sur
-    sha256 "ace9bfac33026748bfe2a1465d9a58b597bd85f001153ce3952760889e9aff74" => :catalina
-    sha256 "268aed99192b8df1d673a6a64a0de4d8289c7a2316b19ed429b330ee3eb110b1" => :mojave
+  head "https://github.com/vapoursynth/vs-ocr.git", branch: "master"
+
+  livecheck do
+    formula "vapoursynth"
   end
 
-  depends_on "autoconf" => :build
-  depends_on "automake" => :build
-  depends_on "libtool" => :build
-  depends_on "nasm" => :build
+  bottle do
+    sha256 cellar: :any, arm64_big_sur: "abef84d6213651b91d9e60d32ae065b3227de72a2371f97266825b81f50d7148"
+    sha256 cellar: :any, big_sur:       "d31d4f0eb749e5797e856de45e1c1f3e862abe31e897696887e20123330a29ae"
+    sha256 cellar: :any, catalina:      "6c7e3eb62e6cf0a5140b158fce51c5fca682e04b7b1074fd6425c9b0bf8ef40b"
+    sha256 cellar: :any, mojave:        "916f671b1aabc46a37c7197f061bf73c0360a8d3e22a72cce74009802b341351"
+  end
+
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
   depends_on "pkg-config" => :build
   depends_on "tesseract"
   depends_on "vapoursynth"
 
-  def install
-    system "./autogen.sh"
-    inreplace "Makefile.in", "pkglibdir = $(libdir)", "pkglibdir = $(exec_prefix)"
-    system "./configure", "--prefix=#{prefix}",
-                          "--disable-core",
-                          "--disable-vsscript",
-                          "--disable-plugins",
-                          "--enable-ocr"
-    system "make", "install"
-    rm prefix/"vapoursynth/libocr.la"
+  # Upstream has added a build system, but it's not present in the current release.
+  # Remove patch on next update.
+  patch do
+    url "https://github.com/vapoursynth/vs-ocr/commit/d1e80c6a9d6efe7921300c01ffc0f311927ba443.patch?full_index=1"
+    sha256 "6d4ec06e2d3dd5a2b071035775e76475e108cd191f9302ee89b3973420d69925"
   end
 
-  def post_install
-    (HOMEBREW_PREFIX/"lib/vapoursynth").mkpath
-    (HOMEBREW_PREFIX/"lib/vapoursynth").install_symlink prefix/"vapoursynth/libocr.dylib" => "libocr.dylib"
+  def install
+    # Upstream build system wants to install directly into vapoursynth's libdir and does not respect
+    # prefix, but we want it in a Cellar location instead.
+    inreplace "meson.build",
+      "install_dir : join_paths(vapoursynth_dep.get_pkgconfig_variable('libdir'), 'vapoursynth')",
+      "install_dir : '#{lib}/vapoursynth'"
+
+    mkdir "build" do
+      system "meson", *std_meson_args, ".."
+      system "ninja", "-v"
+      system "ninja", "install", "-v"
+    end
   end
 
   test do
-    xy = Language::Python.major_minor_version Formula["python@3.9"].opt_bin/"python3"
-    ENV.prepend_path "PYTHONPATH", lib/"python#{xy}/site-packages"
     system Formula["python@3.9"].opt_bin/"python3", "-c", "from vapoursynth import core; core.ocr"
   end
 end

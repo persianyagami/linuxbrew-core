@@ -5,9 +5,13 @@ class LibnetfilterQueue < Formula
   sha256 "f9ff3c11305d6e03d81405957bdc11aea18e0d315c3e3f48da53a24ba251b9f5"
   license "LGPL-2.0-or-later"
 
+  livecheck do
+    url "https://www.netfilter.org/projects/libnetfilter_queue/downloads.html"
+    regex(/href=.*?libnetfilter_queue[._-]v?(\d+(?:\.\d+)+)\.t/i)
+  end
+
   bottle do
-    cellar :any_skip_relocation
-    sha256 "3e3aa6338ec45a13632db538ae9e98dcfd521ac621f7556a197f070defd50da5" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "3e3aa6338ec45a13632db538ae9e98dcfd521ac621f7556a197f070defd50da5" # linuxbrew-core
   end
 
   depends_on "pkg-config" => :build

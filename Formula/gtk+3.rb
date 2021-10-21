@@ -1,8 +1,8 @@
 class Gtkx3 < Formula
   desc "Toolkit for creating graphical user interfaces"
   homepage "https://gtk.org/"
-  url "https://download.gnome.org/sources/gtk+/3.24/gtk+-3.24.24.tar.xz"
-  sha256 "cc9d4367c55b724832f6b09ab85481738ea456871f0381768a6a99335a98378a"
+  url "https://download.gnome.org/sources/gtk+/3.24/gtk+-3.24.30.tar.xz"
+  sha256 "ba75bfff320ad1f4cfbee92ba813ec336322cc3c660d406aad014b07087a3ba9"
   license "LGPL-2.0-or-later"
 
   livecheck do
@@ -11,10 +11,11 @@ class Gtkx3 < Formula
   end
 
   bottle do
-    sha256 "37eb8aa72b11ef7efbb4e70f3cd0b1881a925c41c223e662cc106739f022fe07" => :big_sur
-    sha256 "844d9b4a4c8fc50c29fa4a9464e6a0ae8f22299e7162dfa18a6b048e6aaa1b9a" => :catalina
-    sha256 "798c425db2e840d23c95298fb44cadbd5b1d944240a3ccd0ae369386b3120ca9" => :mojave
-    sha256 "c2bba1c6a7b5f9f4381517192d8ab0ee2359b7348d6d2e9c9afcc011fbadfc4e" => :x86_64_linux
+    sha256 arm64_big_sur: "50f08798c70f1ec428f8a577af2fedd2a8b5a7ffff09d4636d42f48e67873db7"
+    sha256 big_sur:       "af17c723acf1cb4f699ff55346c1443ad3e6d0803a403af8409cc766fb35e34a"
+    sha256 catalina:      "24a97ee2d3b5195d2e2b22213157bbbffce7e7cc89523bf5edb7ed41a01dc198"
+    sha256 mojave:        "e5af02a39f1bcd45f7668b43d3235524d3aeef3760a248eeea4c00b25ecbf761"
+    sha256 x86_64_linux:  "dbff8fb269fd40bfecbb0c40bc1c8ce2fa91c549f678f49a769201f2a7c25c0b" # linuxbrew-core
   end
 
   depends_on "docbook" => :build
@@ -31,17 +32,17 @@ class Gtkx3 < Formula
   depends_on "libepoxy"
   depends_on "pango"
 
-  unless OS.mac?
-    depends_on "cmake"
+  uses_from_macos "libxslt" => :build # for xsltproc
+
+  on_linux do
+    depends_on "cmake" => :build
     depends_on "at-spi2-atk"
     depends_on "cairo"
     depends_on "iso-codes"
     depends_on "libxkbcommon"
     depends_on "xorgproto"
-    depends_on "linuxbrew/xorg/wayland-protocols"
+    depends_on "wayland-protocols"
   end
-
-  uses_from_macos "libxslt" => :build # for xsltproc
 
   def install
     args = std_meson_args + %w[
@@ -53,9 +54,6 @@ class Gtkx3 < Formula
     if OS.mac?
       args << "-Dquartz_backend=true"
       args << "-Dx11_backend=false"
-    else
-      args << "-Dquartz_backend=false"
-      args << "-Dx11_backend=true"
     end
 
     # ensure that we don't run the meson post install script
@@ -138,7 +136,9 @@ class Gtkx3 < Formula
       -lpango-1.0
       -lpangocairo-1.0
     ]
-    flags << "-lintl" if OS.mac?
+    on_macos do
+      flags << "-lintl"
+    end
     system ENV.cc, "test.c", "-o", "test", *flags
     system "./test"
     # include a version check for the pkg-config files

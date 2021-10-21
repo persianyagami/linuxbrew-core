@@ -1,19 +1,32 @@
 class Icon < Formula
   desc "General-purpose programming language"
-  homepage "https://www.cs.arizona.edu/icon/"
-  url "https://github.com/gtownsend/icon/archive/v9.5.20i.tar.gz"
-  sha256 "3ebfcc89f3f3f7acc5afe61402f6b3b168b8cd83f79021c98bbd791e92c4cbe8"
+  homepage "https://github.com"
+  url "https://github.com/gtownsend/icon/archive/v9.5.21b.tar.gz"
+  version "9.5.21b"
+  sha256 "5dd46cd4e868c75ff1b50de275f1ec06a09641afcb8c18b072333f97f86d3bcc"
+  license :public_domain
+
+  livecheck do
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+[a-z]?)$/i)
+  end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "14023318a41cfb25dc16580def3078398493ed67a6c17bcf4fef748ef8bf2779" => :big_sur
-    sha256 "fc52931ec8205d4bce4a9d7b2d8d8a12bcca9c55ac3e0fa8a1c1e5550f193ccc" => :catalina
-    sha256 "7375228280ad4b34aa3e703da54e6af031c78c644636f1e1e45f0b776b4f5b18" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "f125fa0da1cf68ea312bf3f4b17c2b49491effc3ec55918f5578b7e819b87ea3"
+    sha256 cellar: :any_skip_relocation, big_sur:       "26221c72cd120274c75db2dca9926ff6d651f380814946005f1bb20fa8a12be9"
+    sha256 cellar: :any_skip_relocation, catalina:      "c59f68713faf7424ff485f8e5b3407367d29cd1412af432355c0f6d525d78f71"
+    sha256 cellar: :any_skip_relocation, mojave:        "7882a95b7c29003762ee254bc6fb4e2f1ca857edadc679d0802328dfcd0ab7c2"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d34c1cef5d78859389c91a35da2a06d1bee9df2ddb21521dbf8fdc3afafd6a80" # linuxbrew-core
   end
 
   def install
     ENV.deparallelize
-    system "make", "Configure", "name=posix"
+    target = if OS.mac?
+      "posix"
+    else
+      "linux"
+    end
+    system "make", "Configure", "name=#{target}"
     system "make"
     bin.install "bin/icon", "bin/icont", "bin/iconx"
     doc.install Dir["doc/*"]

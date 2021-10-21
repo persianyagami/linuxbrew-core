@@ -3,9 +3,10 @@ class Isort < Formula
 
   desc "Sort Python imports automatically"
   homepage "https://pycqa.github.io/isort/"
-  url "https://files.pythonhosted.org/packages/7b/b5/19e828baf02d3e441cd287a3f3cc172bec2d1210c0210294debeddbd3550/isort-5.6.4.tar.gz"
-  sha256 "dcaeec1b5f0eca77faea2a35ab790b4f3680ff75590bfcb7145986905aab2f58"
+  url "https://files.pythonhosted.org/packages/1c/34/ed9178b5b23ade4561bf77b91856e0e3bc094620fd81bd74d535817a0f0d/isort-5.9.3.tar.gz"
+  sha256 "9c2ea1e62d871267b78307fe511c0838ba0da28698c5732d54e2790bf3ba9899"
   license "MIT"
+  revision 1
 
   livecheck do
     url :stable
@@ -13,15 +14,14 @@ class Isort < Formula
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "cfe5ce4ffe7f57604fd65e1b0a6ed9c60d9eb4e477113be0eef8e8d3dcf1da90" => :big_sur
-    sha256 "ee43e1f2f07c6d309ea19e1001e740feed67db1a27b8f03a415e513ea34e73e1" => :catalina
-    sha256 "d1f54b06f018f33ac11c15f960c4f192c0c489ecb8dbb42df6496cd6a0856e22" => :mojave
-    sha256 "7b4fb7d120f70e8cd5b785ccf44cef6da8eac9d879735363f29f557c3e1582ec" => :high_sierra
-    sha256 "96a3ee0cf8f9d4b9b0c9742e5350dd2d20c5d6b3832d8c9d107206a3c2abb27e" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "36eca38b43c2fe314d024a1995d0953cf155862dbc7f00f6d0a34edb742ea513"
+    sha256 cellar: :any_skip_relocation, big_sur:       "50b4352cc80c9b4064b43889478d62d928fbe4b1046682a75425101008388a07"
+    sha256 cellar: :any_skip_relocation, catalina:      "d3b566b024853af9f4b15f21a67e24bfe388d3091d083070e3a0a751d304c97b"
+    sha256 cellar: :any_skip_relocation, mojave:        "04253871a201d55662ac4467f41c10154801199b8d751fee858f752681f3335e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "cb7599703bba21a3e5ffb71a2416ecec35b8cf1f6ca462f2afde4c84e490d740" # linuxbrew-core
   end
 
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   def install
     virtualenv_install_with_resources

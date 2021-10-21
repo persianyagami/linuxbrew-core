@@ -1,24 +1,23 @@
 class Openimageio < Formula
   desc "Library for reading, processing and writing images"
   homepage "https://openimageio.org/"
-  url "https://github.com/OpenImageIO/oiio/archive/Release-2.2.7.0.tar.gz"
-  version "2.2.7"
-  sha256 "857ac83798d6d2bda5d4d11a90618ff19486da2e5a4c4ff022c5976b5746fe8c"
+  url "https://github.com/OpenImageIO/oiio/archive/v2.3.8.0.tar.gz"
+  sha256 "0b0495e7c2c5213b1c68e9fd4e89e153355b0f61b244d77c50e7999219b07f44"
   license "BSD-3-Clause"
-  revision 1
-  head "https://github.com/OpenImageIO/oiio.git"
+  head "https://github.com/OpenImageIO/oiio.git", branch: "master"
 
   livecheck do
     url :stable
     strategy :github_latest
-    regex(%r{href=.*?/tag/Release[._-]v?(\d+(?:\.\d+)+)["' >]}i)
+    regex(%r{href=.*?/tag/(?:Release[._-])?v?(\d+(?:\.\d+)+)["' >]}i)
   end
 
   bottle do
-    sha256 "fcd03015832924e928fd3d3a8ca16c17389e95c062c11829e6630745df2d6fb1" => :big_sur
-    sha256 "1c95f07642c9c4ec91b19f6eb449b251c9f2ae82164561c84e4eb311d286730c" => :catalina
-    sha256 "97a22718f49ac48a5ebe1663e9fb2bbfbe13b2513dfa2eb0aeb68040d84cc500" => :mojave
-    sha256 "ba66d98bd371b1af625beb52269129ab904cc56927b3d50b1a9ccbe8afe2e074" => :high_sierra
+    sha256 cellar: :any,                 arm64_big_sur: "d6a030f7b529b89ddd498deb88e1e1d1406d17a563c2e7d99ff00deb76965beb"
+    sha256 cellar: :any,                 big_sur:       "6106b20a1492e4fc043db08ae8795cb89e255de8a12fe41388dddcd683430416"
+    sha256 cellar: :any,                 catalina:      "4858e7b56cf97d842a9b85ec5b7a33f1f1ea43e87165e32f9e4ec4260ba536fd"
+    sha256 cellar: :any,                 mojave:        "aebdec660f180475b714cf79dc3d973158bacd6dca29b9153b4749f72387f103"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "dd52a96d7fbe199307d3643ee75d31b2167fb5343ecd7b6defc080fc083ec735" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
@@ -28,7 +27,7 @@ class Openimageio < Formula
   depends_on "ffmpeg"
   depends_on "freetype"
   depends_on "giflib"
-  depends_on "ilmbase"
+  depends_on "imath"
   depends_on "jpeg"
   depends_on "libheif"
   depends_on "libpng"
@@ -68,16 +67,6 @@ class Openimageio < Formula
     args << "-DPYTHON_LIBRARY=#{py3prefix}/lib/#{shared_library("libpython#{py3ver}")}"
     args << "-DPYTHON_INCLUDE_DIR=#{py3prefix}/include/python#{py3ver}"
 
-    # CMake picks up boost-python instead of boost-python3
-    args << "-DBOOST_ROOT=#{Formula["boost"].opt_prefix}"
-    boost_lib = Formula["boost-python3"].opt_lib
-    py3ver_without_dots = py3ver.to_s.delete(".")
-    args << "-DBoost_PYTHON_LIBRARIES=#{boost_lib}/#{shared_library("libboost_python#{py3ver_without_dots}-mt")}"
-
-    # This is strange, but must be set to make the hack above work
-    args << "-DBoost_PYTHON_LIBRARY_DEBUG=''"
-    args << "-DBoost_PYTHON_LIBRARY_RELEASE=''"
-
     mkdir "build" do
       system "cmake", "..", *args
       system "make", "install"
@@ -94,6 +83,6 @@ class Openimageio < Formula
       import OpenImageIO
       print(OpenImageIO.VERSION_STRING)
     EOS
-    assert_match version.to_s, pipe_output(Formula["python@3.9"].opt_bin/"python3", output, 0)
+    assert_match version.major_minor_patch.to_s, pipe_output(Formula["python@3.9"].opt_bin/"python3", output, 0)
   end
 end

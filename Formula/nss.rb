@@ -1,8 +1,8 @@
 class Nss < Formula
   desc "Libraries for security-enabled client and server applications"
-  homepage "https://developer.mozilla.org/docs/NSS"
-  url "https://ftp.mozilla.org/pub/security/nss/releases/NSS_3_59_RTM/src/nss-3.59.tar.gz"
-  sha256 "e6298174caa8527beacdc2858f77ed098d7047c1792846040e27e420fed0ce24"
+  homepage "https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS"
+  url "https://ftp.mozilla.org/pub/security/nss/releases/NSS_3_71_RTM/src/nss-3.71.tar.gz"
+  sha256 "99acd315d9af35419cda4a6960f00a7d446bd231bd407174a7b07cb3dba0c253"
   license "MPL-2.0"
 
   livecheck do
@@ -11,12 +11,11 @@ class Nss < Formula
   end
 
   bottle do
-    cellar :any
-    sha256 "cf1a0f081a61bcb62dd686814b7e3fb648928e446a150e4f657edda17ef65e10" => :big_sur
-    sha256 "068e8340dfe4243e3dd2a7b6df006f3f4cdc7ffad6a7f3668ed4d8e25ceb1a93" => :catalina
-    sha256 "47468eb1600e4f7f8f94759e54cad4ca33f5e702eb155a9781190a0980673346" => :mojave
-    sha256 "92a0f9ec54b581d6cd1e30fa51db545463f83e53f5fa2ea4a8ab14797cab3e3e" => :high_sierra
-    sha256 "199b167c8392bbc01fef3bac1f9a840dd9efcabfb221a7546db7988e3a9de846" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "0adb1d87440062452a125b61ba6f1d02ca1fd08a13f16198eb75c6b8fe8316f3"
+    sha256 cellar: :any,                 big_sur:       "4e2903927f44570829cd06b131dd110ea6b56bf0911bbef8e7109a64f86fb1e5"
+    sha256 cellar: :any,                 catalina:      "9bf1121a058da249531340e5a1cb22f4eaa3c08921ccaf97fb933dfcf7382d75"
+    sha256 cellar: :any,                 mojave:        "1044185d3a60c026f93594fa8f3da8ee2b5db4acecf0585a0d83cc8c0208252f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e9c655c256935e17cedef42a7955932880c1257106054fe0d2b8a95cac315fd8" # linuxbrew-core
   end
 
   depends_on "nspr"
@@ -51,7 +50,8 @@ class Nss < Formula
     # rather than copying the referenced file.
     cd "../dist"
     bin.mkpath
-    Dir.glob("*.OBJ/bin/*") do |file|
+    os = OS.kernel_name
+    Dir.glob("#{os}*/bin/*") do |file|
       cp file, bin unless file.include? ".dylib"
     end
 
@@ -61,7 +61,7 @@ class Nss < Formula
 
     lib.mkpath
     libexec.mkpath
-    Dir.glob("*.OBJ/lib/*") do |file|
+    Dir.glob("#{os}*/lib/*") do |file|
       if file.include? ".chk"
         cp file, libexec
       else

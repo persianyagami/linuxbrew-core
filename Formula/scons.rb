@@ -3,25 +3,20 @@ class Scons < Formula
 
   desc "Substitute for classic 'make' tool with autoconf/automake functionality"
   homepage "https://www.scons.org/"
-  url "https://files.pythonhosted.org/packages/ae/a4/2eb8d05b0ac9e168e8ff0681624c123a123c743487e528757c68ea995d20/SCons-4.0.1.tar.gz"
-  mirror "https://downloads.sourceforge.net/project/scons/scons/4.0.1/scons-4.0.1.tar.gz"
-  sha256 "722ed104b5c624ecdc89bd4e02b094d2b14d99d47b5d0501961e47f579a2007c"
+  url "https://files.pythonhosted.org/packages/5e/f1/82e5d9c0621f116415526181610adf3f9b07ffca419620f4edfc41ef5237/SCons-4.2.0.tar.gz"
+  sha256 "691893b63f38ad14295f5104661d55cb738ec6514421c6261323351c25432b0a"
+  license "MIT"
   revision 1
 
-  livecheck do
-    url :stable
-  end
-
   bottle do
-    cellar :any_skip_relocation
-    sha256 "5ebef89fc0bc3ac4b510504e24368a44f926771e61dfa6adb2b0ac29f92e66d7" => :big_sur
-    sha256 "c5051503085ee71b2ca039c0c30d16a1aceb77fd2603735b3e37571b936b9158" => :catalina
-    sha256 "b3fbbbf21fc6198ba87770cc870aa98602a2cf76f2971fb054b7e7dafdcd191c" => :mojave
-    sha256 "337031123eb8835112a41baec030df5d16fcd90944a827d9f9721dd64388d6ef" => :high_sierra
-    sha256 "680e83dfa64513eab33bd507ada37cc4e3e64e6514685f96b536d3dc840b130e" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "e2d4ba2cf999877f61995e55235552997d2236d66d69d29d9e93059876cf7656"
+    sha256 cellar: :any_skip_relocation, big_sur:       "a5e7cc6c2d5dc05d1cd02ca3927425ccaf583cbbe2a8d97760bfa45d8479bd80"
+    sha256 cellar: :any_skip_relocation, catalina:      "a5e7cc6c2d5dc05d1cd02ca3927425ccaf583cbbe2a8d97760bfa45d8479bd80"
+    sha256 cellar: :any_skip_relocation, mojave:        "a5e7cc6c2d5dc05d1cd02ca3927425ccaf583cbbe2a8d97760bfa45d8479bd80"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "6ea01cfe768ad1e59ec0c1dc6e777c6ab36fb821ca553bf5e54d9f74dd35b07f" # linuxbrew-core
   end
 
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   def install
     virtualenv_install_with_resources

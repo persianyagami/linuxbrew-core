@@ -5,19 +5,20 @@ class Bumpversion < Formula
   homepage "https://pypi.python.org/pypi/bumpversion"
   # maintained fork for the project
   # Ongoing maintenance discussion for the project, https://github.com/c4urself/bump2version/issues/86
-  url "https://github.com/c4urself/bump2version/archive/v1.0.1.tar.gz"
-  sha256 "b0864d58b0ef231f99fef85ee028633d9366557a748e29cd92df0aa94f83f5fc"
+  url "https://files.pythonhosted.org/packages/29/2a/688aca6eeebfe8941235be53f4da780c6edee05dbbea5d7abaa3aab6fad2/bump2version-1.0.1.tar.gz"
+  sha256 "762cb2bfad61f4ec8e2bdf452c7c267416f8c70dd9ecb1653fd0bbb01fa936e6"
   license "MIT"
+  revision 1
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "d8b819a451310e2c12c43f7fc33b7c59b9a8dbeb9836729357c97b4faf8a991d" => :big_sur
-    sha256 "98faab4d2a8683aeae0d70544ddd975fe3bb67754faa5723ef085555d103990f" => :catalina
-    sha256 "7e216796b73d0fd1903ee89b84bbaa259e64aafc3db6596dbb5e6009b7870d44" => :mojave
-    sha256 "15fa88250157b9773f20b7645410778be0afb63855eabe38bc572f52dafb31b6" => :high_sierra
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "a879b38d1607fa3fdb6351a4e423fe58407a30cc4e1dbc06de2b9bfd8bf62056"
+    sha256 cellar: :any_skip_relocation, big_sur:       "67879764a6f7b05d9948a91cad56a18c2a85298037c2dab7c7d92d6b2aa8d534"
+    sha256 cellar: :any_skip_relocation, catalina:      "67879764a6f7b05d9948a91cad56a18c2a85298037c2dab7c7d92d6b2aa8d534"
+    sha256 cellar: :any_skip_relocation, mojave:        "67879764a6f7b05d9948a91cad56a18c2a85298037c2dab7c7d92d6b2aa8d534"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "86aa4d813e08f5e3d1fb1381f80b87ce61bd62acc17f3b55cbd085cb2fafee91" # linuxbrew-core
   end
 
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   def install
     virtualenv_install_with_resources
@@ -25,9 +26,10 @@ class Bumpversion < Formula
 
   test do
     ENV["COLUMNS"] = "80"
-    if OS.mac?
+    on_macos do
       assert_includes shell_output("script -q /dev/null #{bin}/bumpversion --help"), "bumpversion: v#{version}"
-    else
+    end
+    on_linux do
       assert_includes shell_output("script -q /dev/null -c \"#{bin}/bumpversion --help\""), "bumpversion: v#{version}"
     end
     version_file = testpath/"VERSION"

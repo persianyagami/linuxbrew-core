@@ -1,19 +1,19 @@
 class Geeqie < Formula
   desc "Lightweight Gtk+ based image viewer"
-  homepage "http://www.geeqie.org/"
-  url "http://www.geeqie.org/geeqie-1.6.tar.xz"
+  homepage "https://www.geeqie.org/"
+  url "https://github.com/BestImageViewer/geeqie/releases/download/v1.6/geeqie-1.6.tar.xz"
   sha256 "48f8a4474454d182353100e43878754b76227f3b8f30cfc258afc9d90a4e1920"
-  license "GPL-2.0"
+  license "GPL-2.0-or-later"
 
   livecheck do
-    url :homepage
-    regex(/href=.*?geeqie[._-]v?(\d+(?:\.\d+)+)\.t/i)
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    sha256 "2aa83988145308caaa7bdd49b0fabfff7e2b7805c988f4cb5a782696355d53e7" => :big_sur
-    sha256 "6cd0177bb8e510ce20c440f21491e390e0f4339cb0461bc24fa2e0cadda17a99" => :catalina
-    sha256 "de5e6de4c8b6098193cff623e96f0fbbd9204705bff0accfc1c354cfd8cc95e5" => :mojave
+    sha256 big_sur:  "2aa83988145308caaa7bdd49b0fabfff7e2b7805c988f4cb5a782696355d53e7"
+    sha256 catalina: "6cd0177bb8e510ce20c440f21491e390e0f4339cb0461bc24fa2e0cadda17a99"
+    sha256 mojave:   "de5e6de4c8b6098193cff623e96f0fbbd9204705bff0accfc1c354cfd8cc95e5"
   end
 
   depends_on "autoconf" => :build

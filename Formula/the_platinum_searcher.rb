@@ -4,15 +4,15 @@ class ThePlatinumSearcher < Formula
   url "https://github.com/monochromegane/the_platinum_searcher/archive/v2.2.0.tar.gz"
   sha256 "3d5412208644b13723b2b7ca4af0870d25c654e3a76feee846164c51b88240b0"
   license "MIT"
-  head "https://github.com/monochromegane/the_platinum_searcher.git"
+  head "https://github.com/monochromegane/the_platinum_searcher.git", branch: "master"
 
   bottle do
-    cellar :any_skip_relocation
     rebuild 1
-    sha256 "63cc973af4c1fc612acb86c7a928f1680f84db7edfae52f374b95925c00761dc" => :big_sur
-    sha256 "79066cac44fd6cd21b8feadc9737045f98846832f15bd2a2e1fdaae3a8165e6d" => :catalina
-    sha256 "6b7fb2ff2ca2b5a0d264a7733a59eb0e1b68e211d15a261f6bbcab5664bb6ff7" => :mojave
-    sha256 "fa025f9ae8524b5d0505d5b31c15a178f91e93444ee5b3b416ccd9680a790313" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "0f3097b2d88f4b8479ecb3e3439f6688656fc1c5e20f18a4c300edf9ea953874"
+    sha256 cellar: :any_skip_relocation, big_sur:       "63cc973af4c1fc612acb86c7a928f1680f84db7edfae52f374b95925c00761dc"
+    sha256 cellar: :any_skip_relocation, catalina:      "79066cac44fd6cd21b8feadc9737045f98846832f15bd2a2e1fdaae3a8165e6d"
+    sha256 cellar: :any_skip_relocation, mojave:        "6b7fb2ff2ca2b5a0d264a7733a59eb0e1b68e211d15a261f6bbcab5664bb6ff7"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "fa025f9ae8524b5d0505d5b31c15a178f91e93444ee5b3b416ccd9680a790313" # linuxbrew-core
   end
 
   depends_on "go" => :build

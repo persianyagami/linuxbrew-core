@@ -1,22 +1,17 @@
 class Libhandy < Formula
   desc "Building blocks for modern adaptive GNOME apps"
   homepage "https://gitlab.gnome.org/GNOME/libhandy"
-  url "https://gitlab.gnome.org/GNOME/libhandy/-/archive/1.0.2/libhandy-1.0.2.tar.gz"
-  sha256 "e27cb02651ac967ec6f5535dee128c40dbd59b53e6dc9482ba3b972994f3db58"
+  url "https://download.gnome.org/sources/libhandy/1.4/libhandy-1.4.0.tar.xz"
+  sha256 "2676d51fa1fa40fdee7497d3e763fefa18b0338bffcd2ee32e7f7e633c885446"
   license "LGPL-2.1-or-later"
 
   bottle do
-    sha256 "9eeeb58cdefdb836005b138a289f98f56da15811c0f0b780f40fbed77d203aa7" => :big_sur
-    sha256 "3087f66709a5278ba808feb87e6567bfea461896b3691b30f9d07f5f91b93658" => :catalina
-    sha256 "7c844577d6f7b7093ae9f2c0569140d8392e6ad9790274a643226290d2e201d0" => :mojave
-    sha256 "aff98ff6a6b9d071a635cbe294c675b4f7fd2c155f737bafa0d787501714e847" => :high_sierra
+    sha256 arm64_big_sur: "67c5f4982894646b07942c0f387443c2aac2813167aaa3de9197cd760fc93e5b"
+    sha256 big_sur:       "337f9be107164821d8436c443c20dcb79d66bc3268fac909ace2878432bcc652"
+    sha256 catalina:      "2e04f3f8004ac544fea47905a65a6597908b8ced6dadd5c330d87b8a310951d9"
+    sha256 mojave:        "a8972dc9efc8c2d6a6fe0f038ebda941a741c3e0d7be57b51b9c634120d1a479"
+    sha256 x86_64_linux:  "17515106b873bbdbc591ca0daca12c043485e6a52b478cff912f9a835620c825" # linuxbrew-core
   end
-
-  # NOTE: The glade catalog is disabled due to a bug that has been fixed but
-  # not landed in a stable libhandy version yet (as of September 2020).
-  # See https://gitlab.gnome.org/GNOME/libhandy/-/merge_requests/614
-  # When it lands, -Dglade_catalog=enabled should work (make sure to add
-  # glade to the dependencies)
 
   depends_on "gettext" => :build
   depends_on "gobject-introspection" => :build
@@ -89,13 +84,18 @@ class Libhandy < Formula
       -lgio-2.0
       -lglib-2.0
       -lgobject-2.0
-      -lgtk-3.0
+      -lgtk-3
       -lhandy-1
-      -lintl
       -lpango-1.0
       -lpangocairo-1.0
     ]
+    on_macos do
+      flags << "-lintl"
+    end
     system ENV.cc, "test.c", "-o", "test", *flags
-    system "./test"
+    # Don't have X/Wayland in Docker
+    on_macos do
+      system "./test"
+    end
   end
 end

@@ -1,32 +1,33 @@
 class PdftkJava < Formula
   desc "Port of pdftk in java"
   homepage "https://gitlab.com/pdftk-java/pdftk"
-  url "https://gitlab.com/pdftk-java/pdftk/-/archive/v3.2.1/pdftk-v3.2.1.tar.gz"
-  sha256 "16aacc54d5b3cd5da35e0d8e09a51bf4e5938f289cf32d09ef9225dda99041ed"
+  url "https://gitlab.com/pdftk-java/pdftk/-/archive/v3.3.1/pdftk-v3.3.1.tar.gz"
+  sha256 "4a97856c8aadfa182e480d2e717842e6cbed43829cd917c9f9dd2d15b57d3d2d"
   license "GPL-2.0-or-later"
   revision 1
-  head "https://gitlab.com/pdftk-java/pdftk.git"
+  head "https://gitlab.com/pdftk-java/pdftk.git", branch: "master"
 
   livecheck do
-    url :head
+    url :stable
     regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "e99d166365c77f782b89c3d07a4c0c083c300db38b0f86efe266347f06dc25d8" => :big_sur
-    sha256 "f0e46fad9fca2e1f0f3031c365a0adbe642119cf7ad2fcd9236cbf12aef9d584" => :catalina
-    sha256 "42b9233d31c2a91bdd3bff1e2e48bc4796d99878bf4ae0f0ff798d5f59b154c8" => :mojave
-    sha256 "f4bbce8fdec9f897bac95e3a4006fe171f0d700bc832dd56243a39475e82789c" => :high_sierra
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "697142c434ed6b00925ba13c845f5a91942ef9509e63393b1ca12fd7b3acc9b2"
+    sha256 cellar: :any_skip_relocation, big_sur:       "eb0b076125b9b7023eef4aa646b14bc087476e3ea8950e93e9c4aa5b68265dd7"
+    sha256 cellar: :any_skip_relocation, catalina:      "c1719607f7e628fb26215b53c2e4b10dab3f20bf6533476d0825dafdc604c3bc"
+    sha256 cellar: :any_skip_relocation, mojave:        "603bf4ee89edf29dd9e8c272b719ea6bb42e58a14b5eb59569ff74d1d6d8e207"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0909356843ee0034cb97710c2f3a84a024fcf4a0c8e91a47cc73bd8a4a1bff77" # linuxbrew-core
   end
 
   depends_on "gradle" => :build
-  depends_on "openjdk@8"
+  depends_on "openjdk@11"
 
   def install
     system "gradle", "shadowJar", "--no-daemon"
     libexec.install "build/libs/pdftk-all.jar"
-    bin.write_jar_script libexec/"pdftk-all.jar", "pdftk", java_version: "1.8"
+    bin.write_jar_script libexec/"pdftk-all.jar", "pdftk", java_version: "11"
+    man1.install "pdftk.1"
   end
 
   test do

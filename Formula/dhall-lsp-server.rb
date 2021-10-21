@@ -1,20 +1,16 @@
 class DhallLspServer < Formula
   desc "Language Server Protocol (LSP) server for Dhall"
   homepage "https://github.com/dhall-lang/dhall-haskell/tree/master/dhall-lsp-server"
-  url "https://hackage.haskell.org/package/dhall-lsp-server-1.0.12/dhall-lsp-server-1.0.12.tar.gz"
-  sha256 "f77e9937704fd492adabbf86f0c587b175e697c42136ae8cf289d47687bae93e"
+  url "https://hackage.haskell.org/package/dhall-lsp-server-1.0.16/dhall-lsp-server-1.0.16.tar.gz"
+  sha256 "78b2cfd45a6c3a9489d03719f3af230c8fbc4055d96b62e80951912bd79e4413"
   license "BSD-3-Clause"
   head "https://github.com/dhall-lang/dhall-haskell.git"
 
-  livecheck do
-    url :stable
-  end
-
   bottle do
-    cellar :any_skip_relocation
-    sha256 "835cceefb28c1ed72371e60e90f52866fe84e47528bf98d611aeed80c88da9a4" => :big_sur
-    sha256 "be5312ef2e58ac431110b2fc0a7612be888814910550a4b1731f424adcb77030" => :catalina
-    sha256 "f92d8f2b8c09f46fa4ef6307eeb016b7bdacd6d709b748248926bf738f4299b2" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "040c4961a15ce28cbfb896a0057b26d5b6ad155df4543d9efc9edcf518343aa1"
+    sha256 cellar: :any_skip_relocation, big_sur:       "8fd9acfed2ce6997a2a16435372b7d012a67fcb427a031cf24595c153d13c63a"
+    sha256 cellar: :any_skip_relocation, catalina:      "2ef242fd1a6d231fcfa4cb37df3e58004da2d8e1a98452b0e5e82e3708f424bf"
+    sha256 cellar: :any_skip_relocation, mojave:        "b8d9503c6462a3e0739001212ae5bebaf80d653df9de6b10f788f3f1eb623115"
   end
 
   depends_on "cabal-install" => :build
@@ -33,21 +29,9 @@ class DhallLspServer < Formula
       "processId\":88075,\"rootUri\":null,\"capabilities\":{},\"trace\":\"ver" \
       "bose\",\"workspaceFolders\":null}}\r\n"
 
-    output =
-      "Content-Length: 683\r\n" \
-      "\r\n" \
-      "{\"result\":{\"capabilities\":{\"typeDefinitionProvider\":false,\"fold" \
-      "ingRangeProvider\":false,\"textDocumentSync\":{\"openClose\":true,\"ch" \
-      "ange\":2,\"willSave\":false,\"willSaveWaitUntil\":false,\"save\":{\"in" \
-      "cludeText\":false}},\"workspace\":{},\"implementationProvider\":false," \
-      "\"executeCommandProvider\":{\"commands\":[\"dhall.server.lint\",\"dhal" \
-      "l.server.annotateLet\",\"dhall.server.freezeImport\",\"dhall.server.fr" \
-      "eezeAllImports\"]},\"renameProvider\":false,\"colorProvider\":false,\"" \
-      "hoverProvider\":true,\"codeActionProvider\":false,\"completionProvider" \
-      "\":{\"triggerCharacters\":[\":\",\".\",\"/\"],\"resolveProvider\":fals" \
-      "e},\"documentLinkProvider\":{\"resolveProvider\":false},\"documentForm" \
-      "attingProvider\":true}},\"jsonrpc\":\"2.0\",\"id\":1}"
+    output = pipe_output("#{bin}/dhall-lsp-server", input, 0)
 
-    assert_match output, pipe_output("#{bin}/dhall-lsp-server", input, 0)
+    assert_match(/^Content-Length: \d+/i, output)
+    assert_match "dhall.server.lint", output
   end
 end

@@ -2,8 +2,8 @@ class Onnxruntime < Formula
   desc "Cross-platform, high performance scoring engine for ML models"
   homepage "https://github.com/microsoft/onnxruntime"
   url "https://github.com/microsoft/onnxruntime.git",
-      tag:      "v1.5.3",
-      revision: "7bcf796a0d3208b0c193d1758708495b09281e0a"
+      tag:      "v1.9.1",
+      revision: "2a96b73a1afa9aaafb510749627e267c4e8dee63"
   license "MIT"
 
   livecheck do
@@ -12,15 +12,21 @@ class Onnxruntime < Formula
   end
 
   bottle do
-    cellar :any
-    sha256 "7c06aa23f92080bef06db9b6b1d4e48bd51a5444bc289c27e095b5d38e986f05" => :big_sur
-    sha256 "a41b686ad0849a7fb6814fbbebfc18686fce539a77c52ae7968f63a799b22d20" => :catalina
-    sha256 "7b76307e0d98e604ce75a035444aeb1949df34a753eb49ddd84f1edff1f881b3" => :mojave
-    sha256 "e8a76e108e9b00a3ea165dd5a661da797dc5516ccc0a8938dce4a774da30aa8c" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "b201b295f91bb36ea1ddd9a1fc369698466e790d2db462c74adf07cb5a7bd764"
+    sha256 cellar: :any,                 big_sur:       "9df210ba239c623f6c0270db7c3e75089007422156be6c35867c37f060ede8f7"
+    sha256 cellar: :any,                 catalina:      "ff4acf5025be335fbb577682f2ba438f749a64d12b6f7167a11c1aff29235dcc"
+    sha256 cellar: :any,                 mojave:        "be2ce9d531cdc938a4587126364fa4fd7b237bc50d183d9aa3359969913e7b77"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "434adc953551995129b29dba77a9ab68eee1398f2d177326f4f9c76a2117f1a8" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
   depends_on "python@3.9" => :build
+
+  on_linux do
+    depends_on "gcc" => :build
+  end
+
+  fails_with gcc: "5" # GCC version < 7 is no longer supported
 
   def install
     cmake_args = %W[
@@ -29,7 +35,6 @@ class Onnxruntime < Formula
       -DPYTHON_EXECUTABLE=#{Formula["python@3.9"].opt_bin}/python3
       -Donnxruntime_BUILD_SHARED_LIB=ON
       -Donnxruntime_BUILD_UNIT_TESTS=OFF
-      -DCMAKE_BUILD_TYPE=Release
     ]
 
     mkdir "build" do
@@ -39,32 +44,17 @@ class Onnxruntime < Formula
   end
 
   test do
-    if OS.mac?
-      (testpath/"test.c").write <<~EOS
-        #include <onnxruntime/core/session/onnxruntime_c_api.h>
-        #include <stdio.h>
-        int main()
-        {
-          printf("%s\\n", OrtGetApiBase()->GetVersionString());
-          return 0;
-        }
-      EOS
-      system ENV.cc, "-I#{include}", "-L#{lib}", "-lonnxruntime",
-             testpath/"test.c", "-o", testpath/"test"
-      assert_equal version, shell_output("./test").strip
-    else
-      (testpath/"test.c").write <<~EOS
-        #include <onnxruntime/core/session/onnxruntime_c_api.h>
-        #include <stdio.h>
-        int main()
-        {
-          if(ORT_API_VERSION)
-            printf("ok");
-        }
-      EOS
-      system ENV.cc, "-I#{include}", "-L#{lib}", "-lonnxruntime",
-             testpath/"test.c", "-o", testpath/"test"
-      assert_equal "ok", shell_output("./test").strip
-    end
+    (testpath/"test.c").write <<~EOS
+      #include <onnxruntime/core/session/onnxruntime_c_api.h>
+      #include <stdio.h>
+      int main()
+      {
+        printf("%s\\n", OrtGetApiBase()->GetVersionString());
+        return 0;
+      }
+    EOS
+    system ENV.cc, "-I#{include}", testpath/"test.c",
+           "-L#{lib}", "-lonnxruntime", "-o", testpath/"test"
+    assert_equal version, shell_output("./test").strip
   end
 end

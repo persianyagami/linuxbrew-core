@@ -2,8 +2,8 @@ class ErlangAT22 < Formula
   desc "Programming language for highly scalable real-time systems"
   homepage "https://www.erlang.org/"
   # Download tarball from GitHub; it is served faster than the official tarball.
-  url "https://github.com/erlang/otp/archive/OTP-22.3.4.12.tar.gz"
-  sha256 "5607b27169edb2c02806f21330a3d430c55f21580292743d25b29b678e951aaf"
+  url "https://github.com/erlang/otp/releases/download/OTP-22.3.4.21/otp_src_22.3.4.21.tar.gz"
+  sha256 "f65ab9613dc57efceee0c42a882204f543fd03a68542014ce060ecea7cb45df7"
   license "Apache-2.0"
 
   livecheck do
@@ -12,47 +12,32 @@ class ErlangAT22 < Formula
   end
 
   bottle do
-    cellar :any
-    sha256 "488de36e1f6532a07a505effc1b85ea33ae25d1251be58734b8bf1eb1c7a695c" => :catalina
-    sha256 "980895c1e851c7a7a82be51ca2c1ea24e3b8a9aad63f72e4721d83de3d6121e2" => :mojave
-    sha256 "ba000ca6cd9a086630cc930cd3059238fb54dba5ccb74a4a8dce4e739261db80" => :high_sierra
+    sha256 cellar: :any,                 arm64_big_sur: "8003b927236a6a4a0048b42bfa1082c3cef56dc435d2aaf24bb2935680e8c6e0"
+    sha256 cellar: :any,                 big_sur:       "3c6231a52f643ef4d2aadb45291b50c0316eeaef0b6917c7db18a6217bf74e12"
+    sha256 cellar: :any,                 catalina:      "cc83864d045e44a185a4f88badffef56c85898ed4a2a45654056c55a8477ab0b"
+    sha256 cellar: :any,                 mojave:        "f6cfeb11ec3f61d934c6a8cd6a91fbb9e1aec7f4ca1d46883c353e9bcd8b362a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "64cb0e816b13233c7f72371e21bcb312e4c51e6cdd9cc6c90c875f9456687abb" # linuxbrew-core
   end
 
   keg_only :versioned_formula
 
-  depends_on "autoconf" => :build
-  depends_on "automake" => :build
-  depends_on "libtool" => :build
   depends_on "openssl@1.1"
-  depends_on "wxmac" # for GUI apps like observer
-
-  uses_from_macos "m4" => :build
+  depends_on "wxwidgets" # for GUI apps like observer
 
   resource "man" do
     url "https://www.erlang.org/download/otp_doc_man_22.3.tar.gz"
-    mirror "https://fossies.org/linux/misc/otp_doc_man_22.3.tar.gz"
     sha256 "43b6d62d9595e1dc51946d55c9528c706c5ae753876b9bf29303b7d11a7ccb16"
   end
 
   resource "html" do
     url "https://www.erlang.org/download/otp_doc_html_22.3.tar.gz"
-    mirror "https://fossies.org/linux/misc/otp_doc_html_22.3.tar.gz"
     sha256 "9b01c61f2898235e7f6643c66215d6419f8706c8fdd7c3e0123e68960a388c34"
-  end
-
-  # Fix build on Xcode 12
-  patch do
-    url "https://github.com/erlang/otp/commit/388622e9b626039c1e403b4952c2c905af364a96.patch?full_index=1"
-    sha256 "85d3611fc071f06d421b9c7fae00b656fde054586bf69551aec38930d4086780"
   end
 
   def install
     # Unset these so that building wx, kernel, compiler and
-    # other modules doesn't fail with an unintelligable error.
+    # other modules doesn't fail with an unintelligible error.
     %w[LIBS FLAGS AFLAGS ZFLAGS].each { |k| ENV.delete("ERL_#{k}") }
-
-    # Do this if building from a checkout to generate configure
-    system "./otp_build", "autoconf" if File.exist? "otp_build"
 
     args = %W[
       --disable-debug
@@ -60,7 +45,6 @@ class ErlangAT22 < Formula
       --prefix=#{prefix}
       --enable-dynamic-ssl-lib
       --enable-hipe
-      --enable-sctp
       --enable-shared-zlib
       --enable-smp-support
       --enable-threads
@@ -69,7 +53,7 @@ class ErlangAT22 < Formula
       --without-javac
     ]
 
-    on_macos do
+    if OS.mac?
       args << "--enable-darwin-64bit"
       args << "--enable-kernel-poll" if MacOS.version > :el_capitan
       args << "--with-dynamic-trace=dtrace" if MacOS::CLT.installed?

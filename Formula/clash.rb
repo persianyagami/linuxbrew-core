@@ -1,15 +1,16 @@
 class Clash < Formula
   desc "Rule-based tunnel in Go"
   homepage "https://github.com/Dreamacro/clash"
-  url "https://github.com/Dreamacro/clash/archive/v1.3.0.tar.gz"
-  sha256 "34a31e12eb7e639bdc2e19421fe3a8d9ad710e7d4c13bfc361c2023c9dfe04f6"
+  url "https://github.com/Dreamacro/clash/archive/v1.7.1.tar.gz"
+  sha256 "18c2ef10df608392435a1277d3f2e256c65bec3662bf0a6c325f02be6deb4fce"
   license "GPL-3.0-only"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "d3c6497c1d3b6f6c4c7c8c611a964d2d9acf54fc7e0f11e1f4b7ba0cfc1bb75f" => :big_sur
-    sha256 "05c3cc38443156b857ba98ec54b8b7ba413d464ec76aad2283487560fa687599" => :catalina
-    sha256 "bbc2a5cc2abc096ed91ca251a2fcac994fc8ecd1c327472eaa5bfdf67f074c77" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "066bc9085115b2e13a4c99634c973948a566d143b32f6c553648ab73adaf1739"
+    sha256 cellar: :any_skip_relocation, big_sur:       "c59f2f4aa03a106b91181dd74c3daebe7e4297191af08fc0f7142cf9e5ecddfb"
+    sha256 cellar: :any_skip_relocation, catalina:      "92897457668e09639ac0b83af976a4c3465bee0af6aa51d10712cb072e8f7c2d"
+    sha256 cellar: :any_skip_relocation, mojave:        "c1e9f88565f1427609c7e432a1b52f6027c649fb223087ba4cee1bd87f48bf90"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "354c75ab99d2b9ea7bae268db11a6028d1590c09a82cd8aad9adad2741f6ff54" # linuxbrew-core
   end
 
   depends_on "go" => :build
@@ -19,31 +20,11 @@ class Clash < Formula
     system "go", "build", *std_go_args
   end
 
-  plist_options manual: "#{HOMEBREW_PREFIX}/opt/clash/bin/clash"
-
-  def plist
-    <<~EOS
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-        <dict>
-          <key>Label</key>
-          <string>#{plist_name}</string>
-          <key>ProgramArguments</key>
-            <array>
-                <string>#{opt_bin}/clash</string>
-            </array>
-            <key>RunAtLoad</key>
-            <true/>
-            <key>KeepAlive</key>
-            <true/>
-            <key>StandardOutPath</key>
-            <string>#{var}/log/clash.log</string>
-            <key>StandardErrorPath</key>
-            <string>#{var}/log/clash.log</string>
-          </dict>
-      </plist>
-    EOS
+  service do
+    run opt_bin/"clash"
+    keep_alive true
+    error_log_path var/"log/clash.log"
+    log_path var/"log/clash.log"
   end
 
   test do

@@ -3,40 +3,44 @@ require "language/node"
 class Appium < Formula
   desc "Automation for Apps"
   homepage "https://appium.io/"
-  url "https://registry.npmjs.org/appium/-/appium-1.19.1.tgz"
-  sha256 "c24f11fe3dba96a9c9d41300e53251b7e8423b88911abd4a5d1ef42bb77fffa0"
+  url "https://registry.npmjs.org/appium/-/appium-1.22.0.tgz"
+  sha256 "69194d5d4ea68e6de101a12332e1484e211ff07a299f1fcf1736e91332a634e7"
   license "Apache-2.0"
-  head "https://github.com/appium/appium.git"
-
-  livecheck do
-    url :stable
-  end
+  head "https://github.com/appium/appium.git", branch: "master"
 
   bottle do
-    cellar :any
-    sha256 "e9cd43b0871486f6567eada38f1f535dc24a7605f3b7222f1f37939bbb8a9076" => :big_sur
-    sha256 "a624ae16c43c88e4cfa29597efff5c824dbebd7434353dffa29fc55c4218e7bc" => :catalina
-    sha256 "23999d5f9ae201854deb5f5ee5b70938bdb9f0204f16324375ac5e63f6c9f481" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "aef088c27cda107b9106c01720f814152bf2ea97cb94b59bc736e459e78aa911"
+    sha256 cellar: :any_skip_relocation, big_sur:       "2817c721f277da6d1e4ba0ed7272ca1d4291b538a0efd6f84fd8c43d86951066"
+    sha256 cellar: :any_skip_relocation, catalina:      "2817c721f277da6d1e4ba0ed7272ca1d4291b538a0efd6f84fd8c43d86951066"
+    sha256 cellar: :any_skip_relocation, mojave:        "2817c721f277da6d1e4ba0ed7272ca1d4291b538a0efd6f84fd8c43d86951066"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "701e78afdcfb0c215a4356390487cd8e3d6950f9adbb5e5f0c7aaf76c2981793" # linuxbrew-core
   end
 
   depends_on "node"
 
   def install
-    # workaround packaging bug exposed in npm 7+ (bin smylinks are now created
-    # before installing dependencies) => manually create symlink for authorize-ios
-    inreplace "package.json", "\"appium\": \"./build/lib/main.js\",", "\"appium\": \"./build/lib/main.js\""
-    inreplace "package.json", "\"authorize-ios\": \"./node_modules/.bin/authorize-ios\"", ""
-    system "npm", "install", *Language::Node.std_npm_install_args(libexec)
-    ln_s libexec/"lib/node_modules/appium/node_modules/.bin/authorize-ios", libexec/"bin/authorize-ios"
+    system "npm", "install", *Language::Node.std_npm_install_args(libexec), "--chromedriver-skip-install"
     bin.install_symlink Dir["#{libexec}/bin/*"]
+
+    # Delete obsolete module appium-ios-driver, which installs universal binaries
+    rm_rf libexec/"lib/node_modules/appium/node_modules/appium-ios-driver"
+  end
+
+  plist_options manual: "appium"
+
+  service do
+    run opt_bin/"appium"
+    environment_variables PATH: std_service_path_env
+    run_type :immediate
+    keep_alive true
+    error_log_path var/"log/appium-error.log"
+    log_path var/"log/appium.log"
+    working_dir var
   end
 
   test do
     output = shell_output("#{bin}/appium --show-config 2>&1")
     assert_match version.to_str, output
-
-    # Test stays stuck forever on Linux CI
-    return if ENV["CI"]
 
     port = free_port
     begin

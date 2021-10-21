@@ -1,17 +1,24 @@
 class Tectonic < Formula
   desc "Modernized, complete, self-contained TeX/LaTeX engine"
   homepage "https://tectonic-typesetting.github.io/"
-  url "https://github.com/tectonic-typesetting/tectonic/archive/tectonic@0.3.3.tar.gz"
-  sha256 "c0aa60186f2e7f37af67dafbdccfc7a99ca5ce084651d8fcabe7561b941dcb97"
+  url "https://github.com/tectonic-typesetting/tectonic/archive/tectonic@0.8.0.tar.gz"
+  sha256 "794cf34aee017b8a4288ed509a4e9d550a36aadc2bc0d35b1727d1135dac8e02"
   license "MIT"
 
+  # As of writing, only the tags starting with `tectonic@` are release versions.
+  # NOTE: The `GithubLatest` strategy cannot be used here because the "latest"
+  # release on GitHub sometimes points to a tag that isn't a release version.
+  livecheck do
+    url :stable
+    regex(/^tectonic@v?(\d+(?:\.\d+)+)$/i)
+  end
+
   bottle do
-    cellar :any
-    sha256 "374962deea5595efb5b0e7b36821a9c97727e1e6035063edd1b59dd519ae61a0" => :big_sur
-    sha256 "b0aab588b2ad733f37aa380bd8b6ef1985ffb1f41a345ad6829193a7eba6381e" => :catalina
-    sha256 "566f6be7025d4f228f66c26f45eb1342cedfadbe33d9979aa72da89e2c5e4ee7" => :mojave
-    sha256 "d5c2e447def3051174e6a9f1578d7df132b10ab95db3e86c41a49bb1fe8d5761" => :high_sierra
-    sha256 "97eaf95d6df71e6865024680c8515c8eb1bb7dc9a51fea13f2939abb45a75a65" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "c251b3e996a3a9bb92b4a3e01967a39a173d15953b24952b045a4bce12f5f5dd"
+    sha256 cellar: :any,                 big_sur:       "f877391f52526e989cee32b8a6424a2c570c51c65f332134fb7fb94d11ede5f4"
+    sha256 cellar: :any,                 catalina:      "90f93c343215ba86c8950e75309dbc241fe88ea25b3679c9c9c810bbc40ed198"
+    sha256 cellar: :any,                 mojave:        "9efcd42f9b38b1d25f4144846ec107b6554be85dad65caf631da2923320be298"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "de4e82b7d5adc7b8adbb121d2b3b15bd1cb9effebd4c0f96e61ab57846cee164" # linuxbrew-core
   end
 
   depends_on "pkg-config" => :build
@@ -32,7 +39,7 @@ class Tectonic < Formula
     # https://crates.io/crates/openssl#manual-configuration
     ENV["OPENSSL_DIR"] = Formula["openssl@1.1"].opt_prefix
 
-    system "cargo", "install", *std_cargo_args
+    system "cargo", "install", "--features", "external-harfbuzz", *std_cargo_args
   end
 
   test do

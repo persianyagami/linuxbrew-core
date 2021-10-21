@@ -1,10 +1,10 @@
 class Clingo < Formula
   desc "ASP system to ground and solve logic programs"
   homepage "https://potassco.org/"
-  url "https://github.com/potassco/clingo/archive/v5.4.0.tar.gz"
-  sha256 "e2de331ee0a6d254193aab5995338a621372517adcf91568092be8ac511c18f3"
+  url "https://github.com/potassco/clingo/archive/v5.5.0.tar.gz"
+  sha256 "c9d7004a0caec61b636ad1c1960fbf339ef8fdee9719321fc1b6b210613a8499"
   license "MIT"
-  revision 3
+  revision 1
 
   livecheck do
     url :stable
@@ -12,16 +12,23 @@ class Clingo < Formula
   end
 
   bottle do
-    sha256 "9a02b6ced933810e4cff55143989e37ef08d22bcf6a945a9682d3d73a0accedb" => :big_sur
-    sha256 "5c6dd1f45a2cfe48e4616c6e4bcc45a8b9b5ab050016ad8db6c38bd810129985" => :catalina
-    sha256 "55a5d161667e66004aa6d56f92ab00ccefb6863094fd2ba3c113b6d20d741968" => :mojave
-    sha256 "2db78b7065d110737da783b19a5d75a2dd049d99cab1e033688b1ec6cc138a0a" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "982e57b5894a3927249e58909dc0f690411ce6ad643915063e3b711ae85ca097"
+    sha256 cellar: :any,                 big_sur:       "def9e572f86af37409a0f4f908e7caee183888b9ea506403464f3ce7d26a0bbc"
+    sha256 cellar: :any,                 catalina:      "472868ff2dbf256f9cf8b01055b6a041b5a4ec1a1ecf83869f82e8367d3de007"
+    sha256 cellar: :any,                 mojave:        "67e741141731249081fd2b4c24fac088f1a5020a6a2028606cd6e1623d51a7b6"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3b670e139fcc657fc63ce183023587259adbd1a1cfa9fa9d9ea7f2a36c8d8553" # linuxbrew-core
+  end
+
+  head do
+    url "https://github.com/potassco/clingo.git"
+    depends_on "bison" => :build
+    depends_on "re2c" => :build
   end
 
   depends_on "cmake" => :build
   depends_on "doxygen" => :build
   depends_on "lua"
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   # This formula replaced the clasp & gringo formulae.
   # https://github.com/Homebrew/homebrew-core/pull/20281
@@ -31,24 +38,19 @@ class Clingo < Formula
   link_overwrite "bin/lpconvert"
   link_overwrite "bin/reify"
 
-  # Patch adds Python 3.8 compatibility
-  patch do
-    url "https://github.com/potassco/clingo/commit/13a896b6a762e48c2396e3dc9f2e794020f4e6e8.patch?full_index=1"
-    sha256 "f2840bc4ab5159c253c5390c845f0d003f5fef813f49ddca27dbd5245f535e79"
-  end
-
   def install
     system "cmake", ".", "-DCLINGO_BUILD_WITH_PYTHON=ON",
                          "-DCLINGO_BUILD_PY_SHARED=ON",
                          "-DPYCLINGO_USE_INSTALL_PREFIX=ON",
+                         "-DPYCLINGO_USER_INSTALL=OFF",
                          "-DCLINGO_BUILD_WITH_LUA=ON",
-                         "-DPYTHON_EXECUTABLE=#{Formula["python@3.9"].opt_bin}/python3",
+                         "-DPython_EXECUTABLE=#{which("python3")}",
                          "-DPYCLINGO_DYNAMIC_LOOKUP=OFF",
                          *std_cmake_args
     system "make", "install"
   end
 
   test do
-    assert_match version.to_s, shell_output("#{bin}/clingo --version")
+    assert_match "clingo version", shell_output("#{bin}/clingo --version")
   end
 end

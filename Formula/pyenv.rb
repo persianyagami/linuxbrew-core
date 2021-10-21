@@ -1,12 +1,11 @@
 class Pyenv < Formula
   desc "Python version management"
   homepage "https://github.com/pyenv/pyenv"
-  url "https://github.com/pyenv/pyenv/archive/v1.2.21.tar.gz"
-  sha256 "a36f11a9e35bb3354e820fe2e9d258208624703506878fc6b7466d646b59d782"
+  url "https://github.com/pyenv/pyenv/archive/v2.1.0.tar.gz"
+  sha256 "464439c2f764b5ed9b00c97727cef0a7152be4ccbe703d54db43a48afe277a70"
   license "MIT"
   version_scheme 1
-  revision 1 unless OS.mac?
-  head "https://github.com/pyenv/pyenv.git"
+  head "https://github.com/pyenv/pyenv.git", branch: "master"
 
   livecheck do
     url :stable
@@ -14,19 +13,17 @@ class Pyenv < Formula
   end
 
   bottle do
-    cellar :any
-    sha256 "e31e42f7e32997c86bc4eb5882a330d162b674e2c8304ea33d2bdef1467ccb4f" => :big_sur
-    sha256 "2f4c78fd8cce10de8e9fb48a43c7cd51003e7a87c3cba9e4c3942d72f331df58" => :catalina
-    sha256 "a3f8395adbc0644940fa03f41807fac246b997d10ae990f549e016699a2b7e51" => :mojave
-    sha256 "d4a573a9116ee1f474e4a77517af5c9dfaefe5ebb9cf7f26d2cc9ac872fe1155" => :high_sierra
-    sha256 "69854bb635ae0147e0da9facfdbd4e7aa270af917f1055ef4592e9a206237475" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "751d22c51f6c18a81cd09b3aec8ed56b110d982c120e0ba272f9aeefb6dd9a63"
+    sha256 cellar: :any,                 big_sur:       "1835dba9301c262d4806a783662245cfbd131461e2e86725ccc8e19fc454209e"
+    sha256 cellar: :any,                 catalina:      "8d41bc74359afba20e45955ed7b6750fb99162256fc57b92d0c72b5499176a22"
+    sha256 cellar: :any,                 mojave:        "a910ff8f10405587d46698bb461f44da3ba602a3fb69948556ad66f17129f678"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c22983540f24ac4feb3468ff9d69c3fc133b0358e7cc739e38cd5146089deddd" # linuxbrew-core
   end
 
   depends_on "autoconf"
   depends_on "openssl@1.1"
   depends_on "pkg-config"
   depends_on "readline"
-  depends_on "python@3.9" unless OS.mac?
 
   uses_from_macos "bzip2"
   uses_from_macos "libffi"
@@ -34,9 +31,14 @@ class Pyenv < Formula
   uses_from_macos "xz"
   uses_from_macos "zlib"
 
+  on_linux do
+    depends_on "python@3.9" => :test
+  end
+
   def install
     inreplace "libexec/pyenv", "/usr/local", HOMEBREW_PREFIX
-    inreplace "libexec/pyenv-versions", "system pyenv-which python", "system pyenv-which python3"
+    inreplace "libexec/pyenv-rehash", "$(command -v pyenv)", opt_bin/"pyenv"
+    inreplace "pyenv.d/rehash/source.bash", "$(command -v pyenv)", opt_bin/"pyenv"
 
     system "src/configure"
     system "make", "-C", "src"
@@ -46,12 +48,34 @@ class Pyenv < Formula
       bin.install_symlink "#{prefix}/plugins/python-build/bin/#{cmd}"
     end
 
+    share.install prefix/"man"
+
     # Do not manually install shell completions. See:
     #   - https://github.com/pyenv/pyenv/issues/1056#issuecomment-356818337
     #   - https://github.com/Homebrew/homebrew-core/pull/22727
   end
 
   test do
-    shell_output("eval \"$(#{bin}/pyenv init -)\" && pyenv versions")
+    # Create a fake python version and executable.
+    pyenv_root = Pathname(shell_output("pyenv root").strip)
+    python_bin = pyenv_root/"versions/1.2.3/bin"
+    foo_script = python_bin/"foo"
+    foo_script.write "echo hello"
+    chmod "+x", foo_script
+
+    # Test versions.
+    versions = shell_output("eval \"$(#{bin}/pyenv init --path)\" " \
+                            "&& eval \"$(#{bin}/pyenv init -)\" " \
+                            "&& pyenv versions").split("\n")
+    assert_equal 2, versions.length
+    assert_match(/\* system/, versions[0])
+    assert_equal("  1.2.3", versions[1])
+
+    # Test rehash.
+    system "pyenv", "rehash"
+    refute_match "Cellar", (pyenv_root/"shims/foo").read
+    assert_equal "hello", shell_output("eval \"$(#{bin}/pyenv init --path)\" " \
+                                       "&& eval \"$(#{bin}/pyenv init -)\" " \
+                                       "&& PYENV_VERSION='1.2.3' foo").chomp
   end
 end

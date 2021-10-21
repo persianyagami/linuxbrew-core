@@ -1,8 +1,8 @@
 class Convox < Formula
   desc "Command-line interface for the Convox PaaS"
   homepage "https://convox.com/"
-  url "https://github.com/convox/convox/archive/3.0.44.tar.gz"
-  sha256 "e453cbd5e734f23a4b327f702818a2274496d850cf03613cde00431fccb22166"
+  url "https://github.com/convox/convox/archive/3.0.53.tar.gz"
+  sha256 "4626f93cbc0038f5481949ad8982aaf7ac38d9d047498de659b14a5236f7d39d"
   license "Apache-2.0"
   version_scheme 1
 
@@ -12,22 +12,29 @@ class Convox < Formula
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "20b996d907f1c49626c3b5562d7324ff400e857ac7ea9e1b76da05f73dd9b99d" => :big_sur
-    sha256 "6669f173ecb619316e6471e53d7d394542c2dc9dc623df3b6e2743c04b18cc3f" => :catalina
-    sha256 "f5d197813d4e78a16d535c99efad0b1ffc283eafecc69d346df63f3ab1ef5ce2" => :mojave
-    sha256 "ede78636eb4d9502a5cf008b9005c0f9f4d513ab8ac0e32a17e4f531ed01df85" => :high_sierra
-    sha256 "03ad0b350a68efde3bce52f11f666424e85d382570ea82a8c13bd99bcc4a5afb" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "132063210d18c9dde76061123e1f93f6ab20faf1effec5874d66935c02b62c7b"
+    sha256 cellar: :any_skip_relocation, big_sur:       "33521d672ebf81aaffb43d0b7fd7cfd157aa1704ade909e10e6caa3aab87a9e4"
+    sha256 cellar: :any_skip_relocation, catalina:      "fd53356e3f959212f863e405da05b2d26bf9d205b0513878104a2517ecf592d8"
+    sha256 cellar: :any_skip_relocation, mojave:        "7016d5d29e917c8264027a41076602fbe6347197235a09cdbcc088ba5304f466"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1cadd348b5b0d9b425010a2e5fd5cd66c90baf9360dc203a0ef7d8126b2b0e3b"
   end
 
   depends_on "go" => :build
 
+  # Support go 1.17, remove when upstream patch is merged/released
+  # https://github.com/convox/convox/pull/389
+  patch do
+    url "https://github.com/convox/convox/commit/d28b01c5797cc8697820c890e469eb715b1d2e2e.patch?full_index=1"
+    sha256 "a0f94053a5549bf676c13cea877a33b3680b6116d54918d1fcfb7f3d2941f58b"
+  end
+
   def install
     ldflags = %W[
+      -s -w
       -X main.version=#{version}
     ].join(" ")
 
-    system "go", "build", *std_go_args, "-mod=vendor", "-ldflags", ldflags, "./cmd/convox"
+    system "go", "build", *std_go_args(ldflags: ldflags), "./cmd/convox"
   end
 
   test do

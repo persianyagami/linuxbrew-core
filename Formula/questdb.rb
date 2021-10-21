@@ -1,11 +1,16 @@
 class Questdb < Formula
   desc "Time Series Database"
   homepage "https://questdb.io"
-  url "https://github.com/questdb/questdb/releases/download/5.0.5/questdb-5.0.5-no-jre-bin.tar.gz"
-  sha256 "8c3760cb070ded18cbc6193626b691aee5088e7b408bae7eef1b31cc035933e4"
+  url "https://github.com/questdb/questdb/releases/download/6.0.8/questdb-6.0.8-no-jre-bin.tar.gz"
+  sha256 "d6311f8ffb3bec8e5430a9874197d8e77658de1f7f28574479297864ce08f17c"
   license "Apache-2.0"
 
-  bottle :unneeded
+  bottle do
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "f26f9dfdce3cdf98656514323ab79baef479de351d870df8c6ef414a3e82a4d7"
+    sha256 cellar: :any_skip_relocation, big_sur:       "1d1d1c36e9b7a859b18f5d515f6e830cb5c8878ac586b68cd4c73707273beffe"
+    sha256 cellar: :any_skip_relocation, catalina:      "1d1d1c36e9b7a859b18f5d515f6e830cb5c8878ac586b68cd4c73707273beffe"
+    sha256 cellar: :any_skip_relocation, mojave:        "1d1d1c36e9b7a859b18f5d515f6e830cb5c8878ac586b68cd4c73707273beffe"
+  end
 
   depends_on "openjdk@11"
 
@@ -66,7 +71,7 @@ class Questdb < Formula
       sleep 30
       output = shell_output("curl -Is localhost:9000/index.html")
       sleep 4
-      assert_match /questDB/, output
+      assert_match "questDB", output
     ensure
       system "#{bin}/questdb", "stop"
     end

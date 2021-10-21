@@ -1,16 +1,15 @@
 class Scrcpy < Formula
   desc "Display and control your Android device"
   homepage "https://github.com/Genymobile/scrcpy"
-  url "https://github.com/Genymobile/scrcpy/archive/v1.16.tar.gz"
-  sha256 "94cbd59e26faa08ca25d5126d6c8d45e831b6a9e716ce05cd57bc4bcc751f742"
+  url "https://github.com/Genymobile/scrcpy/archive/v1.19.tar.gz"
+  sha256 "40ac2059618f18a0e6f9cd0e40d3bff240ade98664bd619422f875bff7e8c70e"
   license "Apache-2.0"
-  revision 2
 
   bottle do
-    sha256 "c9658d00be68ecb6e0a4375a94d241f0f9499bf1495cf5713c61a5b6dd238de4" => :big_sur
-    sha256 "e6201c5231f70f2a2ea894e5103fc3de4ac6ecd3646898642346dea3973b5943" => :catalina
-    sha256 "b0d097de2bbec45803d193a4e7f49245ba97e30ef3a23b4f68a8dc38756847e9" => :mojave
-    sha256 "67b0df2cfc95417ce5f300229fb14f84e20003f409bda70e76a8e75fa51c9df5" => :high_sierra
+    sha256 arm64_big_sur: "59af1db70a06eb3fc704edf719802fa21a0b9e79437d7ea6aa6c92ae9ca7af47"
+    sha256 big_sur:       "d8390aa2929c634cf5e5f1e9214cb351c1f5759e99071db52d4369215f7ae298"
+    sha256 catalina:      "0429d88c751ed012adc9665b1468b7977bbade99d5849342723eb5c70759f57a"
+    sha256 mojave:        "824307090453ebfcbc755ac4fba653fc0bc00de2d78013991063db926065abcb"
   end
 
   depends_on "meson" => :build
@@ -20,15 +19,8 @@ class Scrcpy < Formula
   depends_on "sdl2"
 
   resource "prebuilt-server" do
-    url "https://github.com/Genymobile/scrcpy/releases/download/v1.16/scrcpy-server-v1.16"
-    sha256 "94a79e05b4498d0460ab7bd9d12cbf05156e3a47bf0c5d1420cee1d4493b3832"
-  end
-
-  # Fix build on Xcode 12 (https://github.com/Genymobile/scrcpy/issues/1726)
-  # Remove in the next release
-  patch do
-    url "https://github.com/Genymobile/scrcpy/commit/bd9f656933e79f7b21b42993f8a70a761ab47226.patch?full_index=1"
-    sha256 "3ab1c2d4b9cc38fe94ae24c49c74b4008a36ffb8079442545feeffa5d3448540"
+    url "https://github.com/Genymobile/scrcpy/releases/download/v1.19/scrcpy-server-v1.19"
+    sha256 "876f9322182e6aac6a58db1334f4225855ef3a17eaebc80aab6601d9d1ecb867"
   end
 
   def install

@@ -5,22 +5,19 @@ class Doitlive < Formula
   homepage "https://doitlive.readthedocs.io/en/latest/"
   url "https://files.pythonhosted.org/packages/e5/d9/4ce969d98f521c253ec3b15a0c759104a01061ac90fb9d8636b015bcb4ea/doitlive-4.3.0.tar.gz"
   sha256 "4cb1030e082d8649f10a61d599d3ff3bcad7f775e08f0e68ee06882e06d0190f"
-  revision OS.mac? ? 9 : 10
-
-  livecheck do
-    url :stable
-  end
+  license "MIT"
+  revision OS.mac? ? 10 : 11
+  head "https://github.com/sloria/doitlive.git", branch: "dev"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "a5f6cb32662a07f6610df737c92935c8f94547edf61550ebc653046cd217c65b" => :big_sur
-    sha256 "645c4c69758416768b1f853fba5d9e742c28985d8c1297aff866dcd05a84cce6" => :catalina
-    sha256 "114d1d58d047ae404eb0a9280e11598359117b7cc832a993e2b4fd2a024a55e1" => :mojave
-    sha256 "d17d744e85a69fbe1dccd0433b208aa554e9791866969a1fff484780150e24c6" => :high_sierra
-    sha256 "e0e38fd1aab44bdc5d57afe7156cbf03aea6c82e2fc82c442d86a10c327ac4ea" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "c53819a626934205ac4b32eadb316fc4c3bf287fccc513ff313396bedd002dad"
+    sha256 cellar: :any_skip_relocation, big_sur:       "2cbd6954dd362112f2a1a9eb1226ea506721eb64efe37af548359eef5f116410"
+    sha256 cellar: :any_skip_relocation, catalina:      "0099d450d5512214450d1eec180df1b1b18e114a2b7e9255e720c31dc5c42449"
+    sha256 cellar: :any_skip_relocation, mojave:        "5414c94f952d6394a59752a9e4f6e3a303e93eeb6722a64fd0eba975dcc2ee57"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0ef87d3c8d89067de466f93b98ea9c052d6bc9d31dff84c5749e87ca2d771da0" # linuxbrew-core
   end
 
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   resource "click" do
     url "https://files.pythonhosted.org/packages/4e/ab/5d6bc3b697154018ef196f5b17d958fac3854e2efbc39ea07a284d4a6a9b/click-7.1.1.tar.gz"

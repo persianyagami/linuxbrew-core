@@ -4,7 +4,7 @@ class Libgit2Glib < Formula
   url "https://download.gnome.org/sources/libgit2-glib/0.99/libgit2-glib-0.99.0.1.tar.xz"
   sha256 "e05a75c444d9c8d5991afc4a5a64cd97d731ce21aeb7c1c651ade1a3b465b9de"
   license "LGPL-2.1"
-  revision 2
+  revision 4
   head "https://github.com/GNOME/libgit2-glib.git"
 
   livecheck do
@@ -13,10 +13,11 @@ class Libgit2Glib < Formula
   end
 
   bottle do
-    sha256 "bffdfd6183ae4bdb486f40f9a449ab0582387b40be36c356ce6f83642011bec7" => :big_sur
-    sha256 "335de71224cede561e05645cde3709acf3763e168d2da11b13586d3c3605d67e" => :catalina
-    sha256 "308f244da46a0a70ab9e1fb9cf2eae8dd24e26c363b344f5872f5ee65ef9043a" => :mojave
-    sha256 "54478b53743594a811c3876a6e40d139faf55928df1f78e3ddd329bee688d22d" => :x86_64_linux
+    sha256 cellar: :any, arm64_big_sur: "14f4f4a3b09727ca9993953c5fa7e0b9d0dd991cd9f782cdd42d254e6317b974"
+    sha256 cellar: :any, big_sur:       "88a012ad27e2056c313cad08039c2c2ac534ff6f383baae09363b357fcbf5e7e"
+    sha256 cellar: :any, catalina:      "804db5cc23243985293b05e7ab18c54a52e36cb4f339c5d9bbaaee5ac6ebdd39"
+    sha256 cellar: :any, mojave:        "bf0aacd695af9b723be16caaba4252e87bb1001ff4710872d4b5eceff7efe8f5"
+    sha256               x86_64_linux:  "929dca2396cfb412791b6829ceb41f55bf2c46c8ca2b204b4f85ee8fff6085cf" # linuxbrew-core
   end
 
   depends_on "gobject-introspection" => :build
@@ -30,6 +31,7 @@ class Libgit2Glib < Formula
 
   def install
     mkdir "build" do
+      ENV.append "LDFLAGS", "-Wl,-rpath,#{rpath}"
       system "meson", *std_meson_args,
                       "-Dpython=false",
                       "-Dvapi=true",

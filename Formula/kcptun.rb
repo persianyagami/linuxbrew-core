@@ -1,16 +1,17 @@
 class Kcptun < Formula
   desc "Stable & Secure Tunnel based on KCP with N:M multiplexing and FEC"
   homepage "https://github.com/xtaci/kcptun"
-  url "https://github.com/xtaci/kcptun/archive/v20201126.tar.gz"
-  sha256 "cb4cc62fe6a9f3452f20ada676996b48039f091bdae25943955ac9e2299a9c09"
+  url "https://github.com/xtaci/kcptun/archive/v20210922.tar.gz"
+  sha256 "f6a08f0fe75fa85d15f9c0c28182c69a5ad909229b4c230a8cbe38f91ba2d038"
   license "MIT"
   head "https://github.com/xtaci/kcptun.git"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "ccf86448023fc2dd6c2f1fd27d546c792cb36461232297f40516c2c76fe2c204" => :big_sur
-    sha256 "dafe72ff9e16d91f82d981cd132d16a94086324f102349e0163220aa7b316738" => :catalina
-    sha256 "d79906ade24842ef8df0b5713f3dc16e4c10ae2e0d0ea1017c91a2e5c40bf132" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "c97a883e2048b359e651f507f30253737d2321e4fc1a395d974cc77393e0fe6e"
+    sha256 cellar: :any_skip_relocation, big_sur:       "1ad1270e0bba0a7dc12310895df5d16387fe419368e6cfc6a374d818f9c1678b"
+    sha256 cellar: :any_skip_relocation, catalina:      "445130c0d80589759e05859e2e999335eed7a00a845709c659432c54773d3a35"
+    sha256 cellar: :any_skip_relocation, mojave:        "d2b5d0001b6afed4dcf1804930bc47a8b3df26e75717e18319e38c2b9ebba890"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "74c644d4282ee536136dfa9f2221d9fc01e09359221ea5ae98b620d697683f0a" # linuxbrew-core
   end
 
   depends_on "go" => :build
@@ -24,40 +25,11 @@ class Kcptun < Formula
     etc.install "examples/local.json" => "kcptun_client.json"
   end
 
-  plist_options manual: "#{HOMEBREW_PREFIX}/opt/kcptun/bin/kcptun_client -c #{HOMEBREW_PREFIX}/etc/kcptun_client.json"
-
-  def plist
-    <<~EOS
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-        <dict>
-          <key>Label</key>
-          <string>#{plist_name}</string>
-          <key>ProgramArguments</key>
-          <array>
-            <string>#{opt_bin}/kcptun_client</string>
-            <string>-c</string>
-            <string>#{etc}/kcptun_client.json</string>
-          </array>
-          <key>RunAtLoad</key>
-          <true/>
-          <key>KeepAlive</key>
-          <dict>
-            <key>Crashed</key>
-            <true/>
-            <key>SuccessfulExit</key>
-            <false/>
-          </dict>
-          <key>ProcessType</key>
-          <string>Background</string>
-          <key>StandardErrorPath</key>
-          <string>#{var}/log/kcptun.log</string>
-          <key>StandardOutPath</key>
-          <string>#{var}/log/kcptun.log</string>
-        </dict>
-      </plist>
-    EOS
+  service do
+    run [opt_bin/"kcptun_client", "-c", etc/"kcptun_client.json"]
+    keep_alive true
+    log_path var/"log/kcptun.log"
+    error_log_path var/"log/kcptun.log"
   end
 
   test do

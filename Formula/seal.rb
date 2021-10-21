@@ -1,37 +1,66 @@
 class Seal < Formula
   desc "Easy-to-use homomorphic encryption library"
   homepage "https://github.com/microsoft/SEAL"
-  url "https://github.com/microsoft/SEAL/archive/v3.6.1.tar.gz"
-  sha256 "e399c0df7fb60ad450a0ccfdc81b99d19308d0fc1f730d4cad4748dfb2fdb516"
+  url "https://github.com/microsoft/SEAL/archive/v3.7.1.tar.gz"
+  sha256 "cdc7426d01f879a8b87204a5df9e01339262d4b53962f6fddc2f34a0dec71777"
   license "MIT"
 
   bottle do
-    sha256 "fa0987fdcf86b96cf972ff894bbdd8d24afc3e72c41cb9be25278b851ddb7986" => :big_sur
-    sha256 "59fb7528d124443c8443c1f9ccb8f12ab357e005f1755b9eb8a230a3426fb9dc" => :catalina
-    sha256 "73257c6d562b234a97e320bbb1555fff03ce3bd3b2a8ce0530ba4ebbce883fe3" => :mojave
-    sha256 "63241d163aca83fa4ecb587f537b7b1cacaa41dc0f0307d8503d8c1ebb9476d9" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "23beceb2de3f10406360d6dd91ed9aa386e7e94a368c9457918d3581106c2a7b"
+    sha256 cellar: :any,                 big_sur:       "d6c02002668e4a85b55881dceab6d3e8f4b6ee7ee805c008cd0e8e0b5b991434"
+    sha256 cellar: :any,                 catalina:      "e73d859446af694f6914ee025a73d707cbc873ec3bba65e6f25a88850313f3f4"
+    sha256 cellar: :any,                 mojave:        "94cd84ae736c28a2c234333fb90b5c68933a26e60edbb569c8d2fb00326db170"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "fc947e560250392fc1a7128849d62cc9d6921e0dea814485ce8c8a1ad0b1061a" # linuxbrew-core
   end
 
   depends_on "cmake" => [:build, :test]
+  depends_on "cpp-gsl"
+  depends_on "zstd"
 
-  # #pragma GCC error "SEAL requires __GNUC__ >= 6"
-  # In reality gcc@6 does not work because of some missing C++17 features.
-  unless OS.mac?
-    fails_with gcc: "5"
-    fails_with gcc: "6"
-    fails_with gcc: "7"
-    depends_on "gcc@8" => [:build, :test]
+  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "gcc"
+  end
+
+  fails_with gcc: "5"
+
+  resource "hexl" do
+    url "https://github.com/intel/hexl/archive/v1.2.1.tar.gz"
+    sha256 "d09f4bf5309f4fa13f0046475f77e8c5a065d7b9c726eba2d3d943fc13cdae1a"
   end
 
   def install
-    system "cmake", "-DBUILD_SHARED_LIBS=ON", ".", *std_cmake_args
+    if Hardware::CPU.intel?
+      resource("hexl").stage do
+        hexl_args = std_cmake_args + %w[
+          -DHEXL_BENCHMARK=OFF
+          -DHEXL_TESTING=OFF
+          -DHEXL_EXPORT=ON
+        ]
+        system "cmake", "-S", ".", "-B", "build", *hexl_args
+        system "cmake", "--build", "build"
+        system "cmake", "--install", "build"
+      end
+      ENV.append "LDFLAGS", "-L#{lib}"
+    end
+
+    args = std_cmake_args + %W[
+      -DBUILD_SHARED_LIBS=ON
+      -DSEAL_BUILD_DEPS=OFF
+      -DSEAL_USE_ALIGNED_ALLOC=#{(MacOS.version > :mojave) ? "ON" : "OFF"}
+      -DSEAL_USE_INTEL_HEXL=#{Hardware::CPU.intel? ? "ON" : "OFF"}
+      -DHEXL_DIR=#{lib}/cmake
+      -DCMAKE_CXX_FLAGS=-I#{include}
+    ]
+
+    system "cmake", ".", *args
     system "make"
     system "make", "install"
     pkgshare.install "native/examples"
   end
 
   test do
-    ENV["CXX"] = Formula["gcc@8"].opt_bin/"g++-8" unless OS.mac?
     cp_r (pkgshare/"examples"), testpath
 
     # remove the partial CMakeLists
@@ -66,7 +95,7 @@ class Seal < Formula
       target_link_libraries(sealexamples SEAL::seal_shared)
     EOS
 
-    system "cmake", "examples"
+    system "cmake", "examples", "-DHEXL_DIR=#{lib}/cmake"
     system "make"
     # test examples 1-5 and exit
     input = "1\n2\n3\n4\n5\n0\n"

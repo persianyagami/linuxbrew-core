@@ -1,24 +1,23 @@
 class Tinyxml2 < Formula
   desc "Improved tinyxml (in memory efficiency and size)"
   homepage "http://grinninglizard.com/tinyxml2"
-  url "https://github.com/leethomason/tinyxml2/archive/8.0.0.tar.gz"
-  sha256 "6ce574fbb46751842d23089485ae73d3db12c1b6639cda7721bf3a7ee862012c"
+  url "https://github.com/leethomason/tinyxml2/archive/9.0.0.tar.gz"
+  sha256 "cc2f1417c308b1f6acc54f88eb70771a0bf65f76282ce5c40e54cfe52952702c"
   license "Zlib"
-  head "https://github.com/leethomason/tinyxml2.git"
+  head "https://github.com/leethomason/tinyxml2.git", branch: "master"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "dc187de7b8ecdaae5ca53fb68c940d01dd30d13d635a57dda778f5577ffaaefa" => :big_sur
-    sha256 "de43d8d170826747b593e29cff70f84fba2e35aef5c25bec5c02c406c29bbf84" => :catalina
-    sha256 "65527a3b8385c01fabbaeef1ff1dc3cc301dcf5f49e0875d210d80fc5181379d" => :mojave
-    sha256 "eaacca900292a86dc5d4e95e2a71042a6e2fe7e766341d0b5078cf99cd25c0da" => :high_sierra
-    sha256 "8444b2056b5eaeb4f758c80b3c383d26fe1119b6f5d89b0385477049939d471e" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "a5c5e7ea6dcc446b1f7d38441ac4a226afa14b3e5e5eb890d3105edf54f91db6"
+    sha256 cellar: :any,                 big_sur:       "4df58f65bc6629e1884225503622e07f26e52a9690e24a6e959dd1304b11dbb8"
+    sha256 cellar: :any,                 catalina:      "d09e9f6a1833923fea9528a056c663cb5e05b71afacc1fcec7b9b6fbeb30772f"
+    sha256 cellar: :any,                 mojave:        "84db2d094fa220b2269cd97bed3fb50edfd23061f6ab9dece09a82562e73a975"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c3309307a6ddad63d4ef83da82dc33488796775d1aaac1eec0a19d843fc1f9d4" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
 
   def install
-    system "cmake", ".", *std_cmake_args
+    system "cmake", ".", *std_cmake_args, "-Dtinyxml2_SHARED_LIBS=ON"
     system "make", "install"
   end
 
@@ -30,10 +29,7 @@ class Tinyxml2 < Formula
         return 0;
       }
     EOS
-    system ENV.cc, "test.cpp", "-L#{lib}", "-ltinyxml2",
-                   *("-I#{include}" unless OS.mac?),
-                   *("-Wl,-rpath=#{lib}" unless OS.mac?),
-                   "-o", "test"
+    system ENV.cc, "test.cpp", "-L#{lib}", "-ltinyxml2", "-o", "test"
     system "./test"
   end
 end

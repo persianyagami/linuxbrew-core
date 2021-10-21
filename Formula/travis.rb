@@ -4,13 +4,14 @@ class Travis < Formula
   url "https://github.com/travis-ci/travis.rb/archive/v1.10.0.tar.gz"
   sha256 "b63991faebbd5da0e92bf1547775b69a0dbed01dd57e8b469d23a2a7bd79da43"
   license "MIT"
+  revision 3
 
   bottle do
-    sha256 "21ab8e73b2aab1a67e6ad0cf2dfe4e0f2337b1fd743d22b134baf27354c9dd54" => :big_sur
-    sha256 "e6c6d41d24822636377d55de42b627fd901a6864512efbc1dab418dec752911d" => :catalina
-    sha256 "cdc6ac367f2c79ecce4b33d6ad0c3c5c71457db7ff818eb6de67411a2820ce52" => :mojave
-    sha256 "24bebab17d6e415efacc5314f4fc9c94b93b0da4c31b21069187acba83fc6be0" => :high_sierra
-    sha256 "d888569337cac1039049bab36a146a151acb8e99faed70cf6a4b7678a481b87c" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "59b6dd40d8c0ecf2de6ddab1e51368395983e9dda5e2c9631e61d1017621f9f1"
+    sha256 cellar: :any,                 big_sur:       "bac02798e1f466f44fa0d87bf267a42cf1c27b1a629dcff9ba08ac1403509e9b"
+    sha256 cellar: :any,                 catalina:      "2ea207de733fba0ab4768160765257c95e0ae609f8e0a22e082087707b69ba1a"
+    sha256 cellar: :any,                 mojave:        "b4f6b027ae0f34335b7096212ffd4189bf6baf3e9c6d6f00ef2dd0252cc913a3"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "abc61046d520710ba17bfc5d64e91dddbc9abe15e28a0e375330a1e6b5f20a3e" # linuxbrew-core
   end
 
   depends_on "pkg-config" => :build
@@ -162,6 +163,7 @@ class Travis < Formula
     system "gem", "build", "travis.gemspec"
     system "gem", "install", "--ignore-dependencies", "travis-#{version}.gem"
     bin.install libexec/"bin/travis"
+    (libexec/"gems/travis-#{version}/assets/notifications/Travis CI.app").rmtree
     bin.env_script_all_files(libexec/"bin", GEM_HOME: ENV["GEM_HOME"])
   end
 

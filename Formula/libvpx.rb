@@ -1,18 +1,17 @@
 class Libvpx < Formula
   desc "VP8/VP9 video codec"
   homepage "https://www.webmproject.org/code/"
-  url "https://github.com/webmproject/libvpx/archive/v1.9.0.tar.gz"
-  sha256 "d279c10e4b9316bf11a570ba16c3d55791e1ad6faa4404c67422eb631782c80a"
+  url "https://github.com/webmproject/libvpx/archive/v1.11.0.tar.gz"
+  sha256 "965e51c91ad9851e2337aebcc0f517440c637c506f3a03948062e3d5ea129a83"
   license "BSD-3-Clause"
   head "https://chromium.googlesource.com/webm/libvpx.git"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "9fb33bbcc029287ea3b368a3242d7ae215951a63e3809c71268380f2a41a763b" => :big_sur
-    sha256 "19a684e5b0a2109b40a6c412517ad8639200c76d8bd527e98fc24d9589bb1c4e" => :catalina
-    sha256 "c813698920d7e5144ae45f9922477cc30ed4f7ee81463977b01d50af43e0be19" => :mojave
-    sha256 "13e231eb9c8158e84df24a58c8b96f3f57e9202ad680b4be3bbaf7e67f40aaac" => :high_sierra
-    sha256 "b2d9fbeb6d7211890a0f8d6ce33532ff65c811774c9107dc587dba686a1e876d" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "2edfb6a133be8947da27719975dbd19dd6233e12f21d221bea7f6008cfbc51a2"
+    sha256 cellar: :any,                 big_sur:       "73d6365843bd6b8c868b3bf020152225d06304117c23c2a1e579ce347d3ab4e1"
+    sha256 cellar: :any,                 catalina:      "28194ea0a917dcfecbfdcd51cb37da4ae1697238e3c2dedc769c502b435124c7"
+    sha256 cellar: :any,                 mojave:        "378b9f6680ea8a99c064d8acd0cfbfbf2a1c142d8c4f27cf935dcfed3342cc61"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e79ec2f50112da2b5adfc83b46604af182af8364410c9ec686c6c519c133229d" # linuxbrew-core
   end
 
   depends_on "yasm" => :build
@@ -24,8 +23,14 @@ class Libvpx < Formula
       --disable-examples
       --disable-unit-tests
       --enable-pic
+      --enable-shared
       --enable-vp9-highbitdepth
     ]
+
+    if Hardware::CPU.intel?
+      ENV.runtime_cpu_detection
+      args << "--enable-runtime-cpu-detect"
+    end
 
     # https://bugs.chromium.org/p/webm/issues/detail?id=1475
     args << "--disable-avx512" if MacOS.version <= :el_capitan

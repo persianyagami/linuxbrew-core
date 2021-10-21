@@ -4,20 +4,20 @@ class Libtorch < Formula
   desc "Tensors and dynamic neural networks"
   homepage "https://pytorch.org/"
   url "https://github.com/pytorch/pytorch.git",
-      tag:      "v1.7.1",
-      revision: "57bffc3a8e4fee0cce31e1ff1f662ccf7b16db57"
+      tag:      "v1.9.1",
+      revision: "dfbd030854359207cb3040b864614affeace11ce"
   license "BSD-3-Clause"
 
   livecheck do
     url :stable
-    strategy :github_latest
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    cellar :any
-    sha256 "2423ea34ec448f50ae6006464386fe2c692bf046c2b6b6e3e912c1f93646f5df" => :big_sur
-    sha256 "761764c7160cd4abc0fd54b4d55ab7befb63f0c7e3d734adc78a168eae17cb1a" => :catalina
-    sha256 "7624a54fe176c8c4e84f26cba71d96740e157d7ee93f8a222557db42736f11ce" => :mojave
+    sha256 cellar: :any,                 big_sur:      "259a9ade3880026cddffbadac967405d7a8900cce1d43739456f4acdd826a864"
+    sha256 cellar: :any,                 catalina:     "49c7b2cbd6f18a984be41fe3412a7928e54533acb171abdc89311cff0eb9eab5"
+    sha256 cellar: :any,                 mojave:       "65e1c0c4b62cbc28eb547f4139f8f42e007c9ad940475cbae74791b6dcb747a1"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "871cf46f2c0cf09d4a54c33595ae699e70cea6c7b695dcc37a96244092358b3b" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
@@ -29,33 +29,38 @@ class Libtorch < Formula
   depends_on "pybind11"
 
   resource "PyYAML" do
-    url "https://files.pythonhosted.org/packages/64/c2/b80047c7ac2478f9501676c988a5411ed5572f35d1beff9cae07d321512c/PyYAML-5.3.1.tar.gz"
-    sha256 "b8eac752c5e14d3eca0e6dd9199cd627518cb5ec06add0de9d32baeee6fe645d"
+    url "https://files.pythonhosted.org/packages/a0/a4/d63f2d7597e1a4b55aa3b4d6c5b029991d3b824b5bd331af8d4ab1ed687d/PyYAML-5.4.1.tar.gz"
+    sha256 "607774cbba28732bfa802b54baa7484215f530991055bb562efbed5b2f20a45e"
   end
 
-  resource "typing" do
-    url "https://files.pythonhosted.org/packages/05/d9/6eebe19d46bd05360c9a9aae822e67a80f9242aabbfc58b641b957546607/typing-3.7.4.3.tar.gz"
-    sha256 "1187fb9c82fd670d10aa07bbb6cfcfe4bdda42d6fab8d5134f04e8c4d0b71cc9"
+  resource "typing-extensions" do
+    url "https://files.pythonhosted.org/packages/ed/12/c5079a15cf5c01d7f4252b473b00f7e68ee711be605b9f001528f0298b98/typing_extensions-3.10.0.2.tar.gz"
+    sha256 "49f75d16ff11f1cd258e1b988ccff82a3ca5570217d7ad8c5f48205dd99a677e"
   end
 
   def install
-    venv = virtualenv_create(libexec, Formula["python@3.9"].opt_bin/"python3")
+    venv = virtualenv_create(buildpath/"venv", Formula["python@3.9"].opt_bin/"python3")
     venv.pip_install resources
 
     args = %W[
       -DBUILD_CUSTOM_PROTOBUF=OFF
       -DBUILD_PYTHON=OFF
-      -DPYTHON_EXECUTABLE=#{libexec}/bin/python
+      -DPYTHON_EXECUTABLE=#{buildpath}/venv/bin/python
       -Dpybind11_PREFER_third_party=OFF
       -DUSE_CUDA=OFF
       -DUSE_METAL=OFF
       -DUSE_MKLDNN=OFF
       -DUSE_NNPACK=OFF
+      -DUSE_OPENMP=OFF
       -DUSE_SYSTEM_EIGEN_INSTALL=ON
     ]
 
     mkdir "build" do
       system "cmake", "..", *std_cmake_args, *args
+
+      # Avoid references to Homebrew shims
+      inreplace "caffe2/core/macros.h", Superenv.shims_path/ENV.cxx, ENV.cxx
+
       system "make"
       system "make", "install"
     end
@@ -71,8 +76,9 @@ class Libtorch < Formula
         std::cout << tensor << std::endl;
       }
     EOS
-    system ENV.cxx, "-std=c++14", "-L#{lib}", "-ltorch", "-ltorch_cpu", "-lc10",
-      "-I#{include}/torch/csrc/api/include", "test.cpp", "-o", "test"
+    system ENV.cxx, "-std=c++14", "test.cpp", "-o", "test",
+                    "-I#{include}/torch/csrc/api/include",
+                    "-L#{lib}", "-ltorch", "-ltorch_cpu", "-lc10"
     system "./test"
   end
 end

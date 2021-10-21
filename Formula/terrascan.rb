@@ -1,23 +1,23 @@
 class Terrascan < Formula
   desc "Detect compliance and security violations across Infrastructure as Code"
-  homepage "https://www.accurics.com/products/terrascan/"
-  url "https://github.com/accurics/terrascan/archive/v1.2.0.tar.gz"
-  sha256 "8e9daa4e3b1a1e93d12925fe4facb8171f534dece6742c23ebb9049bf3dd739e"
+  homepage "https://github.com/accurics/terrascan"
+  url "https://github.com/accurics/terrascan/archive/v1.11.0.tar.gz"
+  sha256 "3fc6289e7fffbb8f8f696e264ec8b1481e741bf5638976b02a9f285398c2afa1"
   license "Apache-2.0"
-  head "https://github.com/accurics/terrascan.git"
+  head "https://github.com/accurics/terrascan.git", branch: "master"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "911488ef4e334a7496edeb386a656bb8b5aa48de81c2ace70ea22cd857e79289" => :big_sur
-    sha256 "3d66e898e68386b23fae88df32df00a46ec1a03d1431c36aeadc96e3a233b52d" => :catalina
-    sha256 "6337a9985ded331f613fa958daf4d444feba3174d127997b6120891817afb1fb" => :mojave
-    sha256 "374a85c163ad81f8167fea7e18f1b3bfef5685452206ef766e4c75c57510b294" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "025531bef57c6fb0aac90117f351c41f7087976496ce9a3c0a108c98842101ef"
+    sha256 cellar: :any_skip_relocation, big_sur:       "7bf1fba0a3ec89dedffcb69d6c84fa1d07118a28423cf5565b585d74a97f431e"
+    sha256 cellar: :any_skip_relocation, catalina:      "a83d25121c4c41de4468f8564f5ae40a5677986172117cc84ee8f7b00d8e54cc"
+    sha256 cellar: :any_skip_relocation, mojave:        "a9eee5712ab7cda16dad612c2cc0f8e427257da4b2caca7cffa34ff03094a505"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "79d1601bd90c810f2a6cb8134cb74f413c9902a8ecb82b9f39d0f83464e18040" # linuxbrew-core
   end
 
   depends_on "go" => :build
 
   def install
-    system "go", "build", *std_go_args, "./cmd/terrascan"
+    system "go", "build", *std_go_args(ldflags: "-s -w"), "./cmd/terrascan"
   end
 
   test do
@@ -36,17 +36,14 @@ class Terrascan < Formula
     EOS
 
     expected = <<~EOS
-      results:
-          violations: []
-          count:
-              low: 0
-              medium: 0
-              high: 0
-              total: 0
+      \tViolated Policies   :\t0
+      \tLow                 :\t0
+      \tMedium              :\t0
+      \tHigh                :\t0
     EOS
 
-    assert_match expected, shell_output("#{bin}/terrascan scan -f ami.tf -t aws")
-
-    assert_match "version: v#{version}", shell_output("#{bin}/terrascan version")
+    output = shell_output("#{bin}/terrascan scan -f #{testpath}/ami.tf -t aws")
+    assert_match expected, output
+    assert_match(/Policies Validated\s+:\s+\d+/, output)
   end
 end

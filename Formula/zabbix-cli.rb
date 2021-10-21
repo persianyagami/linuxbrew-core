@@ -5,9 +5,9 @@ class ZabbixCli < Formula
   homepage "https://github.com/unioslo/zabbix-cli/"
   url "https://github.com/unioslo/zabbix-cli/archive/2.2.1.tar.gz"
   sha256 "884ecd2a4a4c7f68a080bb7e0936dd208c813284ec3ed60b948ce90a1be7c828"
-  license "GPL-3.0"
-  revision OS.mac? ? 1 : 2
-  head "https://github.com/unioslo/zabbix-cli.git"
+  license "GPL-3.0-or-later"
+  revision OS.mac? ? 2 : 4
+  head "https://github.com/unioslo/zabbix-cli.git", branch: "master"
 
   livecheck do
     url :stable
@@ -15,15 +15,14 @@ class ZabbixCli < Formula
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "2b4d595e2cc721f242912d2440f563edf5d2356489c1729a241477c2a8895e11" => :big_sur
-    sha256 "279c0d15eb9b0d3318511c235652627498179b6b37664b47e65e47dd37848586" => :catalina
-    sha256 "2021e4b3ca3cc30b290c7a999dd36fd9cd0d9a61bb0498f35537ee52907ad838" => :mojave
-    sha256 "834aaba4a28b53861bd3bf58155131dd50d1b2ea6ccf33177d366365c707fb74" => :high_sierra
-    sha256 "703a0c1423c7d82d81293e229c25d7fef52fc6f43c8869111e790ff75cbd0190" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "60b0cdb24333cf77e677f4a4c67e528a27138cdf0b24ea77b5474ab57ee18f73"
+    sha256 cellar: :any_skip_relocation, big_sur:       "76e5471117d67eb54bd07a336bbdd6a5781fe7330d3952af4464275d96b2467a"
+    sha256 cellar: :any_skip_relocation, catalina:      "76e5471117d67eb54bd07a336bbdd6a5781fe7330d3952af4464275d96b2467a"
+    sha256 cellar: :any_skip_relocation, mojave:        "76e5471117d67eb54bd07a336bbdd6a5781fe7330d3952af4464275d96b2467a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "6c71a45ddb4b8bb753b01d07052e6df1be0ac15f24cd576dc587210d4d14809a" # linuxbrew-core
   end
 
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   ## direct dependencies
 
@@ -59,8 +58,15 @@ class ZabbixCli < Formula
     sha256 "87716c2d2a7121198ebcb7ce7cccf6ce5e9ba539041cfbaeecfb641dc0bf6acc"
   end
 
+  # Support python@3.10, remove with next release
+  patch do
+    url "https://github.com/unioslo/zabbix-cli/commit/656fdbbd6c4415b52f7ad42a29124b15387458de.patch?full_index=1"
+    sha256 "21d574e0d2500d140591c494e513d81552d5f7e259cc0084cc9fa0488532a55c"
+  end
+
   def install
-    # script tries to install config directly to /usr/local/bin
+    # script tries to install config into /usr/local/bin (macOS) or /usr/share (Linux)
+    inreplace %w[setup.py etc/zabbix-cli.conf zabbix_cli/config.py], %r{(["' ])/usr/share/}, "\\1#{share}/"
     inreplace "setup.py", "/usr/local/bin", share
 
     virtualenv_install_with_resources

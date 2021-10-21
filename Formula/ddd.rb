@@ -7,16 +7,13 @@ class Ddd < Formula
   license all_of: ["GPL-3.0-only", "GFDL-1.1-or-later"]
   revision OS.mac? ? 1 : 2
 
-  livecheck do
-    url :stable
-  end
-
   bottle do
     rebuild 2
-    sha256 "498ceb2dc933d2c85e7407f077d187c6cd799ba2f539694087134d038bb211d9" => :big_sur
-    sha256 "df163eb838675a73c69913af1e1526a5c20e5cbeafa58836112ce4ae642a705a" => :catalina
-    sha256 "ef4ae2c46be3ad1aee12c52ca34d7606c3aa056250792a61c03af4581fe8e568" => :mojave
-    sha256 "9fc9c568178424aeb25d6721c4faffb99a8bd7ef967ea0ae4e3464b65651d0b8" => :high_sierra
+    sha256 big_sur:      "498ceb2dc933d2c85e7407f077d187c6cd799ba2f539694087134d038bb211d9"
+    sha256 catalina:     "df163eb838675a73c69913af1e1526a5c20e5cbeafa58836112ce4ae642a705a"
+    sha256 mojave:       "ef4ae2c46be3ad1aee12c52ca34d7606c3aa056250792a61c03af4581fe8e568"
+    sha256 high_sierra:  "9fc9c568178424aeb25d6721c4faffb99a8bd7ef967ea0ae4e3464b65651d0b8"
+    sha256 x86_64_linux: "9c14e25332e94d143ce96bb5dc6d0d9da94b5b219ae428c737b04542ba3d04d8" # linuxbrew-core
   end
 
   depends_on "gdb" => :test
@@ -30,13 +27,6 @@ class Ddd < Formula
   depends_on "libxpm"
   depends_on "libxt"
   depends_on "openmotif"
-
-  # Needed for OSX 10.9 DP6 build failure:
-  # https://savannah.gnu.org/patch/?8178
-  patch :p0 do
-    url "https://savannah.gnu.org/patch/download.php?file_id=29114"
-    sha256 "aaacae79ce27446ead3483123abef0f8222ebc13fd61627bfadad96016248af6"
-  end
 
   # https://savannah.gnu.org/bugs/?41997
   patch do
@@ -59,9 +49,10 @@ class Ddd < Formula
   end
 
   def install
-    unless OS.mac?
+    if OS.linux?
       # Patch to fix compilation error
       # https://savannah.gnu.org/bugs/?33960
+      # Remove with next release
       inreplace "ddd/strclass.C", "#include <stdlib.h>", "#include <stdlib.h>\n#include <cstdio>"
     end
 

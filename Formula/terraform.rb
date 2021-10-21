@@ -1,10 +1,10 @@
 class Terraform < Formula
   desc "Tool to build, change, and version infrastructure"
   homepage "https://www.terraform.io/"
-  url "https://github.com/hashicorp/terraform/archive/v0.14.2.tar.gz"
-  sha256 "a2800ce5b42573e000b5795231b1094159180ee38d2fae727700b1d6e43c5b09"
+  url "https://github.com/hashicorp/terraform/archive/v1.0.9.tar.gz"
+  sha256 "ac9b23a51d900169461c0360a3191440ca0d565714721ec08a0fedc0addf97e8"
   license "MPL-2.0"
-  head "https://github.com/hashicorp/terraform.git"
+  head "https://github.com/hashicorp/terraform.git", branch: "main"
 
   livecheck do
     url "https://releases.hashicorp.com/terraform/"
@@ -12,16 +12,24 @@ class Terraform < Formula
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "6900a6577f1c314d6d94980ad4aac6ce4e7e0ca6e73b03aa6e2e3cd9b99f918b" => :big_sur
-    sha256 "652bd739beb1f41d55f44d35bdce12c1b71a566efad21375079fc35bb89e34e5" => :catalina
-    sha256 "184db6bf6ce68ac85907187a7f7add7d6f25b94a2728e6048f7fe09550a9e9be" => :mojave
-    sha256 "2a1bba0a70ee62f56c185aa04058ae3692b4a8cb71f3d1616833b17e945180f3" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "ac4219fdf70546e9412eaab738446630e2e84a04da72b1b86aecc7f4d0eb4319"
+    sha256 cellar: :any_skip_relocation, big_sur:       "e88c4f7892d63ac2b422d9efbd9b37f3126f9449ad5fbcead959e4223e14464c"
+    sha256 cellar: :any_skip_relocation, catalina:      "d10c56f76b0eefd04916c832b89af79c2d7ca5bdb942ffd73887c665f7248f2e"
+    sha256 cellar: :any_skip_relocation, mojave:        "4c937d477b5b622d162c14a1d9b91e2e8eee2cf182b4627d71138be7aa629a6a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0f0d2a38b0b567938c8e21528059ec0dbbd36bb14276c5cd98da74bae7c38eb7" # linuxbrew-core
   end
 
   depends_on "go" => :build
 
+  on_linux do
+    depends_on "gcc"
+  end
+
   conflicts_with "tfenv", because: "tfenv symlinks terraform binaries"
+
+  # Needs libraries at runtime:
+  # /usr/lib/x86_64-linux-gnu/libstdc++.so.6: version `GLIBCXX_3.4.29' not found (required by node)
+  fails_with gcc: "5"
 
   def install
     # v0.6.12 - source contains tests which fail if these environment variables are set locally.

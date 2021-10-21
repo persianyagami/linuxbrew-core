@@ -1,12 +1,13 @@
 class Uwsgi < Formula
   desc "Full stack for building hosting services"
   homepage "https://uwsgi-docs.readthedocs.io/en/latest/"
-  revision 5
-  head "https://github.com/unbit/uwsgi.git"
+  license "GPL-2.0-or-later"
+  revision 1
+  head "https://github.com/unbit/uwsgi.git", branch: "master"
 
   stable do
-    url "https://projects.unbit.it/downloads/uwsgi-2.0.18.tar.gz"
-    sha256 "4972ac538800fb2d421027f49b4a1869b66048839507ccf0aa2fda792d99f583"
+    url "https://files.pythonhosted.org/packages/c7/75/45234f7b441c59b1eefd31ba3d1041a7e3c89602af24488e2a22e11e7259/uWSGI-2.0.19.1.tar.gz"
+    sha256 "faa85e053c0b1be4d5585b0858d3a511d2cd10201802e8676060fd0a109e5869"
 
     # Fix "library not found for -lgcc_s.10.5" with 10.14 SDK
     # Remove in next release
@@ -17,11 +18,12 @@ class Uwsgi < Formula
   end
 
   bottle do
-    sha256 "74b43633e464fc0e7c77a5878c6c30653c281d1803accab14449cef015e55360" => :big_sur
-    sha256 "54ef215cc4b0dd34c256e757b8ab6bfe691e061429dd51909af1c3c08cf4a580" => :catalina
-    sha256 "f3ce20a0196e32d76e0c355672bc9401fa390f8fc2e64d28e011e07d65b6c8f9" => :mojave
-    sha256 "4508c03d1f3e7df0dadb55f6dfe48d9fb360aaab51195b52784c15791f3f2da6" => :high_sierra
-    sha256 "5d841a4cc805c0b9aa0ed1495054254fdec854193fe9f752aa5130f6681a8d11" => :x86_64_linux
+    rebuild 2
+    sha256 arm64_big_sur: "4326330a1880f7901c4168d85134a37f44de0e786e5fe76a9e9ecd16ed833a58"
+    sha256 big_sur:       "dd093fa094a07dba5ac53f040eaed23a9b61adc80b6cc50de246d160fcff0a34"
+    sha256 catalina:      "8194d4a365e0ce4d3ee5fd9764d008c6d0aabf6c804414d5a6b0733295f9d101"
+    sha256 mojave:        "2def48a9cc74853449722f5dc51a0224956d21906d8ff35e73a45fab3fc3faef"
+    sha256 x86_64_linux:  "d8ebd68650bd17cc9b1f34c31cb37a67c23da906a50ae9d2e8bc3b879297ee8b" # linuxbrew-core
   end
 
   depends_on "pkg-config" => :build
@@ -35,12 +37,14 @@ class Uwsgi < Formula
   uses_from_macos "openldap"
   uses_from_macos "perl"
 
-  depends_on "linux-pam" unless OS.mac?
+  on_linux do
+    depends_on "linux-pam"
+  end
 
   def install
     # Fix file not found errors for /usr/lib/system/libsystem_symptoms.dylib and
     # /usr/lib/system/libsystem_darwin.dylib on 10.11 and 10.12, respectively
-    ENV["SDKROOT"] = MacOS.sdk_path if OS.mac? && (MacOS.version == :sierra || MacOS.version == :el_capitan)
+    ENV["SDKROOT"] = MacOS.sdk_path if MacOS.version <= :sierra
 
     openssl = Formula["openssl@1.1"]
     ENV.prepend "CFLAGS", "-I#{openssl.opt_include}"
@@ -87,40 +91,11 @@ class Uwsgi < Formula
     bin.install "uwsgi"
   end
 
-  plist_options manual: "uwsgi"
-
-  def plist
-    <<~EOS
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-        <dict>
-          <key>Label</key>
-          <string>#{plist_name}</string>
-          <key>RunAtLoad</key>
-          <true/>
-          <key>KeepAlive</key>
-          <true/>
-          <key>ProgramArguments</key>
-          <array>
-              <string>#{opt_bin}/uwsgi</string>
-              <string>--uid</string>
-              <string>_www</string>
-              <string>--gid</string>
-              <string>_www</string>
-              <string>--master</string>
-              <string>--die-on-term</string>
-              <string>--autoload</string>
-              <string>--logto</string>
-              <string>#{HOMEBREW_PREFIX}/var/log/uwsgi.log</string>
-              <string>--emperor</string>
-              <string>#{HOMEBREW_PREFIX}/etc/uwsgi/apps-enabled</string>
-          </array>
-          <key>WorkingDirectory</key>
-          <string>#{HOMEBREW_PREFIX}</string>
-        </dict>
-      </plist>
-    EOS
+  service do
+    run [opt_bin/"uwsgi", "--uid", "_www", "--gid", "_www", "--master", "--die-on-term", "--autoload", "--logto",
+         HOMEBREW_PREFIX/"var/log/uwsgi.log", "--emperor", HOMEBREW_PREFIX/"etc/uwsgi/apps-enabled"]
+    keep_alive true
+    working_dir HOMEBREW_PREFIX
   end
 
   test do

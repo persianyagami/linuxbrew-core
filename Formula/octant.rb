@@ -1,11 +1,13 @@
+require "language/node"
+
 class Octant < Formula
   desc "Kubernetes introspection tool for developers"
   homepage "https://octant.dev"
   url "https://github.com/vmware-tanzu/octant.git",
-      tag:      "v0.16.3",
-      revision: "656c7404e529262861eacb13e88d33dccd6035bf"
+      tag:      "v0.24.0",
+      revision: "5a8648921cc2779eb62a0ac11147f12aa29f831c"
   license "Apache-2.0"
-  head "https://github.com/vmware-tanzu/octant.git"
+  head "https://github.com/vmware-tanzu/octant.git", branch: "master"
 
   livecheck do
     url :stable
@@ -13,47 +15,44 @@ class Octant < Formula
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "af07a62007bf7754898735f4b1f1696afe2db439ea152eb8bfbb48a1ccecec08" => :big_sur
-    sha256 "bbdfdf1126ec8472748d949aefc383911d221fdfe44342b4ec73451b3ea12461" => :catalina
-    sha256 "2b94f3e031d6def218b024f74d1a55c3be096beac207e434dc425d43d1cb99f9" => :mojave
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "9e7f96d371260d16f72cf058c2971ac61e5357ab492c1782c6ff6e3db71238ae"
+    sha256 cellar: :any_skip_relocation, big_sur:       "8774288e4251c3e811e845f9c9f7ee03dfb934b87135ab15d25db20e6088d81d"
+    sha256 cellar: :any_skip_relocation, catalina:      "0a7d42feb95cf0e3bf4d9ac7e99d9c8913448349253ff2a527e2ba9d7a14d7cb"
+    sha256 cellar: :any_skip_relocation, mojave:        "ae125c695c751eb481adc21d1826d33056a960ea3f8e2562da1fe13e488eef29"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1850caebf1b5040b649981df2f26274ec1517b9810af7dc64c3b2d1567e5ac85" # linuxbrew-core
   end
 
   depends_on "go" => :build
   depends_on "node" => :build
 
+  on_linux do
+    depends_on "pkg-config" => :build
+  end
+
   def install
-    ENV["GOPATH"] = buildpath
     ENV["GOFLAGS"] = "-mod=vendor"
 
-    ENV.append_path "PATH", HOMEBREW_PREFIX/"bin"
+    Language::Node.setup_npm_environment
 
-    dir = buildpath/"src/github.com/vmware-tanzu/octant"
-    dir.install buildpath.children
+    system "go", "run", "build.go", "go-install"
+    system "go", "run", "build.go", "web-build"
 
-    cd "src/github.com/vmware-tanzu/octant" do
-      system "go", "run", "build.go", "go-install"
-      ENV.prepend_path "PATH", buildpath/"bin"
+    ldflags = ["-X main.version=#{version}",
+               "-X main.gitCommit=#{Utils.git_head}",
+               "-X main.buildTime=#{time.iso8601}"].join(" ")
 
-      system "go", "generate", "./pkg/plugin/plugin.go"
-      system "go", "run", "build.go", "web-build"
+    tags = "embedded exclude_graphdriver_devicemapper exclude_graphdriver_btrfs containers_image_openpgp"
 
-      commit = Utils.safe_popen_read("git", "rev-parse", "HEAD").chomp
-      build_time = Utils.safe_popen_read("date -u +'%Y-%m-%dT%H:%M:%SZ' 2> /dev/null").chomp
-      ldflags = ["-X \"main.version=#{version}\"",
-                 "-X \"main.gitCommit=#{commit}\"",
-                 "-X \"main.buildTime=#{build_time}\""]
-
-      system "go", "build", "-o", bin/"octant", "-ldflags", ldflags.join(" "),
-              "-v", "./cmd/octant"
-    end
+    system "go", "build", *std_go_args(ldflags: ldflags),
+           "-tags", tags, "-v", "./cmd/octant"
   end
 
   test do
     fork do
       exec bin/"octant", "--kubeconfig", testpath/"config", "--disable-open-browser"
     end
-    sleep 2
+    sleep 5
 
     output = shell_output("curl -s http://localhost:7777")
     assert_match "<title>Octant</title>", output, "Octant did not start"

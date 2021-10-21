@@ -2,22 +2,22 @@ class Kamel < Formula
   desc "Apache Camel K CLI"
   homepage "https://camel.apache.org/"
   url "https://github.com/apache/camel-k.git",
-      tag:      "v1.2.1",
-      revision: "476ed0e600abe6fe54de19225f8f0c18d6bcbfa9"
+      tag:      "v1.6.0",
+      revision: "e929db111d6d8ac000f9262342cb3d2eed157aad"
   license "Apache-2.0"
   head "https://github.com/apache/camel-k.git"
 
   livecheck do
-    url :head
-    regex(/^v?(\d+(?:\.\d+)+)$/i)
+    url :stable
+    strategy :github_latest
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "5c7d830dca2368d17098a2566dc51f302105bedca5c31a5163c3effb8fdcb8bb" => :big_sur
-    sha256 "6c26b781979d7aa4270d382f8b7644fe7fb4f64d3439637945c60ce2a9eddbe6" => :catalina
-    sha256 "2764ee91d35712ebf2930df31e3254ccb0c31b60f42288e5963bf2f79729ddb3" => :mojave
-    sha256 "1fffab87e4365ab0535bae8809f6eee8ae12e23c0a54e8e73028ad8ba143ad5e" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "b04e659ed41867ffe0cf799af99263c6d8a04217fd98397aac66c320caf6cfa2"
+    sha256 cellar: :any_skip_relocation, big_sur:       "502265a622bc26ec8989c1f7040ac487611047d64ecaf96ecbb06228dad6b575"
+    sha256 cellar: :any_skip_relocation, catalina:      "03358c7bd13d985564f394a28b213305d2b01726cb7cec864b9005e092d24001"
+    sha256 cellar: :any_skip_relocation, mojave:        "7a1badc7d4dee8911535d1bb5af005acd96d2ff7d0ecd9b5e6f61cde7dce10ec"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "010f327f5487346c0c2a03ded32ca9ab422d921d3daa50a91f9e5a3b1736f0eb" # linuxbrew-core
   end
 
   depends_on "go" => :build
@@ -40,7 +40,7 @@ class Kamel < Formula
     assert_match "Apache Camel K is a lightweight", run_output
 
     help_output = shell_output("echo $(#{bin}/kamel help 2>&1)")
-    assert_match "Error: cannot get command client: invalid configuration", help_output.chomp
+    assert_match "kamel [command] --help", help_output.chomp
 
     get_output = shell_output("echo $(#{bin}/kamel get 2>&1)")
     assert_match "Error: cannot get command client: invalid configuration", get_output
@@ -52,7 +52,7 @@ class Kamel < Formula
     assert_match "Error: run expects at least 1 argument, received 0", run_output
 
     run_none_output = shell_output("echo $(#{bin}/kamel run None.java 2>&1)")
-    assert_match "Error: cannot read file None.java", run_none_output
+    assert_match "cannot read sources: Missing file or unsupported scheme in None.java", run_none_output
 
     reset_output = shell_output("echo $(#{bin}/kamel reset 2>&1)")
     assert_match "Error: cannot get command client: invalid configuration", reset_output

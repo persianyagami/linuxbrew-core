@@ -10,13 +10,18 @@ class Bibtex2html < Formula
   end
 
   bottle do
-    cellar :any_skip_relocation
     rebuild 2
-    sha256 "04836e8704ec993d86ae5534e3a16432edb9ebcd2eebc1549b29c6353e3ff865" => :big_sur
-    sha256 "e9c4f95aaae6ddb40473a8c4349dbd9455c58e71ea4f580c8aa268292578464d" => :catalina
-    sha256 "1a56c6ff9929a75570f231a4fd8b1a4e367d82a8a632c4a45f126b1845ff8ff3" => :mojave
-    sha256 "e2b32aea9dcfb51cff11b8014425975198b73b3a74f48c2f7103e01ef2ec7a9b" => :high_sierra
-    sha256 "f6ff3569aee2b2cfe3d32c6bf303c412ac5462e8024be9fc23c8b219b1c440fc" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "dfcc9b81cb80f2a2397f35158ef6dd8ef1e0d5e3738b78985c494c8910f37786"
+    sha256 cellar: :any_skip_relocation, big_sur:       "04836e8704ec993d86ae5534e3a16432edb9ebcd2eebc1549b29c6353e3ff865"
+    sha256 cellar: :any_skip_relocation, catalina:      "e9c4f95aaae6ddb40473a8c4349dbd9455c58e71ea4f580c8aa268292578464d"
+    sha256 cellar: :any_skip_relocation, mojave:        "1a56c6ff9929a75570f231a4fd8b1a4e367d82a8a632c4a45f126b1845ff8ff3"
+    sha256 cellar: :any_skip_relocation, high_sierra:   "e2b32aea9dcfb51cff11b8014425975198b73b3a74f48c2f7103e01ef2ec7a9b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f6ff3569aee2b2cfe3d32c6bf303c412ac5462e8024be9fc23c8b219b1c440fc" # linuxbrew-core
+  end
+
+  head do
+    url "https://github.com/backtracking/bibtex2html.git"
+    depends_on "autoconf" => :build
   end
 
   depends_on "ocaml" => :build
@@ -27,6 +32,7 @@ class Bibtex2html < Formula
       s.remove_make_var! "STRLIB"
     end
 
+    system "autoconf" if build.head?
     system "./configure", "--prefix=#{prefix}"
     system "make"
     system "make", "install"
@@ -44,7 +50,7 @@ class Bibtex2html < Formula
       }
     EOS
     system "#{bin}/bib2bib", "test.bib", "--remove", "pages", "-ob", "out.bib"
-    assert /pages\s*=\s*\{3--4\}/ !~ File.read("out.bib")
-    assert_match /pages\s*=\s*\{3--4\}/, File.read("test.bib")
+    assert(/pages\s*=\s*\{3--4\}/ !~ File.read("out.bib"))
+    assert_match(/pages\s*=\s*\{3--4\}/, File.read("test.bib"))
   end
 end

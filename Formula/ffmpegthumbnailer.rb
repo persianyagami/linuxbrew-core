@@ -4,16 +4,16 @@ class Ffmpegthumbnailer < Formula
   url "https://github.com/dirkvdb/ffmpegthumbnailer/archive/2.2.2.tar.gz"
   sha256 "8c4c42ab68144a9e2349710d42c0248407a87e7dc0ba4366891905322b331f92"
   license "GPL-2.0"
-  revision 4
+  revision 5
   head "https://github.com/dirkvdb/ffmpegthumbnailer.git"
 
   bottle do
-    cellar :any
-    sha256 "ce055cde5dbe042f8542aca036836f48b0a414168a2474bee0e86b306928b077" => :big_sur
-    sha256 "08386f0b8bef0e4e4d7faf5204226b3a165b03c46b6f77fcd024abc5708e48a4" => :catalina
-    sha256 "2873371242e9835e8b781290d8655b7a28c11ccaabc6abcff9aaf26bed9f28b5" => :mojave
-    sha256 "d1a7c7b565dbe5c045c4cfaaff76a536703b3aa7ffdb7f505d8feafb2ee54d00" => :high_sierra
-    sha256 "88701757481226cfe7a1d8eefb07eaaf5eea44b46e7ba5138c87dd0019bfbf64" => :x86_64_linux
+    rebuild 1
+    sha256 cellar: :any,                 arm64_big_sur: "0fcbba2353da43ce4c08e4b69d8c43143d8cf3813d240957a4fa783fe85c654c"
+    sha256 cellar: :any,                 big_sur:       "0bca865df4298da35227da4090554bc0ee787f05cb6ef5a823d023346e5b48c8"
+    sha256 cellar: :any,                 catalina:      "dd032464ff83d935e388a997365f6f0131a70e080c7f4da682a1e6220e60c127"
+    sha256 cellar: :any,                 mojave:        "ebdda9295e17e1ca9c7acc0cc392ab995fbf2a3bcbe0ca6eee0a3ced49a4eb5e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e94735ade165e7de6d64f9076bf3431d6284aeedd19a1f2bbf7ed27fddf6964a" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
@@ -26,10 +26,13 @@ class Ffmpegthumbnailer < Formula
     args = std_cmake_args
     args << "-DENABLE_GIO=ON"
     args << "-DENABLE_THUMBNAILER=ON"
+    args << "-DCMAKE_INSTALL_RPATH=#{rpath}"
 
-    system "cmake", *args
-    system "make"
-    system "make", "install"
+    mkdir "build" do
+      system "cmake", "..", *args
+      system "make"
+      system "make", "install"
+    end
   end
 
   test do

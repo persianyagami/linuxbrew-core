@@ -7,21 +7,20 @@ class Cxxtest < Formula
   mirror "https://deb.debian.org/debian/pool/main/c/cxxtest/cxxtest_4.4.orig.tar.gz"
   sha256 "1c154fef91c65dbf1cd4519af7ade70a61d85a923b6e0c0b007dc7f4895cf7d8"
   license "LGPL-3.0"
-  revision OS.mac? ? 2 : 3
+  revision OS.mac? ? 3 : 4
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "d3a87d28e3b22363d72fb1e26880c5bb020504936d433b0f786f0a12f336a8b6" => :big_sur
-    sha256 "40c95a78befc9212653a872f53f7b87669d6ed855da71355a6324571cfc09f9c" => :catalina
-    sha256 "19feab27f801c6af7cba8075900cdb96f492244d06fc49ed9b4c943b1f13777e" => :mojave
-    sha256 "c989ac0116f6c42404580610e42f467af4d476b4107e2303d47da4f576a394f2" => :high_sierra
-    sha256 "d81340d817944f1d148c0e9ea06f3750100b76ee17472876a5d440d55b3b1a87" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "290c7e2e1fe99e75a0f7b45d2808d971db1e39fb915acb11ec2d75ef15b18b0c"
+    sha256 cellar: :any_skip_relocation, big_sur:       "e1bcaf3c8fbddf83977c8cbbde084f64d3915a22bbf023cb044423b7215c26ee"
+    sha256 cellar: :any_skip_relocation, catalina:      "e1bcaf3c8fbddf83977c8cbbde084f64d3915a22bbf023cb044423b7215c26ee"
+    sha256 cellar: :any_skip_relocation, mojave:        "e1bcaf3c8fbddf83977c8cbbde084f64d3915a22bbf023cb044423b7215c26ee"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5aa3b11ac7803822ac9ee2609ecdc3e99960a69bab1c76e5c51d29142eb0e447" # linuxbrew-core
   end
 
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   def install
-    venv = virtualenv_create(libexec, Formula["python@3.9"].opt_bin/"python3")
+    venv = virtualenv_create(libexec, Formula["python@3.10"].opt_bin/"python3")
     venv.pip_install_and_link buildpath/"python"
 
     include.install "cxxtest"

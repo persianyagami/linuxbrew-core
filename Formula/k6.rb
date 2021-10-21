@@ -1,23 +1,22 @@
 class K6 < Formula
   desc "Modern load testing tool, using Go and JavaScript"
   homepage "https://k6.io"
-  url "https://github.com/loadimpact/k6/archive/v0.29.0.tar.gz"
-  sha256 "1ffb392c6c83e4c688a1043608bf3bc06dea2b328a6ab0334e9ce33bd9e60d4a"
+  url "https://github.com/loadimpact/k6/archive/v0.34.1.tar.gz"
+  sha256 "64225494aff029dd10f434fd5cb6ab232446c97208bdf9127e195e4d8615d83d"
   license "AGPL-3.0-or-later"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "18408a1b36d5bd61dbf10fc55e83efaa33b358e51fc5d2a91879c9049c5d0f10" => :big_sur
-    sha256 "b7bd5708af3593bb66e252e35d37aad25c8f2b86686ed53f67d438cb0da4adc9" => :catalina
-    sha256 "0eb5aa720d0a1bc5b306e7c7e4d767a346b7073f14e018bc866a5e2540cd9423" => :mojave
-    sha256 "037428689ad82115999e98f4f8967f615339e9c9f3e9211d0935ac63a73fbf20" => :high_sierra
-    sha256 "46479b387f87abc55d2b845f16bd53a9894ff85459eb34f6a639ac3e418bc783" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "cddd9cf3e6fa0cc99888362ba4d6968ea433263b49fd61500d831467036d861a"
+    sha256 cellar: :any_skip_relocation, big_sur:       "24b67060719ff01398df450081a25705e837580600faa268230080e0b2fa67d2"
+    sha256 cellar: :any_skip_relocation, catalina:      "e4d8fac6423861809354f1788e64b7a2138295997b31abbc28a6e9300552a056"
+    sha256 cellar: :any_skip_relocation, mojave:        "7d3a83df3bc716adcb736075f3901ed0d4d9f3f8524bae2ec3f739f101fb8068"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a01ec855c402b99acfc9dedc3eb6809b7f46973e8213523e56ee266a7d21cfdc" # linuxbrew-core
   end
 
   depends_on "go" => :build
 
   def install
-    system "go", "build", *std_go_args
+    system "go", "build", *std_go_args(ldflags: "-s -w")
   end
 
   test do

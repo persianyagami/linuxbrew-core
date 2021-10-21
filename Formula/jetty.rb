@@ -1,17 +1,22 @@
 class Jetty < Formula
   desc "Java servlet engine and webserver"
   homepage "https://www.eclipse.org/jetty/"
-  url "https://search.maven.org/remotecontent?filepath=org/eclipse/jetty/jetty-distribution/9.4.35.v20201120/jetty-distribution-9.4.35.v20201120.tar.gz"
-  version "9.4.35.v20201120"
-  sha256 "5b2d099a167e70628873db54af4ac6a16029909691408a8468ee446e3eceedb2"
+  url "https://search.maven.org/remotecontent?filepath=org/eclipse/jetty/jetty-distribution/9.4.44.v20210927/jetty-distribution-9.4.44.v20210927.tar.gz"
+  version "9.4.44.v20210927"
+  sha256 "fdfd0d1e2732576c09246df8484ff7ed4aa4c84143927936934cb6b8e5194fa3"
   license any_of: ["Apache-2.0", "EPL-1.0"]
 
   livecheck do
-    url "https://www.eclipse.org/jetty/download.html"
+    url "https://www.eclipse.org/jetty/download.php"
     regex(/href=.*?jetty-distribution[._-]v?(\d+(?:\.\d+)+(?:\.v\d+)?)\.t/i)
   end
 
-  bottle :unneeded
+  bottle do
+    sha256 cellar: :any, arm64_big_sur: "a6be10513ab590b3a3eb6ae631a5480af414a2347dcd194530105f0263d6b967"
+    sha256 cellar: :any, big_sur:       "e8777d929a1655066acee7b4467241db035911c971da87619bb2df7b68db4b57"
+    sha256 cellar: :any, catalina:      "e8777d929a1655066acee7b4467241db035911c971da87619bb2df7b68db4b57"
+    sha256 cellar: :any, mojave:        "e8777d929a1655066acee7b4467241db035911c971da87619bb2df7b68db4b57"
+  end
 
   depends_on "openjdk"
 
@@ -33,12 +38,13 @@ class Jetty < Formula
   end
 
   test do
+    ENV["JETTY_ARGS"] = "jetty.http.port=#{free_port} jetty.ssl.port=#{free_port}"
     ENV["JETTY_BASE"] = testpath
     cp_r Dir[libexec/"*"], testpath
     pid = fork { exec bin/"jetty", "start" }
     sleep 5 # grace time for server start
     begin
-      assert_match /Jetty running pid=\d+/, shell_output("#{bin}/jetty check")
+      assert_match(/Jetty running pid=\d+/, shell_output("#{bin}/jetty check"))
       assert_equal "Stopping Jetty: OK\n", shell_output("#{bin}/jetty stop")
     ensure
       Process.kill 9, pid

@@ -1,19 +1,16 @@
 class Libdazzle < Formula
   desc "GNOME companion library to GObject and Gtk+"
   homepage "https://gitlab.gnome.org/GNOME/libdazzle"
-  url "https://download.gnome.org/sources/libdazzle/3.38/libdazzle-3.38.0.tar.xz"
-  sha256 "e18af28217943bcec106585298a91ec3da48aa3ad62fd0992f23f0c70cd1678f"
+  url "https://download.gnome.org/sources/libdazzle/3.42/libdazzle-3.42.0.tar.xz"
+  sha256 "eae67a3b3d9cce408ee9ec0ab6adecb83e52eb53f9bc93713f4df1e84da16925"
   license "GPL-3.0-or-later"
 
-  livecheck do
-    url :stable
-  end
-
   bottle do
-    sha256 "fa2282bdb8556341d8fdb814ced63d41a5936b7c2905c8e6f0f3e98c4d0b54da" => :big_sur
-    sha256 "889b2107f7efceabc760c6e96f1a55c00765cf67a7d5d54a821f1d33e5b0db01" => :catalina
-    sha256 "53c268508a5ef7ff874bb1b52069c240f80f99fd26fd2074066556b6ce095a81" => :mojave
-    sha256 "837eb4ed3f32a9512d6d7efde4ef1ea858009ab7db9a5093285b41387a538e9d" => :high_sierra
+    sha256 arm64_big_sur: "19a89188d9106e7dcfd8942639c805be8ffb3be4bf2c8ac829ae523ac865c412"
+    sha256 big_sur:       "1e262a7cfae434d1cefd1534d93789a31d0d67057cb471dfac8a26b7f2d3b4a9"
+    sha256 catalina:      "b8048d5e661054c8052a007c839c3e2d958a382385a0f43407147942b1ccac3f"
+    sha256 mojave:        "33f973cd8094b7986075211f305fa98aac38f55954968f4b1100e47b380fca77"
+    sha256 x86_64_linux:  "a9efd6ca0568517831040da926c622c391bcc02eb38ceae3c5e2aa2e6f16a28f" # linuxbrew-core
   end
 
   depends_on "gobject-introspection" => :build
@@ -98,7 +95,7 @@ class Libdazzle < Formula
       -lpango-1.0
       -lpangocairo-1.0
     ]
-    if OS.mac?
+    on_macos do
       flags << "-lintl"
       flags << "-Wl,-framework"
       flags << "-Wl,CoreFoundation"

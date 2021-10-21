@@ -3,21 +3,21 @@ class GitRemoteCodecommit < Formula
 
   desc "Git Remote Helper to interact with AWS CodeCommit"
   homepage "https://github.com/aws/git-remote-codecommit"
-  url "https://github.com/aws/git-remote-codecommit/archive/1.15.1.tar.gz"
-  sha256 "23bcc0715c72217f8dcd5841aecce537c360138016baa6b1ed9a2873af546e0b"
+  url "https://files.pythonhosted.org/packages/1f/82/7c22f218a7fd3177def489febc9b8c262a3b2bcb6785d05e15d435ddcab8/git-remote-codecommit-1.15.1.tar.gz"
+  sha256 "cd99d44a94f9adf8c5f15110d830f62af5fe644030fecc0df68cbda4880a5214"
   license "Apache-2.0"
-  revision 1
+  revision 2
   head "https://github.com/aws/git-remote-codecommit.git"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "3b2128aaacc269dc6e1a48e4fd83c1eb1eb3a74e66c5555e856d1bde562d24e7" => :big_sur
-    sha256 "67424681bf8ead286d446d946c818027049cbec4c4ddf618644cf1d10b8b24f7" => :catalina
-    sha256 "b98901e24f879198646f624346d0e04ae92d92eddad8857e5d9aa0f97d4294ae" => :mojave
-    sha256 "842cc8e9642a4c5e5875d33b962005a0e0aef7915624216f9b517c9561515b50" => :high_sierra
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "08a486ebcb944a5773b5168592e9bb0c318b0e72c5d95ae1c5d630f820ef1fb3"
+    sha256 cellar: :any_skip_relocation, big_sur:       "0b2a0253e95d5fe4123c139acf10650b973508de8cfabab01447b7a7cf5c63a0"
+    sha256 cellar: :any_skip_relocation, catalina:      "bf85c3806faadbbafb279a3353727a34acd5ef7338d9416ebc5c8b3713bd17b0"
+    sha256 cellar: :any_skip_relocation, mojave:        "320bddee12ae66769b97892ac8ea95aa78d540d1fca7cc89624e76a97a754548"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "368ca5fd44c3a75d9c40be1009d048ded427ad71386f42f69d7cc2bfebc01295" # linuxbrew-core
   end
 
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   resource "botocore" do
     url "https://files.pythonhosted.org/packages/a7/10/d9bbdbee6d3ea63897e468dddabb3edb7b7360a901e3eee249cdb132a78a/botocore-1.17.43.tar.gz"

@@ -1,38 +1,70 @@
 class Bear < Formula
-  include Language::Python::Shebang
-
   desc "Generate compilation database for clang tooling"
   homepage "https://github.com/rizsotto/Bear"
-  url "https://github.com/rizsotto/Bear/archive/2.4.4.tar.gz"
-  sha256 "5e95c9fe24714bcb98b858f0f0437aff76ad96b1d998940c0684c3a9d3920e82"
+  url "https://github.com/rizsotto/Bear/archive/3.0.16.tar.gz"
+  sha256 "877ee5e89e8445f74df95f2f3896597f04b86a4e5d0dbbca07ac71027dcb362d"
   license "GPL-3.0-or-later"
-  revision 1
-  head "https://github.com/rizsotto/Bear.git"
+  head "https://github.com/rizsotto/Bear.git", branch: "master"
 
   bottle do
-    cellar :any
-    sha256 "9862a97801676dcc319cbc7a41c5a8bc25dcf1605699c151ddaa31a152b73763" => :big_sur
-    sha256 "84cf802302f75a97d460d81b34388f1b426739251a0a1ef693798974de8b20bb" => :catalina
-    sha256 "cf53da69c793f2eebdfe625ffd6776d4f3a7a36a440eeb027ec75bc27865acad" => :mojave
-    sha256 "9e0070f18b84c96e10c0305c016e75129d51b9d480424b12563a1979b2a7e297" => :high_sierra
-    sha256 "0753bb79d23c26518595f4bc0e6f51995db59e161c99d2338d43c7246a3705ab" => :x86_64_linux
+    sha256 arm64_big_sur: "a0732cd4c08dc6611b821e23b4476b7e836233038071e1ffc4f75aa2f1763952"
+    sha256 big_sur:       "98108c1f5c334eba8122baba79933f19bd1088084f27bf4f1b0c4c5ad5578e84"
+    sha256 catalina:      "078d618b46deb46ba922fc7f5e357173d0347e54d9cf5a80c1cf8fa036c218e1"
+    sha256 mojave:        "31e7f7952afd4665d3f3307938267b6ed2c1a7fd5739eaf25eab1c60ad1c09e9"
+    sha256 x86_64_linux:  "b012b0efbb3dc0ddb0f7c372d736841cf6c08888a09179948f79a09829a6691b" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
-  depends_on "python@3.9"
+  depends_on "pkg-config" => :build
+  depends_on "fmt"
+  depends_on "grpc"
+  depends_on "nlohmann-json"
+  depends_on "spdlog"
+
+  uses_from_macos "llvm" => :test
+
+  on_macos do
+    depends_on "llvm" if DevelopmentTools.clang_build_version <= 1100
+  end
+
+  on_linux do
+    depends_on "gcc"
+  end
+
+  fails_with gcc: "5" # needs C++17
+
+  fails_with :clang do
+    build 1100
+    cause <<-EOS
+      Undefined symbols for architecture x86_64:
+        "std::__1::__fs::filesystem::__current_path(std::__1::error_code*)"
+    EOS
+  end
 
   def install
-    args = std_cmake_args + %W[
-      -DPYTHON_EXECUTABLE=#{Formula["python@3.9"].opt_bin}/python3
-    ]
-    system "cmake", ".", *args
-    system "make", "install"
+    ENV.llvm_clang if OS.mac? && (DevelopmentTools.clang_build_version <= 1100)
 
-    rewrite_shebang detected_python_shebang, bin/"bear"
+    args = %w[
+      -DENABLE_UNIT_TESTS=OFF
+      -DENABLE_FUNC_TESTS=OFF
+    ]
+
+    mkdir "build" do
+      system "cmake", "..", *args, *std_cmake_args
+      system "make", "all"
+      system "make", "install"
+    end
   end
 
   test do
-    system "#{bin}/bear", "true"
+    (testpath/"test.c").write <<~EOS
+      #include <stdio.h>
+      int main() {
+        printf("hello, world!\\n");
+        return 0;
+      }
+    EOS
+    system bin/"bear", "--", "clang", "test.c"
     assert_predicate testpath/"compile_commands.json", :exist?
   end
 end

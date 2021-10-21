@@ -3,25 +3,31 @@ require "language/node"
 class Serverless < Formula
   desc "Build applications with serverless architectures"
   homepage "https://www.serverless.com/"
-  url "https://github.com/serverless/serverless/archive/v2.15.0.tar.gz"
-  sha256 "9f382acf2e66299d6348cea288724cb14ffe0cb16b603607a5b21de88176b075"
+  url "https://github.com/serverless/serverless/archive/v2.63.0.tar.gz"
+  sha256 "7f0130fd062be64cda54de2d00f072a5b301a5f3f8fa1d9b7225ea4c1873790b"
   license "MIT"
+  head "https://github.com/serverless/serverless.git", branch: "master"
 
   bottle do
-    sha256 "bb45ef565245efc4031049647407887209f88c38c8d7efc32781cd54063c1a8e" => :big_sur
-    sha256 "47d92cb8ffa65023dd0c3f40c992dd11e808de4e1c02df3f5889aff6b0043763" => :catalina
-    sha256 "f6699e54aed7db10e89b8e740a12ac71798e3eab59f4a76a07ada34cb8d48927" => :mojave
+    sha256                               arm64_big_sur: "734d335c344f8d38e881d1b77896030f62474e49538f070edace82f73d40edbc"
+    sha256                               big_sur:       "2e7f1ddf60d4a88aa60e522c4cd5556170c63d4a61bac1dfb3f44cc7fb51d145"
+    sha256                               catalina:      "572ade49fc1f7916a2336321f963d1f8d4f44207447c4ccbd063a1dda0853536"
+    sha256                               mojave:        "d5ac97db15da7c74a775d1422c7576415e5d59ed88077f5f3774ae13b1128a1f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "afeb0cde084a28690e47a9466322175514c493dbe46b30948fb89b501a0b9389" # linuxbrew-core
   end
 
   depends_on "node"
 
-  on_linux do
-    depends_on "python"
-  end
-
   def install
     system "npm", "install", *Language::Node.std_npm_install_args(libexec)
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    bin.install_symlink Dir[libexec/"bin/*"]
+
+    # Delete incompatible Linux CPython shared library included in dependency package.
+    # Raise an error if no longer found so that the unused logic can be removed.
+    (libexec/"lib/node_modules/serverless/node_modules/@serverless/dashboard-plugin")
+      .glob("sdk-py/serverless_sdk/vendor/wrapt/_wrappers.cpython-*-linux-gnu.so")
+      .map(&:unlink)
+      .empty? && raise("Unable to find wrapt shared library to delete.")
   end
 
   test do

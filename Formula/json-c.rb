@@ -8,17 +8,17 @@ class JsonC < Formula
   head "https://github.com/json-c/json-c.git"
 
   livecheck do
-    url :head
+    url :stable
     regex(/^json-c[._-](\d+(?:\.\d+)+)(?:[._-]\d{6,8})?$/i)
   end
 
   bottle do
-    cellar :any
-    sha256 "11990ad17649041f31c96e7c383e9eb6a8e1cd7491c0ff9a8ee89ab66d2a11ba" => :big_sur
-    sha256 "60d15ece3fb1fdc8722785de8243c2261222f674e998509375522a1de75497ea" => :catalina
-    sha256 "6ab7f776315184769ed74115f614996401eae4577c36144ba4cdd1d41427d0cf" => :mojave
-    sha256 "a211a34a52b452386cf6e23f8f27cc9d088e64d2793bae7a4b3a7a069d31a88a" => :high_sierra
-    sha256 "a758d616079a3ef989fccb1f595a930b9fb849f0fcc6a6d235f951233487d637" => :x86_64_linux
+    sha256 cellar: :any, arm64_big_sur: "cfe16365846be7c8bbbab9cf5eaea4edc861f2174b37b9cc520d6dd0023c23d8"
+    sha256 cellar: :any, big_sur:       "11990ad17649041f31c96e7c383e9eb6a8e1cd7491c0ff9a8ee89ab66d2a11ba"
+    sha256 cellar: :any, catalina:      "60d15ece3fb1fdc8722785de8243c2261222f674e998509375522a1de75497ea"
+    sha256 cellar: :any, mojave:        "6ab7f776315184769ed74115f614996401eae4577c36144ba4cdd1d41427d0cf"
+    sha256 cellar: :any, high_sierra:   "a211a34a52b452386cf6e23f8f27cc9d088e64d2793bae7a4b3a7a069d31a88a"
+    sha256 cellar: :any, x86_64_linux:  "a758d616079a3ef989fccb1f595a930b9fb849f0fcc6a6d235f951233487d637" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
@@ -43,11 +43,7 @@ class JsonC < Formula
         return 0;
       }
     EOS
-    if OS.mac?
-      system ENV.cc, "-I#{include}", "-L#{lib}", "-ljson-c", "test.c", "-o", "test"
-    else
-      system ENV.cc, "-I#{include}", "test.c", "-L#{lib}", "-ljson-c", "-o", "test"
-    end
+    system ENV.cc, "-I#{include}", "test.c", "-L#{lib}", "-ljson-c", "-o", "test"
     assert_equal '{ "key": "value" }', shell_output("./test").chomp
   end
 end

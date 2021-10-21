@@ -3,44 +3,35 @@ class Cppman < Formula
 
   desc "C++ 98/11/14/17/20 manual pages from cplusplus.com and cppreference.com"
   homepage "https://github.com/aitjcize/cppman"
-  url "https://files.pythonhosted.org/packages/e4/a0/6c8af0f95dc7fe418f2cf812a8704780f83295235c7f32b12e87e77a79e4/cppman-0.5.1.tar.gz"
-  sha256 "a34261da3186d4f13836fec72e32258b82b6fad7d25f353d54ca54e831dd8589"
-  license "GPL-3.0"
+  url "https://files.pythonhosted.org/packages/99/9e/c0c3f4d8a3b5e45533a11ec7882623a5f59195173fdd7124b913e62dda47/cppman-0.5.3.tar.gz"
+  sha256 "27b8cee7e99055770d8251f969dcb9c4972342f92250e341bf9e10b9678a9140"
+  license "GPL-3.0-or-later"
   revision 1
 
-  livecheck do
-    url :stable
-  end
-
   bottle do
-    cellar :any_skip_relocation
-    sha256 "003314ab635e36347d9933dede15116782f315be4a9b01fd9d8c9dcae38ce6be" => :big_sur
-    sha256 "4b80eea61f0f7c9050c52a076f297a591f3482513350532f00c039a4cba58860" => :catalina
-    sha256 "70c43842a449dd2fc325c188a79d48e0465bca0fa3909d92807d4860cb71898b" => :mojave
-    sha256 "c8fd2f679703f64dfe3f2cb8a073c10fff3b5db4325291643e07c4c13dc37211" => :high_sierra
-    sha256 "20949887a43d2bc3ef229fb339370afc59cd97bdd6fab1fcb91be83facf1f4d0" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "c7be03e0509903bce8c018175cffdf173e339456aa555cb91a86e5093feab947"
+    sha256 cellar: :any_skip_relocation, big_sur:       "b8d9a3470010dac2167e6bf34e165a5ed30ade83fd3d435e0ec47ecea37c7391"
+    sha256 cellar: :any_skip_relocation, catalina:      "2604a65f2ec97aa523f1efdb7723fd85009ba2b357891dcfb9a912737fdc1b9b"
+    sha256 cellar: :any_skip_relocation, mojave:        "cb190a51ebdbf7c322627b64665c9384cb2f161a30158e5211aa700fead3b507"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "73a0798a0ee3dd1a2d93c9dde0e4cc95f57144ed072a7edcc6c5f0fd171542e0" # linuxbrew-core
   end
 
-  depends_on "python@3.9"
+  depends_on "python@3.10"
+  depends_on "six"
 
   resource "beautifulsoup4" do
-    url "https://files.pythonhosted.org/packages/c6/62/8a2bef01214eeaa5a4489eca7104e152968729512ee33cb5fbbc37a896b7/beautifulsoup4-4.9.1.tar.gz"
-    sha256 "73cc4d115b96f79c7d77c1c7f7a0a8d4c57860d1041df407dd1aae7f07a77fd7"
+    url "https://files.pythonhosted.org/packages/a1/69/daeee6d8f22c997e522cdbeb59641c4d31ab120aba0f2c799500f7456b7e/beautifulsoup4-4.10.0.tar.gz"
+    sha256 "c23ad23c521d818955a4151a67d81580319d4bf548d3d49f4223ae041ff98891"
   end
 
   resource "html5lib" do
-    url "https://files.pythonhosted.org/packages/85/3e/cf449cf1b5004e87510b9368e7a5f1acd8831c2d6691edd3c62a0823f98f/html5lib-1.0.1.tar.gz"
-    sha256 "66cb0dcfdbbc4f9c3ba1a63fdb511ffdbd4f513b2b6d81b80cd26ce6b3fb3736"
-  end
-
-  resource "six" do
-    url "https://files.pythonhosted.org/packages/6b/34/415834bfdafca3c5f451532e8a8d9ba89a21c9743a0c59fbd0205c7f9426/six-1.15.0.tar.gz"
-    sha256 "30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259"
+    url "https://files.pythonhosted.org/packages/ac/b6/b55c3f49042f1df3dcd422b7f224f939892ee94f22abcf503a9b7339eaf2/html5lib-1.1.tar.gz"
+    sha256 "b2e5b40261e20f354d198eae92afc10d750afb487ed5e50f9c4eaf07c184146f"
   end
 
   resource "soupsieve" do
-    url "https://files.pythonhosted.org/packages/3e/db/5ba900920642414333bdc3cb397075381d63eafc7e75c2373bbc560a9fa1/soupsieve-2.0.1.tar.gz"
-    sha256 "a59dc181727e95d25f781f0eb4fd1825ff45590ec8ff49eadfd7f1a537cc0232"
+    url "https://files.pythonhosted.org/packages/c8/3f/e71d92e90771ac2d69986aa0e81cf0dfda6271e8483698f4847b861dd449/soupsieve-2.2.1.tar.gz"
+    sha256 "052774848f448cf19c7e959adf5566904d525f33a3f8b6ba6f6f8f26ec7de0cc"
   end
 
   resource "webencodings" do

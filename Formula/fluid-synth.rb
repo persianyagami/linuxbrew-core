@@ -1,18 +1,17 @@
 class FluidSynth < Formula
   desc "Real-time software synthesizer based on the SoundFont 2 specs"
-  homepage "http://www.fluidsynth.org"
-  url "https://github.com/FluidSynth/fluidsynth/archive/v2.1.5.tar.gz"
-  sha256 "b539b7c65a650b56f01cd60a4e83c6125c217c5a63c0c214ef6274894a677d00"
+  homepage "https://www.fluidsynth.org"
+  url "https://github.com/FluidSynth/fluidsynth/archive/v2.2.3.tar.gz"
+  sha256 "b31807cb0f88e97f3096e2b378c9815a6acfdc20b0b14f97936d905b536965c4"
   license "LGPL-2.1-or-later"
   head "https://github.com/FluidSynth/fluidsynth.git"
 
   bottle do
-    cellar :any
-    sha256 "7ee150a66363d55e5df6bd1fe41098c4d5b1ccc011b854122a36bbeb0216c2fa" => :big_sur
-    sha256 "243e9a0d120f1ff90193396be36f47ef9f3309cc33230bd3fae32e313d45f12e" => :catalina
-    sha256 "67056fe2f9ed53190384c9a7776e81fdb35e23a265a54b3df1c16673e7c302c3" => :mojave
-    sha256 "028fcbb7878f8a1f48db5d0af058c04c934a548e8215cec11b1bcf63450d42ba" => :high_sierra
-    sha256 "2edb068e3c4d1c05df56f9132db2bdecd23628acb1584386391d6b64859afa69" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "57b1c20d591b10710d8925d9dc6ec36c59de7cc29f38fbbcf3227781647298a3"
+    sha256 cellar: :any,                 big_sur:       "df4608a36dba661b05360b0ce0f7b83c6a1d520a40f7d405f72a416517a01551"
+    sha256 cellar: :any,                 catalina:      "0ba416ec67f720ec5c3e2542699b93d53c7ea104dd101e1e794c9066828c00b1"
+    sha256 cellar: :any,                 mojave:        "9b26d7238abf5cf5fa3215ffc5c53da254cc3c9b020fab2922b3e7065ecb2384"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4aaf6b40c2155a3a4c8da2e07c1bb8f3f5687fe411eb60424bd810cabe3cdd43" # linuxbrew-core
   end
 
   depends_on "cmake" => :build

@@ -3,26 +3,38 @@ class Rtmidi < Formula
   homepage "https://www.music.mcgill.ca/~gary/rtmidi/"
   url "https://www.music.mcgill.ca/~gary/rtmidi/release/rtmidi-4.0.0.tar.gz"
   sha256 "370cfe710f43fbeba8d2b8c8bc310f314338c519c2cf2865e2d2737b251526cd"
+  revision 1
 
-  bottle do
-    cellar :any
-    sha256 "2eee6c3a73e0621703d2cff69249bdbc6cb6f46c91b2599bb74953d0292f5277" => :big_sur
-    sha256 "527496c834c7c98aca105255a39cf80ddaa074c7073e24d3325eb66ab4b07754" => :catalina
-    sha256 "5cb51ca3774a1e22d2388f01ccb514d091519b9d8cbc5f4805437be1be7dba30" => :mojave
-    sha256 "8744fb2c8d9952b0e14e50f2fed7982e715843746506378645211a178a3163e0" => :high_sierra
-    sha256 "4eab0eb4ede3d1035d7918bd84e2aede8f648c2ebcf449ac6f9ce15c0c744988" => :sierra
+  livecheck do
+    url :homepage
+    regex(/href=.*?rtmidi[._-]v?(\d+(?:\.\d+)+)\.t/i)
   end
 
-  depends_on "autoconf" => :build
-  depends_on "automake" => :build
-  depends_on "libtool" => :build
+  bottle do
+    sha256 cellar: :any,                 arm64_big_sur: "494faf5859eded9a849b50f8ce6ea813b7de240e0a555c5b62817e9225cc5c4e"
+    sha256 cellar: :any,                 big_sur:       "1a11b007b42c9e270354f47a2c97d42f20a4cea8f7a6b8976efd9535e6cfa077"
+    sha256 cellar: :any,                 catalina:      "f65ae764cc0d13549206e5c4d5a47285b412876e97a89a7ea7ec404e8565800a"
+    sha256 cellar: :any,                 mojave:        "9f8dfe0f1928c824e73d5e6d8f246db3abc8a2463fde613b7ac14fd3a6fc4602"
+  end
+
+  head do
+    url "https://github.com/thestk/rtmidi.git", branch: "master"
+
+    depends_on "autoconf" => :build
+    depends_on "automake" => :build
+    depends_on "libtool" => :build
+  end
+
+  on_linux do
+    depends_on "alsa-lib"
+    depends_on "jack"
+  end
 
   def install
-    system "./autogen.sh", "--no-configure"
-    system "./configure", "--prefix=#{prefix}"
+    system "./autogen.sh", "--no-configure" if build.head?
+    system "./configure", *std_configure_args
     system "make"
-    lib.install Dir[".libs/*.a", ".libs/*.dylib"]
-    include.install Dir["*.h"]
+    system "make", "install"
   end
 
   test do
@@ -35,7 +47,9 @@ class Rtmidi < Formula
                   << "Output ports: " << midiout.getPortCount() << "\\n";
       }
     EOS
-    system ENV.cxx, "test.cpp", "-L#{lib}", "-lrtmidi", "-o", "test"
-    system "./test"
+    system ENV.cxx, "test.cpp", "-I#{include}/rtmidi", "-L#{lib}", "-lrtmidi", "-o", "test"
+    # Only run the test on macOS since ALSA initialization errors on Linux CI.
+    # ALSA lib seq_hw.c:466:(snd_seq_hw_open) open /dev/snd/seq failed: No such file or directory
+    system "./test" if OS.mac?
   end
 end

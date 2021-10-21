@@ -1,28 +1,28 @@
 class Scummvm < Formula
   desc "Graphic adventure game interpreter"
   homepage "https://www.scummvm.org/"
-  url "https://www.scummvm.org/frs/scummvm/2.2.0/scummvm-2.2.0.tar.xz"
-  sha256 "1469657e593bd8acbcfac0b839b086f640ebf120633e93f116cab652b5b27387"
+  url "https://downloads.scummvm.org/frs/scummvm/2.5.0/scummvm-2.5.0.tar.xz"
+  sha256 "b47ee4b195828d2c358e38a4088eda49886dc37a04f1cc17b981345a59e0d623"
   license "GPL-2.0-or-later"
-  head "https://github.com/scummvm/scummvm.git"
+  head "https://github.com/scummvm/scummvm.git", branch: "master"
 
   livecheck do
-    url "https://www.scummvm.org/frs/scummvm/"
-    regex(%r{href=.*?v?(\d+(?:\.\d+)+)/?["']}i)
+    url "https://www.scummvm.org/downloads/"
+    regex(/href=.*?scummvm[._-]v?(\d+(?:\.\d+)+)\.t/i)
   end
 
   bottle do
-    sha256 "bfdd3aa29ce7738729b03c1c58844a9085df58de2e8042db880519dcb3d61aeb" => :big_sur
-    sha256 "b48fb222871740414480cb4a1789c1c1b379b30dafac2970656ec8802deb205b" => :catalina
-    sha256 "0e359a79ab9835cd3511d1aa7e617349b50fcb0a3241c2d700d2341f321a90b7" => :mojave
-    sha256 "dafe75e762c2ccee797055f3bf6dda13d08f3e1efcd2c7017dc734db41a1acef" => :high_sierra
-    sha256 "45a76d156df3890147728336050093d9857c73ee234a73e15b9fa8f6894a60b6" => :x86_64_linux
+    sha256 arm64_big_sur: "90d437657d306794297adcfaf083dd0bd951bbf437e8f7ff40c12413efa32376"
+    sha256 big_sur:       "f1543bc3553a0bae3a659f4c17412228cf6fb643c460ec3f488354d65ebcd27b"
+    sha256 catalina:      "07e6e6c14491af15cb9900691fd60276568bdc66ef423752dbe4cde10d5e8bc7"
+    sha256 mojave:        "b83003efb12c36548180f1bb883f02e48276078992b3916196c3495bd80bb9a9"
+    sha256 x86_64_linux:  "671cc9da5228b2e1c6500083b3508bc41d7a9fe7c0b94f525732126bae4edb2d" # linuxbrew-core
   end
 
   depends_on "a52dec"
   depends_on "faad2"
   depends_on "flac"
-  depends_on "fluid-synth"
+  depends_on "fluid-synth@2.1"
   depends_on "freetype"
   depends_on "jpeg-turbo"
   depends_on "libmpeg2"
@@ -43,8 +43,10 @@ class Scummvm < Formula
   end
 
   test do
-    # Test fails on headless CI: Could not initialize SDL: No available video device
-    return if ENV["CI"]
+    on_linux do
+      # Test fails on headless CI: Could not initialize SDL: No available video device
+      return if ENV["HOMEBREW_GITHUB_ACTIONS"]
+    end
 
     system "#{bin}/scummvm", "-v"
   end

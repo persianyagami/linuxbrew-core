@@ -1,8 +1,8 @@
 class Leptonica < Formula
   desc "Image processing and image analysis library"
   homepage "http://www.leptonica.org/"
-  url "http://www.leptonica.org/source/leptonica-1.80.0.tar.gz"
-  sha256 "ec9c46c2aefbb960fb6a6b7f800fe39de48343437b6ce08e30a8d9688ed14ba4"
+  url "http://www.leptonica.org/source/leptonica-1.82.0.tar.gz"
+  sha256 "155302ee914668c27b6fe3ca9ff2da63b245f6d62f3061c8f27563774b8ae2d6"
   license "BSD-2-Clause"
 
   livecheck do
@@ -11,12 +11,11 @@ class Leptonica < Formula
   end
 
   bottle do
-    cellar :any
-    sha256 "7cdcfbb0616b884ace6657b1a009f874ac249bf7c38e08ec8b43217584968e64" => :big_sur
-    sha256 "2772ab6d50bb48132db5bf6d2d7b4086058635c060392dc375b23769513ebca7" => :catalina
-    sha256 "b6503796ec87ac555bb4c5278aa3c8bf6b5ef3c88d66da9a040c04e0cafdcade" => :mojave
-    sha256 "01c2fe703b082f830fffec5f1d21d50d41c1c30967cb74e1bc0b744dcb72d50d" => :high_sierra
-    sha256 "27d9d1740fa529532e50ff73de429f442e4b76e104d452114d02b679a75c67f3" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "f0d0cdb312ad51dc498f25765c7f4566e246eb7d74bd7ddc87b9a23f539f0bba"
+    sha256 cellar: :any,                 big_sur:       "850aac10ef99d81dacea54d7b0f04df1a2058aac792b2649c4ecd91adcf1bbeb"
+    sha256 cellar: :any,                 catalina:      "a758e0b2eb14c548dd87946193185784cdb8d868e0aa17b2426660fad6ecdab2"
+    sha256 cellar: :any,                 mojave:        "8cef538c6bda97b6f8d71010259bced7ae5400f8a02e79e32cec1eee939b1463"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "08acc9f1bb0bd9f0a4071c487e7f30b363e697ad8cf79e722de82e2e75805b58" # linuxbrew-core
   end
 
   depends_on "pkg-config" => :build

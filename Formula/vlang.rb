@@ -2,22 +2,21 @@ class Vlang < Formula
   desc "V programming language"
   homepage "https://vlang.io"
   # NOTE: Keep this in sync with V compiler below when updating
-  url "https://github.com/vlang/v/archive/weekly.2020.48.2.tar.gz"
-  version "0.1.30"
-  sha256 "15921991779262dfcf01cc3399ceccd831588ce313b99a46dcb7bed9dbabcc2c"
+  url "https://github.com/vlang/v/archive/0.2.4.tar.gz"
+  sha256 "8cdbc32fb928051ce7959dd943af3efee26bddc4ed3700a1cb365be73a306bf9"
   license "MIT"
-  revision 1
 
   livecheck do
-    url "https://raw.githubusercontent.com/vlang/v/master/CHANGELOG.md"
-    regex(/## v?\s?(\d+(?:\.\d+)+)/i)
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "c23cedc60c6004cb453fefeba70473fd56b5d856da6dd4c7ae8f57c92d8ca95b" => :big_sur
-    sha256 "c1cd351872627566b1da7fd2d2759dd255aa99021a57d8b4e950ac7b96e7c175" => :catalina
-    sha256 "d12d4bd7226aa06f7be1632455db6c85b20b996d85fc9f913645381607ba37e8" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "9fc0d5fea246584518fc01c59483f07ad89274c78606a70cb4623be28380f7d0"
+    sha256 cellar: :any_skip_relocation, big_sur:       "19266863aa98b5a45d9b423db1924fd03470453ed9e5b8ca958fc4abecf6f88c"
+    sha256 cellar: :any_skip_relocation, catalina:      "60e0f440e473d751fdc8ad1704105f8c1ac870a742740d7f7335e39c47a8929f"
+    sha256 cellar: :any_skip_relocation, mojave:        "03d594231e0e381fe454dfde377062e9b1d77f1845e3863896027fc856455829"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a3f86bed7ae7baf1d3f398e98870852a8d6451616f06234ac9b142b4bca768b5" # linuxbrew-core
   end
 
   resource "vc" do
@@ -25,7 +24,7 @@ class Vlang < Formula
     # "[v:master] {short SHA of the vlang release commit} - {vlang version number}".
     # The sources of this V compiler commit need to be used here
     url "https://github.com/vlang/vc.git",
-        revision: "e8da48b5e44c3671cf5fc649cae5c38983b1ff52"
+        revision: "fd5f57740ff6d7a8566b774318df54c2fa460f92"
   end
 
   def install

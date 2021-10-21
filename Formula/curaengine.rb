@@ -1,42 +1,48 @@
 class Curaengine < Formula
   desc "C++ 3D printing GCode generator"
   homepage "https://github.com/Ultimaker/CuraEngine"
-  url "https://github.com/Ultimaker/CuraEngine/archive/4.8.0.tar.gz"
-  sha256 "752977fbe48653743b9f1a6e25e6d1f061513b7cf1cd4f0105b233595e8a15ff"
+  url "https://github.com/Ultimaker/CuraEngine/archive/4.11.0.tar.gz"
+  sha256 "d654c2e0397f87d75d4481591f9d7f5e252a4fb4bc61cf84a477223618674f80"
   license "AGPL-3.0-or-later"
   version_scheme 1
-  head "https://github.com/Ultimaker/CuraEngine.git"
+  head "https://github.com/Ultimaker/CuraEngine.git", branch: "master"
 
   # Releases like xx.xx or xx.xx.x are older than releases like x.x.x, so we
-  # work around this less-than-ideal situation by restricting the minor version
-  # to one digit. This won't pick up versions where the minor version is 10+
+  # work around this less-than-ideal situation by restricting the major version
+  # to one digit. This won't pick up versions where the major version is 10+
   # but thankfully that hasn't been true yet. This should be handled in a better
   # way in the future, to avoid the possibility of missing good versions.
   livecheck do
-    url :head
-    regex(/^v?(\d+\.\d(?:\.\d+)+)$/i)
+    url :stable
+    regex(/^v?(\d(?:\.\d+)+)$/i)
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "ea4ddbed801958a3b9298b30a27fe638906bb7c04e78d5e0d7035872c0d1c680" => :big_sur
-    sha256 "6d732ea2dfbe75f23ada46f804a627b425bb5b091aca784f5139f63746a7ba56" => :catalina
-    sha256 "7c98a1ae8a3d08afe1fdf6eb7baa1ed273dc7b04edc8c01bb4a91d1147ac6810" => :mojave
-    sha256 "c31ad4722a3933d57c624c01a1390978743bb0d19d6fc0217d2307a2bbc2435c" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "65db3e5bd79cd6d05b9f1b1977f4ac9cd4f5086bc2fb8805a2380cea66336823"
+    sha256 cellar: :any,                 big_sur:       "ecf3e469cedce0fc986b2648df563997806a9156c5cab3db8da2351fa0d0e07e"
+    sha256 cellar: :any,                 catalina:      "ba5a690f2febe148e2fa836a840c996e6e41701379c152f8a32a2b5074e263fa"
+    sha256 cellar: :any,                 mojave:        "bac60b2b7e9c50c1ea5dcb939d4dec14d7dedde5b0d972817a3fd17ba5a08ed4"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a1e5054a28f5a85d3a43a61cc3780cc6be6e7ef4a1301d4b8f080fb456c88df6" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
 
+  on_linux do
+    depends_on "gcc"
+  end
+
+  fails_with gcc: "5"
+
   # The version tag in these resources (e.g., `/1.2.3/`) should be changed as
   # part of updating this formula to a new version.
   resource "fdmextruder_defaults" do
-    url "https://raw.githubusercontent.com/Ultimaker/Cura/4.8.0/resources/definitions/fdmextruder.def.json"
-    sha256 "d9b38fdf02d1dcdc6ee7401118ca9468236adb860786361e453f1eeb54c95b1f"
+    url "https://raw.githubusercontent.com/Ultimaker/Cura/4.11.0/resources/definitions/fdmextruder.def.json"
+    sha256 "331c3e203eaf012b19b62795235becec9f1da8939e96fc6834213291269c769e"
   end
 
   resource "fdmprinter_defaults" do
-    url "https://raw.githubusercontent.com/Ultimaker/Cura/4.8.0/resources/definitions/fdmprinter.def.json"
-    sha256 "16381c4b888fcc787c77c95945635b0837f6b40761f7c0c442a1716e30d932f7"
+    url "https://raw.githubusercontent.com/Ultimaker/Cura/4.11.0/resources/definitions/fdmprinter.def.json"
+    sha256 "7e6d73c6165c6d50e09ed2b6cd417ebb82fe6832e99ebfec19f7584224ffd60c"
   end
 
   def install

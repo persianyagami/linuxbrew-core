@@ -1,16 +1,17 @@
 class Inframap < Formula
   desc "Read your tfstate or HCL to generate a graph"
   homepage "https://github.com/cycloidio/inframap"
-  url "https://github.com/cycloidio/inframap/archive/v0.4.0.tar.gz"
-  sha256 "65182e1c84f33a00a2acab3bb1e6dbcc3de579bab5480016748be94e51a6a2bd"
+  url "https://github.com/cycloidio/inframap/archive/v0.6.7.tar.gz"
+  sha256 "e9d6daa48c6fa1a8ecc5437c7121cb5072eb81c29c88ca9e6d778637c8442332"
   license "MIT"
   head "https://github.com/cycloidio/inframap.git"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "8db89e38e5d255b7bf38c2d375e9b78a8565b78ad7776ed6491a72c8ee6d4e46" => :big_sur
-    sha256 "bbb1e66bfee4b0a097403c1bc862a85065b6edcb176699758e7508f0d5d9000f" => :catalina
-    sha256 "075ef7667e91efaeda845953975e59d46b19cfc1455186169bac1d758b0ecabd" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "ee096fc9fe0909cc34675dbd7a7269c8092ffee0d6ba71fa333e75afc4ff28c1"
+    sha256 cellar: :any_skip_relocation, big_sur:       "0a4fe8ae6b7fcf419ab21ea31beb6b90dbeedd73ba2a771672e41c7a30ff4d0d"
+    sha256 cellar: :any_skip_relocation, catalina:      "ba85244090ace0d6a94dbb41c9693f11647cb8e949acc5511c8d9c25a3f74c1b"
+    sha256 cellar: :any_skip_relocation, mojave:        "d7bb58c695d390162b9a5376decf76acf02929d9b4421137ccbb7e91f940bdd2"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7aa3a0f3f5c16b290b32dd4afe368a79f2095a239ebc26d4e51c1a275f08d65b" # linuxbrew-core
   end
 
   depends_on "go" => :build
@@ -21,8 +22,7 @@ class Inframap < Formula
   end
 
   def install
-    ldflags = "-X github.com/cycloidio/inframap/cmd.Version=v#{version}"
-    system "go", "build", *std_go_args, "-ldflags", ldflags
+    system "go", "build", *std_go_args(ldflags: "-s -w -X github.com/cycloidio/inframap/cmd.Version=v#{version}")
   end
 
   test do

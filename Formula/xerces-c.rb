@@ -7,17 +7,13 @@ class XercesC < Formula
   revision 1 unless OS.mac?
   license "Apache-2.0"
 
-  livecheck do
-    url :stable
-  end
-
   bottle do
-    cellar :any
-    sha256 "24e3607a7d969dcf55b9184bb481e7b1fd78bcd9f16239ef8a35c4acb8638a3b" => :big_sur
-    sha256 "8bcfddab9276b6f09c9af5bd8be60d500cd5107795c25495b53ef5e0734ae617" => :catalina
-    sha256 "502d34b51931ead6b1db27ca1a71eed465ecd4da5dbdeaa51c0ae77e77dc25ea" => :mojave
-    sha256 "8b30ad6819fc3628b706a18193d45b96c13749e7d1e27f5392cf91e48fe7d63b" => :high_sierra
-    sha256 "59c751d97da8bad2a9cd060b0afade5e5d94e472e81f475c13875edaff433b50" => :x86_64_linux
+    rebuild 2
+    sha256 cellar: :any,                 arm64_big_sur: "ad9251257543aee28e08fbc5f433a5ad72c0065511c09d19c888bf28b5bbf21f"
+    sha256 cellar: :any,                 big_sur:       "6a561a0f4175e7da6790b2beaedf185516a118116402a674a6b936d5c3236575"
+    sha256 cellar: :any,                 catalina:      "743af0adcd563f604bf3f057d1144b9e11bc1b5a9e842f82d430301d2b5fc185"
+    sha256 cellar: :any,                 mojave:        "cf22a3e57f6e6e279e9eb476bb80c08d18979938f54d19347fd103ccdc7cf78e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "cc8041c06f4aea15a1c3c519c71e3663dd53753e781eb8e552ef2127136abe31" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
@@ -28,12 +24,12 @@ class XercesC < Formula
     ENV.cxx11
 
     mkdir "build" do
-      system "cmake", "..", *std_cmake_args
+      system "cmake", "..", *std_cmake_args, "-DCMAKE_INSTALL_RPATH=#{rpath}"
       system "make"
       system "ctest", "-V"
       system "make", "install"
       system "make", "clean"
-      system "cmake", "..", "-DBUILD_SHARED_LIBS=OFF", *std_cmake_args
+      system "cmake", "..", "-DBUILD_SHARED_LIBS=OFF", *std_cmake_args, "-DCMAKE_INSTALL_RPATH=#{rpath}"
       system "make"
       lib.install Dir["src/*.a"]
     end

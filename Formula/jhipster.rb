@@ -3,31 +3,29 @@ require "language/node"
 class Jhipster < Formula
   desc "Generate, develop and deploy Spring Boot + Angular/React applications"
   homepage "https://www.jhipster.tech/"
-  url "https://registry.npmjs.org/generator-jhipster/-/generator-jhipster-6.10.5.tgz"
-  sha256 "3d6ac98e1e777f9f7a33a21a01f4f181a8d9252acb46003a0e850fb8c62bc918"
+  # Check if this can be switched to the newest `node` at version bump
+  url "https://registry.npmjs.org/generator-jhipster/-/generator-jhipster-7.3.0.tgz"
+  sha256 "254ec00025dd856e22360a9dc4acceaeeaafb27d5538d4877dbd39959c5e44b1"
   license "Apache-2.0"
 
-  livecheck do
-    url :stable
-  end
-
   bottle do
-    cellar :any_skip_relocation
-    rebuild 1
-    sha256 "02bd1b4b163a00a08af7c15e49b60cf141903cf235c75f89daafe083fa07d4ef" => :big_sur
-    sha256 "4ca44dc77bab71951af8df0ecd0c2ff4c42ced99da51489eb762dd5811930105" => :catalina
-    sha256 "dc57fc139d909b7da4f0c9a0d3fd8f13aadbd1b41daa4036377f8ce236d5aad9" => :mojave
-    sha256 "faf1d7553a95d40e7a7efb0115c811633f4b436eee9776eab9a41de70df47e20" => :high_sierra
-    sha256 "d8358618db796d18c3c660cbd24d2fe0362f7725dc6db7616d239a5993291c2e" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "23480174aa3ca6b111c7467391a03c47de4eb81e1afb895859d6d9f8fd73780c"
+    sha256 cellar: :any_skip_relocation, big_sur:       "8b8150fdb29447bfc341eecdb4420e55e363b20ba6d855d8dbe1ea196c0fe549"
+    sha256 cellar: :any_skip_relocation, catalina:      "a3e23bd1bb8a5617d52658e66a957702f77366a19901f1a9ce3c5cb102eaa976"
+    sha256 cellar: :any_skip_relocation, mojave:        "dc822516f9a30a7dc214c7b02502f4ebbbe2887892f81a9ac368c888d0724ac4"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ce9b191b6a956c13095b4799bd1b3d8d5182bfd579ed0c7c418af15df215854d" # linuxbrew-core
   end
 
-  depends_on "node"
+  depends_on "node@14"
   depends_on "openjdk"
 
   def install
+    node = Formula["node@14"]
     system "npm", "install", *Language::Node.std_npm_install_args(libexec)
     bin.install Dir["#{libexec}/bin/*"]
-    bin.env_script_all_files libexec/"bin", Language::Java.overridable_java_home_env
+    env = { PATH: "#{node.opt_bin}:$PATH" }
+    env.merge! Language::Java.overridable_java_home_env
+    bin.env_script_all_files libexec/"bin", env
   end
 
   test do

@@ -1,19 +1,15 @@
 class Baobab < Formula
   desc "Gnome disk usage analyzer"
   homepage "https://wiki.gnome.org/Apps/Baobab"
-  url "https://download.gnome.org/sources/baobab/3.38/baobab-3.38.0.tar.xz"
-  sha256 "048468147860816b97f15d50b3c84e9acf0539c1441cfeb63703d112e8728329"
-
-  livecheck do
-    url :stable
-  end
+  url "https://download.gnome.org/sources/baobab/41/baobab-41.0.tar.xz"
+  sha256 "cad6278d2dcc80c84b57105aa5bb58d8a30ce98d6fabd767519ddb86c857e855"
+  license "GPL-2.0-or-later"
 
   bottle do
-    sha256 "4a9d7b940b8d32bea12f03e4dde9c834a1efd60bcae26bc8dfce82784dee1183" => :big_sur
-    sha256 "433a0bd533b88a32c6a860776c1979a9d4face3db73d7011cef2f444bcbc033b" => :catalina
-    sha256 "b1043ff9f9bd7edb169a955fe4eaccc521dcf95a448d3a52aed4b79a8eb982f9" => :mojave
-    sha256 "9768e9d8d1f4fdcc0a0fbb5936183c1f0bff547e34fc9814f38698e0e3da2f55" => :high_sierra
-    sha256 "857275e8107258a60436bcfaf265d3e7215cd20f9b0846def1daf5d7dfd4a58c" => :x86_64_linux
+    sha256 arm64_big_sur: "99df49e1259144e3b641e6cd6b8b71b30a10cf6d6dec12e2b137914708daf9bc"
+    sha256 big_sur:       "9dfe596e51e700f6973aeccdbcd4047000b63994e3e6d8af62913d684edfc68b"
+    sha256 catalina:      "d873858d8bf8c7358f9840d280f94f5247a11393dc079ebbb659ada5bc7660f3"
+    sha256 mojave:        "46b4cfbbfe550d56996a7275049e53f2e8d653c46c750ec4cd48e618cd1c83e1"
   end
 
   depends_on "itstool" => :build
@@ -24,6 +20,7 @@ class Baobab < Formula
   depends_on "adwaita-icon-theme"
   depends_on "gtk+3"
   depends_on "hicolor-icon-theme"
+  depends_on "libhandy"
 
   def install
     # stop meson_post_install.py from doing what needs to be done in the post_install step

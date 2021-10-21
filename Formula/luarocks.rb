@@ -1,22 +1,22 @@
 class Luarocks < Formula
   desc "Package manager for the Lua programming language"
   homepage "https://luarocks.org/"
-  url "https://luarocks.org/releases/luarocks-3.5.0.tar.gz"
-  sha256 "701d0cc0c7e97cc2cf2c2f4068fce45e52a8854f5dc6c9e49e2014202eec9a4f"
+  url "https://luarocks.org/releases/luarocks-3.7.0.tar.gz"
+  sha256 "9255d97fee95cec5b54fc6ac718b11bf5029e45bed7873e053314919cd448551"
   license "MIT"
   head "https://github.com/luarocks/luarocks.git"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "e2ba2ebb87484385389f3a942410ee76edfe7f949cbed52eddcf84f55f87d70f" => :big_sur
-    sha256 "c78b48493aac6ae394e5e7560295dce073f2af127a5ee420bf648a761e813e5c" => :catalina
-    sha256 "54ee73d74cbaf4295674371de8c8b8bd7174f9d7351663e406b15f040e401a83" => :mojave
-    sha256 "ddd2f3c9da8517733738deab972c1160f6d8ef04be752d463b9b5ec103df88b2" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "884ff51dc8c4b1009ce40d3a6f4a1306566ff9da8417ea4c03dce4c38a136807"
+    sha256 cellar: :any_skip_relocation, big_sur:       "631971f2bc3585dc67d7b5c7b07391489442564a0f111ae358008a02e3b8d73d"
+    sha256 cellar: :any_skip_relocation, catalina:      "b7d91bbc4ec33e19953bc1ed4127557c530b66c0e0ff7eec1a188268b486b594"
+    sha256 cellar: :any_skip_relocation, mojave:        "bcd1442f092e25f04eac3270b5a468d911716a50a3af716ce3f4f9c44a46920e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2d380de1a08aae8d61924afa66cc13ae9d587e94884d7de03828bbe4ad22e6d5" # linuxbrew-core
   end
 
   depends_on "lua@5.1" => :test
   depends_on "lua@5.3" => :test
-  depends_on "luajit" => :test
+  depends_on "luajit" => :test unless Hardware::CPU.arm?
   depends_on "lua"
 
   uses_from_macos "unzip"
@@ -70,10 +70,12 @@ class Luarocks < Formula
           "Luafilesystem failed to create the expected directory"
 
         # LuaJIT is compatible with lua5.1, so we can also test it here
-        rmdir testpath/"blank_space"
-        system "#{Formula["luajit"].bin}/luajit", "lfs_#{luaversion}test.lua"
-        assert_predicate testpath/"blank_space", :directory?,
-          "Luafilesystem failed to create the expected directory"
+        unless Hardware::CPU.arm?
+          rmdir testpath/"blank_space"
+          system "#{Formula["luajit"].bin}/luajit", "lfs_#{luaversion}test.lua"
+          assert_predicate testpath/"blank_space", :directory?,
+            "Luafilesystem failed to create the expected directory"
+        end
       else
         (testpath/"lfs_#{luaversion}test.lua").write <<~EOS
           require("lfs")

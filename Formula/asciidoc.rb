@@ -2,25 +2,26 @@ class Asciidoc < Formula
   include Language::Python::Shebang
 
   desc "Formatter/translator for text files to numerous formats. Includes a2x"
-  homepage "https://asciidoc.org/"
-  url "https://github.com/asciidoc/asciidoc-py3/archive/9.0.4.tar.gz"
-  sha256 "9e269f336a71e8685d03a00c71b55ca029eed9f7baf1afe67c447be32206b176"
+  homepage "https://asciidoc-py.github.io/"
+  url "https://github.com/asciidoc-py/asciidoc-py/archive/9.1.1.tar.gz"
+  sha256 "914dfc1542c30bd47faa0aaaae0985cb57d0ca584015729ccd1b94d90da3a616"
   license "GPL-2.0-only"
-  head "https://github.com/asciidoc/asciidoc-py3.git"
+  revision 1
+  head "https://github.com/asciidoc-py/asciidoc-py.git", branch: "main"
+
+  livecheck do
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
+  end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "a7f6a49939e627eece6cddf4cbb91ae72922e6beb88ae9715cfd479051b3fb4b" => :big_sur
-    sha256 "0d4c6143d618720d9d1907d4a914b0ba685e67ee024859de3afb7fb6f50bbbb5" => :catalina
-    sha256 "23836dcab06fc863b9babf4501179317d6e28899a83f078aca1cac564ef585e2" => :mojave
-    sha256 "e61daf8474cb187643e49c313b839c957dbaecc5944ed43c9b8a8116ff656a5f" => :high_sierra
-    sha256 "b371fb75f0e3c5ad98d313f794061d532aecb1116e5c0dae916bbc2212889b3c" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "c9ddf877047f2b026bc790eb8f7414ea909dbd213c92b50fba336da80e1d8286" # linuxbrew-core
   end
 
   depends_on "autoconf" => :build
   depends_on "docbook-xsl" => :build
   depends_on "docbook"
-  depends_on "python@3.9"
+  depends_on "python@3.10"
   depends_on "source-highlight"
 
   uses_from_macos "libxml2" => :build
@@ -43,7 +44,7 @@ class Asciidoc < Formula
     ].map { |f| rewrite_shebang detected_python_shebang, f }
 
     # otherwise macOS's xmllint bails out
-    inreplace "Makefile", "-f manpage", "-f manpage -L" if OS.mac?
+    inreplace "Makefile", "-f manpage", "-f manpage -L"
     system "make", "install"
     system "make", "docs"
   end

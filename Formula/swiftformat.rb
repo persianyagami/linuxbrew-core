@@ -1,25 +1,26 @@
 class Swiftformat < Formula
   desc "Formatting tool for reformatting Swift code"
   homepage "https://github.com/nicklockwood/SwiftFormat"
-  url "https://github.com/nicklockwood/SwiftFormat/archive/0.47.8.tar.gz"
-  sha256 "c83f67a2d54cda4eeaa635b2719ed7b6f7af5d932c19da02467617902bdb9a16"
+  url "https://github.com/nicklockwood/SwiftFormat/archive/0.48.16.tar.gz"
+  sha256 "baea2b0fc66afa1db17404c5cdedb536371e107627e41be6b55e44642c4688bb"
   license "MIT"
-  head "https://github.com/nicklockwood/SwiftFormat.git", shallow: false
+  head "https://github.com/nicklockwood/SwiftFormat.git", branch: "master"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "47e3aa92792a53413eb0866d3b6709e88c7164184f406c3e49c560e82a2fe589" => :big_sur
-    sha256 "c268a44da4ed4e7836d2b43f917a1411f3b8f13488ee25c66f4bd8bb2f4d5e05" => :catalina
-    sha256 "38abb30c870974c65ee0a3afed11cd5f983ab05a13923061fc67c4b6566df6f8" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "6e754174bb20c391ccebe2685d1ab2dcba66020f0bb0eb118c09272d9daebbbd"
+    sha256 cellar: :any_skip_relocation, big_sur:       "a6d4e1a74a8904358df45ea9cc694dbf9b228e6fcf1bcf88bb9f5e18681411ac"
+    sha256 cellar: :any_skip_relocation, catalina:      "c88cdbc2ade1ad4635fdafcb9b3ad23b6ba12aa50f5507bd2615dca2f9d21530"
+    sha256 cellar: :any_skip_relocation, mojave:        "0a4d4a8b561e961e8cd98c216fb4589cbbcf127c26fc25c81f794360295950ec"
   end
 
   depends_on xcode: ["10.1", :build]
   depends_on :macos
 
   def install
-    xcodebuild "-project",
-        "SwiftFormat.xcodeproj",
+    xcodebuild "-arch", Hardware::CPU.arch,
+        "-project", "SwiftFormat.xcodeproj",
         "-scheme", "SwiftFormat (Command Line Tool)",
+        "-configuration", "Release",
         "CODE_SIGN_IDENTITY=",
         "SYMROOT=build", "OBJROOT=build"
     bin.install "build/Release/swiftformat"

@@ -3,21 +3,13 @@ require "language/node"
 class Typescript < Formula
   desc "Language for application scale JavaScript development"
   homepage "https://www.typescriptlang.org/"
-  url "https://registry.npmjs.org/typescript/-/typescript-4.1.3.tgz"
-  sha256 "213b2677e1f29700601c29e4a603eabe63f87f14fa02fd3633bf141aaa4e0e7e"
+  url "https://registry.npmjs.org/typescript/-/typescript-4.4.4.tgz"
+  sha256 "7524841bbf63777fef1fe6e1a826026b1dd4849f54f5affa481502faab2cdb16"
   license "Apache-2.0"
-  head "https://github.com/Microsoft/TypeScript.git"
-
-  livecheck do
-    url :stable
-  end
+  head "https://github.com/Microsoft/TypeScript.git", branch: "main"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "221b4f01eff3ac25750ac019c95380cf9136ab71d9885c99d0a17f9f1521af95" => :big_sur
-    sha256 "21fbdafc6132436663714241829b4b58eba7c714ca741beb2b1bf918fa9b75dc" => :catalina
-    sha256 "a5927aa302e6bcef5fd359d0bef1be2928c26f013e9730bfb9f82798b1f6290f" => :mojave
-    sha256 "7cd5c8aa47ca0725409cc2d4a7cebe05fc8720a86770e20a068fb4e8fbe61367" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "09c7d6dbe44149ed8d5e5c317b7b2301d68bcee5a2ee5d2daff775387def0cf3" # linuxbrew-core
   end
 
   depends_on "node"

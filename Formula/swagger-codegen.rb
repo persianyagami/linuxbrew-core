@@ -1,29 +1,29 @@
 class SwaggerCodegen < Formula
   desc "Generate clients, server stubs, and docs from an OpenAPI spec"
   homepage "https://swagger.io/swagger-codegen/"
-  url "https://github.com/swagger-api/swagger-codegen/archive/v3.0.22.tar.gz"
-  sha256 "fbdd96ea4577fcc5dfb53402a893a1033e35f336d4db43f078cdd05cf3a7e108"
+  url "https://github.com/swagger-api/swagger-codegen/archive/v3.0.29.tar.gz"
+  sha256 "1c9285f2c186e54030dbcabfee54c395f57ebfbc42aa35c4cb9143f69e5348d0"
   license "Apache-2.0"
-  head "https://github.com/swagger-api/swagger-codegen.git"
+  head "https://github.com/swagger-api/swagger-codegen.git", branch: "master"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "7fdfc6c478debdce4beb5068b8f7f0c7d0c7f7388a518cd17d2fa0c99ad436e1" => :big_sur
-    sha256 "3b4850b0c7b9451ddc7882f154e13e2c1d7a5850742b973c49ebf14681d75b83" => :catalina
-    sha256 "3d25a89ffd299a2a638aeea874eb08309810af05c2174287c9316369656765a4" => :mojave
-    sha256 "4a9b0b330da4d82235eef0859642991dcfebd802d3b569c5cbfb27d4821ead5f" => :high_sierra
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "a5cdf8da29b6714579a611b56d333b2e9a5deb1a2836fcbb7bce38c514277f19"
+    sha256 cellar: :any_skip_relocation, big_sur:       "b7e43d51d44fb9d13269afb13ee48dd9480864416b89c7da38ca6272f435f0c6"
+    sha256 cellar: :any_skip_relocation, catalina:      "9c5d5da2529b5dd084f1b54551cf2a833ef8127b470575d520f2026983538018"
+    sha256 cellar: :any_skip_relocation, mojave:        "0879013b47480613e2bdc02f0fa4ea31c20deaa894ec2b2bc6463d47170b93f1"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1d165079fee9b4332560307ed5bfa6bba4e18c252f0a005c5e579a0b8c51b42a" # linuxbrew-core
   end
 
   depends_on "maven" => :build
-  depends_on "openjdk"
+  depends_on "openjdk@11"
 
   def install
     # Need to set JAVA_HOME manually since maven overrides 1.8 with 1.7+
-    ENV["JAVA_HOME"] = Formula["openjdk"].opt_prefix
+    ENV["JAVA_HOME"] = Formula["openjdk@11"].opt_prefix
 
     system "mvn", "clean", "package"
     libexec.install "modules/swagger-codegen-cli/target/swagger-codegen-cli.jar"
-    bin.write_jar_script libexec/"swagger-codegen-cli.jar", "swagger-codegen"
+    bin.write_jar_script libexec/"swagger-codegen-cli.jar", "swagger-codegen", java_version: "11"
   end
 
   test do

@@ -1,15 +1,17 @@
 class Xdotool < Formula
   desc "Fake keyboard/mouse input and window management for X"
   homepage "https://www.semicomplete.com/projects/xdotool/"
-  url "https://github.com/jordansissel/xdotool/archive/v3.20160805.1.tar.gz"
-  sha256 "ddafca1239075c203769c17a5a184587731e56fbe0438c09d08f8af1704e117a"
-  revision OS.mac? ? 2 : 5
+  url "https://github.com/jordansissel/xdotool/releases/download/v3.20210903.1/xdotool-3.20210903.1.tar.gz"
+  sha256 "9110198702d7549c4eccdab95f276d35a9fa9f540015d2739b62c55618d3b7b6"
+  license "BSD-3-Clause"
+  head "https://github.com/jordansissel/xdotool.git", branch: "master"
 
   bottle do
-    sha256 "7092970eee9f15fab6aad9e364cb23b29f11fc19b1edbedd3ac794a7858aecc5" => :catalina
-    sha256 "0a24fe2911c4db734794e7c22c596a9809602af3d974abe2aae2f6ef9babb777" => :mojave
-    sha256 "9e84711dc1979c07a5367c2a2638e07e01f9bb7b8fb5166b4d1cadaed6babb7b" => :high_sierra
-    sha256 "35692890d3240a8f33eb1faf24da6cb74307e5c5fa8beccea232afdca3b0352d" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "b5ce445e70ccf9a65310630aede622b216f8cb272b660e9420205b862e01fab7"
+    sha256 cellar: :any,                 big_sur:       "f5210972a8352765068add40fd4c3fe77cf4a687cd3c81ddb719e24c739ffae2"
+    sha256 cellar: :any,                 catalina:      "fe7c50b395ca8d9b196deb24046e2d433812478f247d44738396c2c2f3745f1a"
+    sha256 cellar: :any,                 mojave:        "8d675d9a6391e70da34bcbea738af0a77b6a53a693fe8ed716f9ce6a4633aaff"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "cec125dd2493d3956a23e574283fab5bc60195ef3defd54088fc002a795f1e45" # linuxbrew-core
   end
 
   depends_on "pkg-config" => :build
@@ -18,13 +20,15 @@ class Xdotool < Formula
   depends_on "libxkbcommon"
   depends_on "libxtst"
 
-  depends_on "libxi" unless OS.mac?
+  # Disable clock_gettime() workaround since the real API is available on macOS >= 10.12
+  # Note that the PR from this patch was actually closed originally because of problems
+  # caused on pre-10.12 environments, but that is no longer a concern.
+  patch do
+    url "https://github.com/jordansissel/xdotool/commit/dffc9a1597bd96c522a2b71c20301f97c130b7a8.patch?full_index=1"
+    sha256 "447fa42ec274eb7488bb4aeeccfaaba0df5ae747f1a7d818191698035169a5ef"
+  end
 
   def install
-    # Work around an issue with Xcode 8 on El Capitan, which
-    # errors out with `typedef redefinition with different types`
-    ENV.delete("SDKROOT") if MacOS.version == :el_capitan && MacOS::Xcode.version >= "8.0"
-
     system "make", "PREFIX=#{prefix}", "INSTALLMAN=#{man}", "install"
   end
 

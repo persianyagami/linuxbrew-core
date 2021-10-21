@@ -1,38 +1,32 @@
-require "language/go"
-
 class SSearch < Formula
   desc "Web search from the terminal"
   homepage "https://github.com/zquestz/s"
-  url "https://github.com/zquestz/s/archive/v0.5.14.tar.gz"
-  sha256 "c32eedf6a4080cbe221c902cf7f63b1668b3927edfc448d963d69ed66c8ec2fb"
+  url "https://github.com/zquestz/s/archive/v0.6.0.tar.gz"
+  sha256 "0019e21dba7bb30e4de279b71e027c7d78f3236d709c2fe5be39b38d22aa7097"
   license "MIT"
-  head "https://github.com/zquestz/s.git"
+  head "https://github.com/zquestz/s.git", branch: "master"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "477cae54c3f7a8914298f8a06b890b0ecf62be4fa8281691ac5c636880968706" => :big_sur
-    sha256 "cd7352e1c4092774fdd4cbff61bd107e6447ea00e96ec94431dcbc1be7bbade5" => :catalina
-    sha256 "04281fb66e28cf23c3ea1cd23ec6286432191fde31ac8c7b6c9c13bc6b365b0a" => :mojave
-    sha256 "4a0c5595943e8b7b4892ff3caf4d03b29533405a411268a77e0a51272a3d7823" => :high_sierra
-    sha256 "b9d547b1bcc45516396ed8398b624ac83a1c4ade7bf13f130b1b063b9aec1590" => :sierra
-    sha256 "570e25b19ec8da17b9d4691fa7ac311499cc8d8bcac2ad79748263d0a12ff972" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "f11b7632fb8b306788d486d54b53feed63f7dec7c4f149fc2a6bf716cbe18837"
+    sha256 cellar: :any_skip_relocation, big_sur:       "e37573825550c63f264efaebf0f9331034fa722cbcff2f41480e3f36663b6a70"
+    sha256 cellar: :any_skip_relocation, catalina:      "71ec2554f4cb3b04e2cb4bb871f91b80c102e0d08ea42cc9d9c77c7828b8c20e"
+    sha256 cellar: :any_skip_relocation, mojave:        "437a7566955f6c381b81458428abdae3ae01dd124543cf08212e1617dbbafd65"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "6a06b8ed3430c05ce0cd462284da8fdcbdea88f023aeb71f965804bd3d97f95c" # linuxbrew-core
   end
 
   depends_on "go" => :build
 
-  go_resource "github.com/FiloSottile/gvt" do
-    url "https://github.com/FiloSottile/gvt.git",
-        revision: "50d83ea21cb0405e81efd284951e111b3a68d701"
-  end
-
   def install
-    ENV["GOPATH"] = buildpath
-    Language::Go.stage_deps resources, buildpath/"src"
-    cd("src/github.com/FiloSottile/gvt") { system "go", "install" }
-    (buildpath/"src/github.com/zquestz").mkpath
-    ln_s buildpath, "src/github.com/zquestz/s"
-    system buildpath/"bin/gvt", "restore"
-    system "go", "build", "-o", bin/"s"
+    system "go", "build", *std_go_args(ldflags: "-s -w"), "-o", bin/"s"
+
+    output = Utils.safe_popen_read("#{bin}/s", "--completion", "bash")
+    (bash_completion/"s-completion.bash").write output
+
+    output = Utils.safe_popen_read("#{bin}/s", "--completion", "zsh")
+    (zsh_completion/"_s").write output
+
+    output = Utils.safe_popen_read("#{bin}/s", "--completion", "fish")
+    (fish_completion/"s.fish").write output
   end
 
   test do

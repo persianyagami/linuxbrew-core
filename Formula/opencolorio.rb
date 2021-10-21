@@ -1,19 +1,17 @@
 class Opencolorio < Formula
   desc "Color management solution geared towards motion picture production"
   homepage "https://opencolorio.org/"
-  url "https://github.com/imageworks/OpenColorIO/archive/v1.1.1.tar.gz"
-  sha256 "c9b5b9def907e1dafb29e37336b702fff22cc6306d445a13b1621b8a754c14c8"
+  url "https://github.com/imageworks/OpenColorIO/archive/v2.1.0.tar.gz"
+  sha256 "81fc7853a490031632a69c73716bc6ac271b395e2ba0e2587af9995c2b0efb5f"
   license "BSD-3-Clause"
-  revision 3
-  head "https://github.com/imageworks/OpenColorIO.git"
+  head "https://github.com/imageworks/OpenColorIO.git", branch: "master"
 
   bottle do
-    cellar :any
-    sha256 "41d69027763621bd23db83f3656587afbb90a456d6aab1d4429839a04a2bfdb8" => :big_sur
-    sha256 "41140d26dbe70add3bece6d1dfc2b6a01b7ed1879c79c18e29eeefd66694b9db" => :catalina
-    sha256 "f3b183e64cf41cc28273b9e0fe99013fd1bd4a7f3774f3be370423d04ac847da" => :mojave
-    sha256 "4beea67e0c1400c1d82b1257bae9476e4f58fbab6a727f31161199b5dae4d3bc" => :high_sierra
-    sha256 "77916165084b65355952010108e6a2411e8d3baa24a8142a51247ead1f337ab4" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "36f49aa701d4121185e300594128b1b55264b7f0d8da930f3e195668fa63ee2d"
+    sha256 cellar: :any,                 big_sur:       "e948b41de75e637b6e458eac15d2d018d2dce9a060b9b24e4be9cf4c689e9820"
+    sha256 cellar: :any,                 catalina:      "1502fca0c423ced4903f48870f1788f4166a6cb69310bd82f76d5dba655c68ff"
+    sha256 cellar: :any,                 mojave:        "64e9a2916188c3ccd8ae7459cf5e4ab3664c3d4cb8b764bed8314a5e95e141ae"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "89ab1f3231189abfd2edcd8a33a245d5d79dca897fe3c57a1e56a762e872ac5c" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
@@ -24,6 +22,7 @@ class Opencolorio < Formula
   def install
     args = std_cmake_args + %W[
       -DCMAKE_VERBOSE_MAKEFILE=OFF
+      -DCMAKE_INSTALL_RPATH=#{rpath}
       -DPYTHON=python3
       -DPYTHON_EXECUTABLE=#{Formula["python@3.9"].opt_bin}/"python3"
     ]

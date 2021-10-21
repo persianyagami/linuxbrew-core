@@ -1,13 +1,12 @@
 class Strace < Formula
   desc "Diagnostic, instructional, and debugging tool for the Linux kernel"
   homepage "https://strace.io/"
-  url "https://github.com/strace/strace/releases/download/v5.9/strace-5.9.tar.xz"
-  sha256 "39473eb8465546c3e940fb663cb381eba5613160c7302794699d194a4d5d66d9"
+  url "https://github.com/strace/strace/releases/download/v5.14/strace-5.14.tar.xz"
+  sha256 "901bee6db5e17debad4530dd9ffb4dc9a96c4a656edbe1c3141b7cb307b11e73"
   license "LGPL-2.1-or-later"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "1d99427e82d117d882492cd9edbd3c0e5007f5803c876d990f0570e083e7476f" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "ab74131ded479cb7685c0505cd86d60e9ddc9ff10bb8a9c68d710debd7bc54cf" # linuxbrew-core
   end
 
   head do
@@ -17,7 +16,7 @@ class Strace < Formula
   end
 
   depends_on :linux
-  depends_on "linux-headers"
+  depends_on "linux-headers@4.4"
 
   def install
     system "./bootstrap" if build.head?

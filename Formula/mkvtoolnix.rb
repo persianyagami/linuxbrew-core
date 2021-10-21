@@ -1,10 +1,10 @@
 class Mkvtoolnix < Formula
   desc "Matroska media files manipulation tools"
   homepage "https://mkvtoolnix.download/"
-  url "https://mkvtoolnix.download/sources/mkvtoolnix-51.0.0.tar.xz"
-  sha256 "c17aa010a13c943b1347c5a20f7f6e05337a7d90317f525345813bcbcdcf4c70"
+  url "https://mkvtoolnix.download/sources/mkvtoolnix-62.0.0.tar.xz"
+  mirror "https://fossies.org/linux/misc/mkvtoolnix-62.0.0.tar.xz"
+  sha256 "42b853a063ea77b79d37fb698857947159a4481842c3b3d45fe862ee234400e1"
   license "GPL-2.0-or-later"
-  revision 1
 
   livecheck do
     url "https://mkvtoolnix.download/sources/"
@@ -12,10 +12,9 @@ class Mkvtoolnix < Formula
   end
 
   bottle do
-    cellar :any
-    sha256 "bb9a2ed011d0eb9d5520c57498ce2fea1bb00d7c61791c966fde18cf19456190" => :big_sur
-    sha256 "218b3a0dbdf6cb257267bcc30d54d432be04960ba637f3c6a3e75124e9cf0fc6" => :catalina
-    sha256 "9e565ae6098d46b9b32be9ec971bd7eca1975213561c71616d9add327a0ab5b1" => :mojave
+    sha256 cellar: :any, arm64_big_sur: "e8ed016ddf3d4cadbbdc373dc2f8b958824bd20248704c9ae01d9f75f4377d4b"
+    sha256 cellar: :any, big_sur:       "f4fb114829e5324651cf0524cb407892635967020640b537d2ce40e474e8646d"
+    sha256 cellar: :any, catalina:      "ea505af575e701ae46c4285cf54c962647e72e1085b3496b75c5b496886a3c45"
   end
 
   head do
@@ -27,34 +26,42 @@ class Mkvtoolnix < Formula
 
   depends_on "docbook-xsl" => :build
   depends_on "pkg-config" => :build
-  depends_on "pugixml" => :build
   depends_on "boost"
   depends_on "flac"
   depends_on "fmt"
   depends_on "gettext"
+  depends_on "gmp"
   depends_on "libebml"
-  depends_on "libmagic"
   depends_on "libmatroska"
   depends_on "libogg"
   depends_on "libvorbis"
-  depends_on macos: :mojave # C++17
-  depends_on "pcre2"
+  # https://mkvtoolnix.download/downloads.html#macosx
+  depends_on macos: :catalina # C++17
+  depends_on "nlohmann-json"
+  depends_on "pugixml"
+  depends_on "qt"
+  depends_on "utf8cpp"
 
   uses_from_macos "libxslt" => :build
   uses_from_macos "ruby" => :build
 
-  def install
-    ENV["XML_CATALOG_FILES"] = "#{etc}/xml/catalog" unless OS.mac?
+  on_linux do
+    depends_on "gcc" => :build
+  end
 
+  fails_with gcc: "5"
+
+  def install
     ENV.cxx11
 
-    features = %w[flac libebml libmagic libmatroska libogg libvorbis]
+    features = %w[flac gmp libebml libmatroska libogg libvorbis]
     extra_includes = ""
     extra_libs = ""
     features.each do |feature|
       extra_includes << "#{Formula[feature].opt_include};"
       extra_libs << "#{Formula[feature].opt_lib};"
     end
+    extra_includes << "#{Formula["utf8cpp"].opt_include}/utf8cpp;"
     extra_includes.chop!
     extra_libs.chop!
 
@@ -65,7 +72,7 @@ class Mkvtoolnix < Formula
                           "--with-docbook-xsl-root=#{Formula["docbook-xsl"].opt_prefix}/docbook-xsl",
                           "--with-extra-includes=#{extra_includes}",
                           "--with-extra-libs=#{extra_libs}",
-                          "--disable-qt"
+                          "--disable-gui"
     system "rake", "-j#{ENV.make_jobs}"
     system "rake", "install"
   end

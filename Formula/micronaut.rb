@@ -1,35 +1,35 @@
 class Micronaut < Formula
   desc "Modern JVM-based framework for building modular microservices"
   homepage "https://micronaut.io/"
-  url "https://github.com/micronaut-projects/micronaut-starter/archive/v2.2.1.tar.gz"
-  sha256 "be537f6da16ddd6d2925fe870df2d87f250cec3936cd2077ab31ad6e3f491999"
+  url "https://github.com/micronaut-projects/micronaut-starter/archive/v3.1.0.tar.gz"
+  sha256 "cf95a742006408f0abde07aa8e5145dc5b72dd72b47cea404db350041a0335bd"
   license "Apache-2.0"
 
   livecheck do
     url :stable
-    strategy :github_latest
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "1434c2fca1c9972d2f37a2a0fa8c991a32a597ba01633d2c8c5a018f7d2790ee" => :big_sur
-    sha256 "1c856d0b6ee5c23a910ddd5b149a6bb742232f35fb3d6973f2e9270c65cc9026" => :catalina
-    sha256 "c99928829b56cb4277f6c3dd9aefe5b0006e815626aadd03cb41ce73789a3815" => :mojave
-    sha256 "e70b82446eb106f5c3eeca1d24a131590f9140fd60fd6acb152fd6247b4d1706" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "066e6d6eaf99070ff22d278d649db2e4bd7568e65e0f61dfc9ba12591626b086"
+    sha256 cellar: :any_skip_relocation, big_sur:       "5a035be33a6a864a6f4ef8d06e62435b52c1968537f56aff9489f0bfd30d08ce"
+    sha256 cellar: :any_skip_relocation, catalina:      "c49b17c932385f0cc93d05176d37912cd74f1fcf16318047b1f8caa36a03a3e9"
+    sha256 cellar: :any_skip_relocation, mojave:        "0e772ebdec5f685f80dcb8dd47419f099d322a379f2fc8bd389c4ae1155bc6dc"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "19d50927bf6cc50d0dd71be9c5126a126fe0dadeb3c70d7a1092851494204794" # linuxbrew-core
   end
 
-  depends_on "gradle" => :build
-  depends_on "openjdk"
+  # Uses a hardcoded list of supported JDKs. Try switching to `openjdk` on update.
+  depends_on "openjdk@11"
 
   def install
-    system "gradle", "micronaut-cli:assemble", "-x", "test"
+    system "./gradlew", "micronaut-cli:assemble", "-x", "test"
 
     mkdir_p libexec/"bin"
     mv "starter-cli/build/exploded/bin/mn", libexec/"bin/mn"
     mv "starter-cli/build/exploded/lib", libexec/"lib"
 
     bash_completion.install "starter-cli/build/exploded/bin/mn_completion"
-    (bin/"mn").write_env_script libexec/"bin/mn", Language::Java.overridable_java_home_env
+    (bin/"mn").write_env_script libexec/"bin/mn", Language::Java.overridable_java_home_env("11")
   end
 
   test do

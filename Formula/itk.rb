@@ -1,20 +1,21 @@
 class Itk < Formula
   desc "Insight Toolkit is a toolkit for performing registration and segmentation"
   homepage "https://itk.org"
-  url "https://github.com/InsightSoftwareConsortium/ITK/releases/download/v5.1.2/InsightToolkit-5.1.2.tar.gz"
-  sha256 "f1e5a78e11125348f68f655c6b89b617c3a8b2c09f710081f621054811a70c98"
+  url "https://github.com/InsightSoftwareConsortium/ITK/releases/download/v5.2.1/InsightToolkit-5.2.1.tar.gz"
+  sha256 "192d41bcdd258273d88069094f98c61c38693553fd751b54f8cda308439555db"
   license "Apache-2.0"
   head "https://github.com/InsightSoftwareConsortium/ITK.git"
 
   livecheck do
-    url :head
+    url :stable
     regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    sha256 "d471032839867a33b3199917b679a47fe31f32923c8362008df8ab661dffeec2" => :big_sur
-    sha256 "9ef1d85a062b42910f7d8e4cd6f09dad9c8d8eb85fd3ac7f31e253e17ee6d80d" => :catalina
-    sha256 "e72bc2bd7cc17c6671aa05bc8c545cc263501c38758fef7521094ed2acb3c57b" => :mojave
+    sha256 arm64_big_sur: "7b59055f5a4d15929975183ff03593a0500f6f9a4ff70d740ab184b29e182b99"
+    sha256 big_sur:       "b7b30cd49b92cfcbd05404a4d0a592f3623f122354a82e458d5ee01ac2f9aa73"
+    sha256 catalina:      "2e87abe07201cd013ac9535b02f3a012e79b049327d5ecc6ff015b1752c0a7f8"
+    sha256 mojave:        "d2020a7710d5b42d0d833ff04ee2d821ff8080f34c8d2d00a86feaa39f6dfa25"
   end
 
   depends_on "cmake" => :build
@@ -28,10 +29,13 @@ class Itk < Formula
 
   on_linux do
     depends_on "alsa-lib"
+    depends_on "gcc"
     depends_on "unixodbc"
+
+    ignore_missing_libraries "libjvm.so"
   end
 
-  depends_on "glibc" unless OS.mac?
+  fails_with gcc: "5"
 
   def install
     args = std_cmake_args + %W[
@@ -58,12 +62,7 @@ class Itk < Formula
       -DModule_ITKVtkGlue=ON
     ]
 
-    # Requires OpenCL on Linux which is not available in Homebrew
-    args << if OS.mac?
-      "-DITK_USE_GPU=ON"
-    else
-      "-DITK_USE_GPU=OFF"
-    end
+    args << "-DITK_USE_GPU=ON" if OS.mac?
 
     # Avoid references to the Homebrew shims directory
     inreplace "Modules/Core/Common/src/CMakeLists.txt" do |s|
@@ -98,15 +97,14 @@ class Itk < Formula
     EOS
 
     v = version.major_minor
-    suffix = OS.mac? ? "#{v}.1.dylib" : "#{v}.so.1"
     # Build step
     system ENV.cxx, "-std=c++11", "-isystem", "#{include}/ITK-#{v}", "-o", "test.cxx.o", "-c", "test.cxx"
     # Linking step
     system ENV.cxx, "-std=c++11", "test.cxx.o", "-o", "test",
-                    "#{lib}/libITKCommon-#{suffix}",
-                    "#{lib}/libITKVNLInstantiation-#{suffix}",
-                    "#{lib}/libitkvnl_algo-#{suffix}",
-                    "#{lib}/libitkvnl-#{suffix}"
+                    shared_library("#{lib}/libITKCommon-#{v}", 1),
+                    shared_library("#{lib}/libITKVNLInstantiation-#{v}", 1),
+                    shared_library("#{lib}/libitkvnl_algo-#{v}", 1),
+                    shared_library("#{lib}/libitkvnl-#{v}", 1)
     system "./test"
   end
 end

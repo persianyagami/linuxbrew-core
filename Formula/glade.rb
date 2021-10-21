@@ -4,22 +4,18 @@ class Glade < Formula
   url "https://download.gnome.org/sources/glade/3.38/glade-3.38.2.tar.xz"
   sha256 "98fc87647d88505c97dd2f30f2db2d3e9527515b3af11694787d62a8d28fbab7"
   license "LGPL-2.1-or-later"
-
-  livecheck do
-    url :stable
-  end
+  revision 1 unless OS.mac?
 
   bottle do
-    sha256 "0fb77b21e6176c6690410a76d843f4582c1ef833e54ce5efa620bfce514e7af7" => :big_sur
-    sha256 "e5c239c3d05350ff8a8710ce6beecf7fd22461336e77d55febb338b6a1456a61" => :catalina
-    sha256 "0b641d56f385a798fafe8fe424191de83207dea5b0edcf9d06c8b8b03ad0c68f" => :mojave
-    sha256 "c0c93dd47f85419438b9ae552852642cab2bfd2776aa8674a0dc7fa23a234fec" => :x86_64_linux
+    sha256 arm64_big_sur: "2a55e22c571d0d158c1b66bf18c35c44aeaed0694d139f13c48f5a6642b4785b"
+    sha256 big_sur:       "0fb77b21e6176c6690410a76d843f4582c1ef833e54ce5efa620bfce514e7af7"
+    sha256 catalina:      "e5c239c3d05350ff8a8710ce6beecf7fd22461336e77d55febb338b6a1456a61"
+    sha256 mojave:        "0b641d56f385a798fafe8fe424191de83207dea5b0edcf9d06c8b8b03ad0c68f"
   end
 
   depends_on "docbook-xsl" => :build
   depends_on "gobject-introspection" => :build
   depends_on "itstool" => :build
-  depends_on "libxslt" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
   depends_on "pkg-config" => :build
@@ -29,13 +25,13 @@ class Glade < Formula
   depends_on "hicolor-icon-theme"
   depends_on "libxml2"
 
+  uses_from_macos "libxslt" => :build
+
   on_macos do
     depends_on "gtk-mac-integration"
   end
 
   def install
-    ENV.append "LDFLAGS", "-lintl" unless OS.mac?
-
     # Find our docbook catalog
     ENV["XML_CATALOG_FILES"] = "#{etc}/xml/catalog"
 
@@ -55,7 +51,8 @@ class Glade < Formula
 
   test do
     # executable test (GUI)
-    system "#{bin}/glade", "--version"
+    # fails in Linux CI with (glade:20337): Gtk-WARNING **: 21:45:31.876: cannot open display:
+    system "#{bin}/glade", "--version" if OS.mac?
     # API test
     (testpath/"test.c").write <<~EOS
       #include <gladeui/glade.h>

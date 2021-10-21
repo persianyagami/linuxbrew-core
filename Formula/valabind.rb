@@ -4,13 +4,15 @@ class Valabind < Formula
   url "https://github.com/radare/valabind/archive/1.8.0.tar.gz"
   sha256 "3eba8c36c923eda932a95b8d0c16b7b30e8cdda442252431990436519cf87cdd"
   license "GPL-3.0-or-later"
-  head "https://github.com/radare/valabind.git"
+  revision 2
+  head "https://github.com/radare/valabind.git", branch: "master"
 
   bottle do
-    cellar :any
-    sha256 "cbaf377ea488bba4b372abe53eab42bdf84da7b93b00a827b847179477c59109" => :big_sur
-    sha256 "6a33a391be8a6d352504ba407afa44bca868d9065fac979ed7139edcb8797fef" => :catalina
-    sha256 "4503f99bdf938276cbdbb8b5312f6b380a13cf8d653b88c02be1dfa880a2803c" => :mojave
+    sha256 cellar: :any,                 arm64_big_sur: "e3ab92ce9929d10db47821cb54a99943397f7708bcf9bac7fba29e5c1a5a184d"
+    sha256 cellar: :any,                 big_sur:       "bef04beaf352699df3774e1d26423b16cdd487836553755d6777b5d3a20e4413"
+    sha256 cellar: :any,                 catalina:      "d1013e81b20cf4c4981b7840c12d281fb2042aebb874317e8dff44d550915954"
+    sha256 cellar: :any,                 mojave:        "ca8cb97fd10e22e1ac1a8966889c9eda14f33bedeeae8395811c55748e2740cc"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d60a5907d80687fc3bf619f357d525ed856aaedf23dbad26fcd8c80636b37698" # linuxbrew-core
   end
 
   depends_on "pkg-config" => :build
@@ -21,20 +23,7 @@ class Valabind < Formula
   uses_from_macos "flex" => :build
 
   def install
-    unless OS.mac?
-      # Valabind depends on the Vala code generator library during execution.
-      # The `libvala` pkg-config file installed by brew isn't pointing to Vala's
-      # opt_prefix so Valabind will break as soon as Vala releases a new
-      # patchlevel. This snippet modifies the Makefile to point to Vala's
-      # `opt_prefix` instead.
-      vala = Formula["vala"]
-      pre_ver = vala.prefix(vala.version)
-      inreplace "Makefile",
-                /^VALA_PKGLIBDIR=(.*$)/,
-                "VALA_PKGLIBDIR_=\\1\nVALA_PKGLIBDIR=$(subst #{pre_ver},#{vala.opt_prefix},$(VALA_PKGLIBDIR_))"
-    end
-
-    system "make"
+    system "make", "VALA_PKGLIBDIR=#{Formula["vala"].opt_lib}/vala-#{Formula["vala"].version.major_minor}"
     system "make", "install", "PREFIX=#{prefix}"
   end
 

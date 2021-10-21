@@ -1,23 +1,38 @@
 class Uncrustify < Formula
   desc "Source code beautifier"
   homepage "https://uncrustify.sourceforge.io/"
-  url "https://github.com/uncrustify/uncrustify/archive/uncrustify-0.72.0.tar.gz"
-  sha256 "d6fff70bc7823fac4c77013055333b79a4839909094e8eee8a14ee8f1777374e"
+  url "https://github.com/uncrustify/uncrustify/archive/uncrustify-0.73.0.tar.gz"
+  sha256 "2df0326ba8c413d675b796e051d89a318b7c9cccebc993d66466e2e7fd970672"
   license "GPL-2.0-or-later"
-  head "https://github.com/uncrustify/uncrustify.git"
+  head "https://github.com/uncrustify/uncrustify.git", branch: "master"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "ee6e6b6d193ed163cd8365382bc56dd621f5c8f6c3776f52e4b0b2aeb1b90329" => :big_sur
-    sha256 "c22df6af4af60a023f95f2cdce327fffe740264e44382e5bcd97e6ea9245bdb7" => :catalina
-    sha256 "3340dd41ba1ad700ba8014225ac005c9a171d16b990ff275257f9c4f30097861" => :mojave
-    sha256 "2af96b34e949ec3034f0c66c90918ac69b6b3f312e32ce4c27b0dfe158bfef40" => :high_sierra
-    sha256 "2128710fc2b1bc1c385de3f57a6826bffd56d23ba628332b8438db8e9eb76cb1" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "2dcaa936d7a4059325a7b8ed903de60ff871123c7d1840292737739b64648b46"
+    sha256 cellar: :any_skip_relocation, big_sur:       "aeaebd9ff33c221237ba005017f7d62012e82d7a0c9a10102bfa57ca71fb7358"
+    sha256 cellar: :any_skip_relocation, catalina:      "4f50d6e3159241c0f561515465d86b771910a2071407b7b5ed7a4f9d70599e3c"
+    sha256 cellar: :any_skip_relocation, mojave:        "58f40e9a613182248edb886953f23d3750580388effc02397ce04760d4f227a3"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "32678f052c55b2696840ae939009aed90efbd8a1e83fb324fb36ed98dca29035" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
 
+  on_linux do
+    depends_on "gcc"
+  end
+
+  fails_with gcc: "5"
+
+  # patches from https://github.com/uncrustify/uncrustify/pull/3178
+  # and https://github.com/uncrustify/uncrustify/pull/3179 that fix build failures
+  # can be removed for 0.74.0
+  patch do
+    url "https://raw.githubusercontent.com/Homebrew/formula-patches/52cd74a3a21841bd6dd6bf2d1e95af8e5e5dfa16/uncrustify/uncrustify-0.73.0.patch"
+    sha256 "9323551298cf2acdeffaa17737d2762241fd3403121272f0523402781cc750ee"
+  end
+
   def install
+    ENV.cxx11
+
     mkdir "build" do
       system "cmake", "..", *std_cmake_args
       system "make", "install"

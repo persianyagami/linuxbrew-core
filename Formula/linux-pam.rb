@@ -1,12 +1,13 @@
 class LinuxPam < Formula
   desc "Pluggable Authentication Modules for Linux"
   homepage "http://www.linux-pam.org"
-  url "https://github.com/linux-pam/linux-pam/releases/download/v1.4.0/Linux-PAM-1.4.0.tar.xz"
-  sha256 "cd6d928c51e64139be3bdb38692c68183a509b83d4f2c221024ccd4bcddfd034"
+  url "https://github.com/linux-pam/linux-pam/releases/download/v1.5.2/Linux-PAM-1.5.2.tar.xz"
+  sha256 "e4ec7131a91da44512574268f493c6d8ca105c87091691b8e9b56ca685d4f94d"
+  license any_of: ["BSD-3-Clause", "GPL-1.0-only"]
   head "https://github.com/linux-pam/linux-pam.git"
 
   bottle do
-    sha256 "16524aa3066317ae40de425d46be07a67ebd7c3d031c3c3e826aeebf7a8b80ce" => :x86_64_linux
+    sha256 x86_64_linux: "5beee64dc646a1b870bee7b07259cbf2eb66146d2856233f5a17c69db709be4d" # linuxbrew-core
   end
 
   depends_on "pkg-config" => :build
@@ -15,7 +16,7 @@ class LinuxPam < Formula
   depends_on "libtirpc"
   depends_on :linux
 
-  skip_clean :la, "etc"
+  skip_clean :la
 
   def install
     args = %W[
@@ -37,12 +38,8 @@ class LinuxPam < Formula
     system "make", "install"
   end
 
-  def post_install
-    chmod "u=rwxs,g=rx,o=rx", "#{sbin}/unix_chkpwd"
-  end
-
   test do
-    File.exist? "#{sbin}/unix_chkpwd"
-    assert_match "Usage", shell_output("#{sbin}/mkhomedir_helper 2>&1", 14)
+    assert_match "Usage: #{sbin}/mkhomedir_helper <username>",
+                 shell_output("#{sbin}/mkhomedir_helper 2>&1", 14)
   end
 end

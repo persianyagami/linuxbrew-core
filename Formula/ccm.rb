@@ -4,23 +4,18 @@ class Ccm < Formula
   url "https://files.pythonhosted.org/packages/f1/12/091e82033d53b3802e1ead6b16045c5ecfb03374f8586a4ae4673a914c1a/ccm-3.1.5.tar.gz"
   sha256 "f07cc0a37116d2ce1b96c0d467f792668aa25835c73beb61639fa50a1954326c"
   license "Apache-2.0"
-  revision 1
-  head "https://github.com/pcmanus/ccm.git"
-
-  livecheck do
-    url :stable
-  end
+  revision 2
+  head "https://github.com/pcmanus/ccm.git", branch: "master"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "f0884f1aa2af574e62b130656d2110c9ad8d544caf6c984e08943c05a0bbf630" => :big_sur
-    sha256 "22fd6d245793ee81816df4ecce043c3a7bda47809f7afacb0eb7d12c6cf23fa5" => :catalina
-    sha256 "59242833ff1017ca8c5fa4a18d0ad7c1c6179b323daa473716c990db2c3d2e2f" => :mojave
-    sha256 "d986995a2a6de7bce2eb538861c94c826bd7f0f38bd23fc999feef15204de8fa" => :high_sierra
-    sha256 "20734e45a71aa74bfea762a803cb63a27ab9c9413b844c8cd875f60f18331004" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "6d54c130a02a2a8e18fa4ab6581fb247801cb8e4a34ed64556092445a7d00768"
+    sha256 cellar: :any_skip_relocation, big_sur:       "5be6d025aa61b10990e45c4158cea86bd6722e5aeb677c5a10e3cadc68971bdf"
+    sha256 cellar: :any_skip_relocation, catalina:      "cb07fbe35e0dcea161491e1a670f7605e21b13299c28de8d3ed08102a0d641a4"
+    sha256 cellar: :any_skip_relocation, mojave:        "076976be7d2278de9591750dcfada9d9856cb217f2869c9e00ddf459e173e933"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "eb8e29fda4d10839bbf3f5d8db9217313103014d36a44dcd79ef879db714cec7" # linuxbrew-core
   end
 
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   resource "PyYAML" do
     url "https://files.pythonhosted.org/packages/3d/d9/ea9816aea31beeadccd03f1f8b625ecf8f645bd66744484d162d84803ce5/PyYAML-5.3.tar.gz"

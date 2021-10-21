@@ -1,23 +1,23 @@
 class Cataclysm < Formula
   desc "Fork/variant of Cataclysm Roguelike"
   homepage "https://github.com/CleverRaven/Cataclysm-DDA"
-  url "https://github.com/CleverRaven/Cataclysm-DDA/archive/0.E.tar.gz"
-  version "0.E"
-  sha256 "b0af9a9292929e17332edcea770bca9a91f1d08ea47726d78a47e09281a42fa3"
+  url "https://github.com/CleverRaven/Cataclysm-DDA/archive/0.F-2.tar.gz"
+  version "0.F-2"
+  sha256 "0c607071302265af07a9b299d0bbdb0716b2b929caa3cbcf435cd415b14ccc56"
   license "CC-BY-SA-3.0"
-  head "https://github.com/CleverRaven/Cataclysm-DDA.git"
+  head "https://github.com/CleverRaven/Cataclysm-DDA.git", branch: "master"
 
   livecheck do
     url :stable
+    regex(%r{href=["']?[^"' >]*?/tag/([^"' >]+)["' >]}i)
     strategy :github_latest
-    regex(%r{href=.*?/tag/([^"' >]+)["' >]}i)
   end
 
   bottle do
-    cellar :any
-    sha256 "bbd96abbc2ac1ddfabb2ab2febff1b0653d95210b84e6ea8a1dec73a530d8647" => :catalina
-    sha256 "c2c44f2a965153e4258c8c3daf6772bd7f5c9935320d2e1975cb63fb6909f095" => :mojave
-    sha256 "1eb07ba0e992116ae94d8b380d520139d686997e6700834f2db4bb1cded1401f" => :high_sierra
+    sha256 cellar: :any, arm64_big_sur: "ca14eb2f01555ab74e44e76e939c41d477c675a7b157e34a17f06d5ce3e56fc2"
+    sha256 cellar: :any, big_sur:       "fe3e6ecd6e489a2f3acf6fef68308a40b0ca364f821fbdb138e81849aa52a9b3"
+    sha256 cellar: :any, catalina:      "655026ec19a856b436722efabd34507e6768468a993dc2768f7c1583b86c3641"
+    sha256 cellar: :any, mojave:        "cf4a1e7e99ac3dd4af801918385bafc6b3425b555436086fcaa7e22c371f9ff7"
   end
 
   depends_on "pkg-config" => :build
@@ -64,13 +64,9 @@ class Cataclysm < Formula
     pid = fork do
       exec bin/"cataclysm"
     end
-    sleep 7
+    sleep 30
     assert_predicate user_config_dir/"config",
                      :exist?, "User config directory should exist"
-    assert_predicate user_config_dir/"templates",
-                     :exist?, "User template directory should exist"
-    assert_predicate user_config_dir/"save",
-                     :exist?, "User save directory should exist"
   ensure
     Process.kill("TERM", pid)
   end

@@ -1,17 +1,17 @@
 class MongoCxxDriver < Formula
   desc "C++ driver for MongoDB"
   homepage "https://github.com/mongodb/mongo-cxx-driver"
-  url "https://github.com/mongodb/mongo-cxx-driver/archive/r3.6.2.tar.gz"
-  sha256 "f50a1acb98a473f0850e2766dc7e84c05415dc63b1a2f851b77b12629ac14d62"
+  url "https://github.com/mongodb/mongo-cxx-driver/archive/r3.6.6.tar.gz"
+  sha256 "f989c371800458ae45ef69f6d9566e010f9420435a01bf5eb14db77fc024662e"
   license "Apache-2.0"
   head "https://github.com/mongodb/mongo-cxx-driver.git"
 
   bottle do
-    cellar :any
-    sha256 "e68f3e5c87021c8537656445b3641966eb1b03b36870d7d63795f75692b443a9" => :big_sur
-    sha256 "c914c8eb18e5b84f6e1051abfd565db1824523b487463ed4c3b670014009a323" => :catalina
-    sha256 "d257deef2474d068c1b7757aa9b2e7c1bb6259e15292c8b48e96487118a1c86a" => :mojave
-    sha256 "63619a9a0b10663fb72f1f90bf56f2645106acf9246259100d0a3dac5bb68894" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "39739b35a1ea90cbbd5d43e9623adfe38088ef5a19e82d2525e92f6128018923"
+    sha256 cellar: :any,                 big_sur:       "4a4b43266285d03ebc8a084a5c210c97ba845b8fd333eac87f4c395267a6967f"
+    sha256 cellar: :any,                 catalina:      "3376ae78c833751b52cce134f6bd1cfa48e13bc267abf9cb09402b8ccef5dda7"
+    sha256 cellar: :any,                 mojave:        "9936b280f4bdeffa5f2a50c07e860ca2025ac559b2e33e535e3077f97568576b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "311f69902d81eb9c21213c10182071c87da870a44dca21ec71d39d6f5e841df2" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
@@ -27,7 +27,8 @@ class MongoCxxDriver < Formula
     system "cmake", ".", *std_cmake_args,
                         "-DBUILD_VERSION=#{version}",
                         "-DLIBBSON_DIR=#{mongo_c_prefix}",
-                        "-DLIBMONGOC_DIR=#{mongo_c_prefix}"
+                        "-DLIBMONGOC_DIR=#{mongo_c_prefix}",
+                        "-DCMAKE_INSTALL_RPATH=#{rpath}"
     system "make"
     system "make", "install"
   end

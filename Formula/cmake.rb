@@ -1,27 +1,30 @@
 class Cmake < Formula
   desc "Cross-platform make"
   homepage "https://www.cmake.org/"
-  url "https://github.com/Kitware/CMake/releases/download/v3.19.1/cmake-3.19.1.tar.gz"
-  sha256 "1d266ea3a76ef650cdcf16c782a317cb4a7aa461617ee941e389cb48738a3aba"
+  # Keep in sync with cmake-docs.
+  url "https://github.com/Kitware/CMake/releases/download/v3.21.3/cmake-3.21.3.tar.gz"
+  mirror "http://fresh-center.net/linux/misc/cmake-3.21.3.tar.gz"
+  mirror "http://fresh-center.net/linux/misc/legacy/cmake-3.21.3.tar.gz"
+  sha256 "d14d06df4265134ee42c4d50f5a60cb8b471b7b6a47da8e5d914d49dd783794f"
   license "BSD-3-Clause"
-  head "https://gitlab.kitware.com/cmake/cmake.git"
+  revision 1
 
+  # The "latest" release on GitHub has been an unstable version before, so we
+  # check the Git tags instead.
   livecheck do
-    url "https://cmake.org/download/"
-    regex(/Latest Release \(v?(\d+(?:\.\d+)+)\)/i)
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "ea7e85abbc6e45d10b1f4b7f9d61cc1888c72e414140f71de1570f5522294501" => :big_sur
-    sha256 "9cf0ad192e48828f2cb9d8a8d6d68f5282f76dc9959ce8b65c88ce078b8bbea1" => :arm64_big_sur
-    sha256 "f1ac09ad5cd3634224b1bde4e8b55856fc0e911227597d9768c07bcd29fd9860" => :catalina
-    sha256 "d301ad06bf88e6aa9354298ae92c22e051ac2f0b3ab0c3eba3004f6c673a749a" => :mojave
-    sha256 "25b91945833770b56b2ac1272e8cc85f051caccf264b42ccf0ebc285c705e9d9" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "43dcb467effe26a5cca419080e9fded311ecc5badc8339e10fa5b11215131128"
+    sha256 cellar: :any_skip_relocation, big_sur:       "b9f106823e83911365f96a5f1b4cab26649840f06e1cbc541335143b7e71b237"
+    sha256 cellar: :any_skip_relocation, catalina:      "1ab2ae431b90878839404643b926eb81e5b6563d2b59cb860a1ebb03d90a09b7"
+    sha256 cellar: :any_skip_relocation, mojave:        "da00844fd5e38040486e1e65c415e92eeab82fcf358d5fe97deceffabc48df80"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "243351958c6d9ed921337240fc446dd75a0716550c884677b68300e79ac0f7fc" # linuxbrew-core
   end
 
-  depends_on "sphinx-doc" => :build
-  depends_on "ncurses"
+  uses_from_macos "ncurses"
 
   on_linux do
     depends_on "openssl@1.1"
@@ -34,10 +37,6 @@ class Cmake < Formula
   # For the GUI application please instead use `brew install --cask cmake`.
 
   def install
-    on_linux do
-      ENV.cxx11
-    end
-
     args = %W[
       --prefix=#{prefix}
       --no-system-libs
@@ -45,25 +44,39 @@ class Cmake < Formula
       --datadir=/share/cmake
       --docdir=/share/doc/cmake
       --mandir=/share/man
-      --sphinx-build=#{Formula["sphinx-doc"].opt_bin}/sphinx-build
-      --sphinx-html
-      --sphinx-man
-      --system-zlib
-      --system-bzip2
-      --system-curl
     ]
-    on_linux do
-      args -= ["--system-zlib", "--system-bzip2", "--system-curl"]
+    if OS.mac?
+      args += %w[
+        --system-zlib
+        --system-bzip2
+        --system-curl
+      ]
     end
 
     system "./bootstrap", *args, "--", *std_cmake_args,
-                                       "-DCMake_INSTALL_EMACS_DIR=#{elisp}"
+                                       "-DCMake_INSTALL_EMACS_DIR=#{elisp}",
+                                       "-DCMake_BUILD_LTO=ON"
     system "make"
     system "make", "install"
+
+    # Remove deprecated and unusable binary
+    # https://gitlab.kitware.com/cmake/cmake/-/issues/20235
+    (pkgshare/"Modules/Internal/CPack/CPack.OSXScriptLauncher.in").unlink
+  end
+
+  def caveats
+    <<~EOS
+      To install the CMake documentation, run:
+        brew install cmake-docs
+    EOS
   end
 
   test do
     (testpath/"CMakeLists.txt").write("find_package(Ruby)")
     system bin/"cmake", "."
+
+    # These should be supplied in a separate cmake-docs formula.
+    refute_path_exists doc/"html"
+    refute_path_exists man
   end
 end

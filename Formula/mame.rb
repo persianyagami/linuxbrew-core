@@ -1,11 +1,12 @@
 class Mame < Formula
   desc "Multiple Arcade Machine Emulator"
   homepage "https://mamedev.org/"
-  url "https://github.com/mamedev/mame/archive/mame0226.tar.gz"
-  version "0.226"
-  sha256 "7c4c9ec232ba988e65fd29665c9b8e40b5ac3aa9f561eeb107cebbf08ba94baf"
+  # NOTE: Please keep these values in sync with rom-tools.rb when updating.
+  url "https://github.com/mamedev/mame/archive/mame0236.tar.gz"
+  version "0.236"
+  sha256 "c76b973d786311f86922101ab0050dac90af9b0fd614a33c20231e3451c7b2dd"
   license "GPL-2.0-or-later"
-  head "https://github.com/mamedev/mame.git"
+  head "https://github.com/mamedev/mame.git", branch: "master"
 
   # MAME tags (and filenames) are formatted like `mame0226`, so livecheck will
   # report the version like `0226`. We work around this by matching the link
@@ -18,16 +19,15 @@ class Mame < Formula
   end
 
   bottle do
-    cellar :any
-    rebuild 1
-    sha256 "df514e97b41c36a65fb3d0729f8e927887cd9d1f7b3f23a189e4430a1e48bb76" => :big_sur
-    sha256 "9bc14fa247f653226bcdc771ad60ba70d2dc5e19b3386b547cf9b02c6f760615" => :catalina
-    sha256 "ca698bbefa83ddc6be99d0a471fe7f6303b35a6c757bb5b6b73a70acf8281c3f" => :mojave
+    sha256 cellar: :any,                 arm64_big_sur: "7e682b3e6fb2b30a5197c014f1b3e56e1a0daea0ec859e892d3c05e86f4a2508"
+    sha256 cellar: :any,                 big_sur:       "aa5065164d99e9ae75491395d1180b392e27eafc5209a6bb9d6cb9fc004557b2"
+    sha256 cellar: :any,                 catalina:      "8717ca403b7781452a483b156851009461ece4905609b82d0eb221a91c735cfc"
+    sha256 cellar: :any,                 mojave:        "c67fd7be123e760ef542e57770219423592e896bf7e7d955ea926f4272ee0d0d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "721fd9120323e227a370558bc9e8241d7ca9bdf7577f86686e2c74cf237db275" # linuxbrew-core
   end
 
   depends_on "glm" => :build
   depends_on "pkg-config" => :build
-  depends_on "pugixml" => :build
   depends_on "python@3.9" => :build
   depends_on "rapidjson" => :build
   depends_on "sphinx-doc" => :build
@@ -37,6 +37,7 @@ class Mame < Formula
   depends_on macos: :high_sierra
   depends_on "portaudio"
   depends_on "portmidi"
+  depends_on "pugixml"
   depends_on "sdl2"
   depends_on "sqlite"
   depends_on "utf8proc"
@@ -44,11 +45,15 @@ class Mame < Formula
   uses_from_macos "expat"
   uses_from_macos "zlib"
 
-  # Disable BGFX threading. Remove in next version.
-  patch do
-    url "https://github.com/mamedev/mame/commit/48d1f0de37fc6c429051dd1bcd1a49dbef581b1a.patch?full_index=1"
-    sha256 "9f9aba588ab1e82d927d1c101780415672c54cb463e80d435be3cb1d0ec34217"
+  on_linux do
+    depends_on "gcc" # for C++17
+    depends_on "pulseaudio"
+    depends_on "qt@5"
+    depends_on "sdl2_ttf"
   end
+
+  fails_with gcc: "5"
+  fails_with gcc: "6"
 
   def install
     # Cut sdl2-config's invalid option.
@@ -72,7 +77,7 @@ class Mame < Formula
                    "USE_SYSTEM_LIB_RAPIDJSON=1",
                    "USE_SYSTEM_LIB_SQLITE3=1",
                    "USE_SYSTEM_LIB_UTF8PROC=1"
-    bin.install "mame64" => "mame"
+    bin.install "mame"
     cd "docs" do
       # We don't convert SVG files into PDF files, don't load the related extensions.
       inreplace "source/conf.py", "'sphinxcontrib.rsvgconverter',", ""

@@ -2,16 +2,18 @@ class K9s < Formula
   desc "Kubernetes CLI To Manage Your Clusters In Style!"
   homepage "https://k9scli.io/"
   url "https://github.com/derailed/k9s.git",
-      tag:      "v0.24.2",
-      revision: "f929114ae4679c89ca06b2833d8a0fca5f1ec69d"
+      tag:      "v0.24.15",
+      revision: "8e41b76edf15f7eddc46cd75fd45d27a30dc9ebe"
   license "Apache-2.0"
+  revision 1
+  head "https://github.com/derailed/k9s.git"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "11eea882d339e31c60c8e3a18ee1d1f4d139896fabb812d87678a63b6d803be7" => :big_sur
-    sha256 "f79446010fd169eb3177e37542116e1197f85010394cca9e146c8088a8cfdab2" => :catalina
-    sha256 "975c7f0640f603439df7280e9cd836be0b7fc4dfb27d5c728c8084bf4eea2376" => :mojave
-    sha256 "bb222fc7f44910c759b119fb44c0df58360baea119cef2d5ece146c2af963178" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "db8f666a4a449636b6ff5b2aab81a1029813ed492dcc82f7eaacd15f7ebc24ed"
+    sha256 cellar: :any_skip_relocation, big_sur:       "c95b74ab0b03b7e72c72d80501bef0317d33beaa40395dfff8763274b0dca8a9"
+    sha256 cellar: :any_skip_relocation, catalina:      "19e1a184b7f609825aa1d16684aa04c2c41789ae505bee96f9d8ccbf119d7d65"
+    sha256 cellar: :any_skip_relocation, mojave:        "aff41d6be560246708b5f7fbce21495190ef7d7354997e905dfae6ea94c54027"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "158063b2e26be4ec4eb93cca2d9b7939689a138a3fc06251ad0bd406922a17be" # linuxbrew-core
   end
 
   depends_on "go" => :build
@@ -19,8 +21,17 @@ class K9s < Formula
   def install
     system "go", "build", "-ldflags",
              "-s -w -X github.com/derailed/k9s/cmd.version=#{version}
-             -X github.com/derailed/k9s/cmd.commit=#{stable.specs[:revision]}",
+             -X github.com/derailed/k9s/cmd.commit=#{Utils.git_head}",
              *std_go_args
+
+    bash_output = Utils.safe_popen_read(bin/"k9s", "completion", "bash")
+    (bash_completion/"k9s").write bash_output
+
+    zsh_output = Utils.safe_popen_read(bin/"k9s", "completion", "zsh")
+    (zsh_completion/"_k9s").write zsh_output
+
+    fish_output = Utils.safe_popen_read(bin/"k9s", "completion", "fish")
+    (fish_completion/"k9s.fish").write fish_output
   end
 
   test do

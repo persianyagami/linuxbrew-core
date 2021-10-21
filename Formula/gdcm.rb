@@ -1,10 +1,9 @@
 class Gdcm < Formula
   desc "Grassroots DICOM library and utilities for medical files"
   homepage "https://sourceforge.net/projects/gdcm/"
-  url "https://github.com/malaterre/GDCM/archive/v3.0.8.tar.gz"
-  sha256 "47b96be345b1611784f9e65fc39367c7450c9a1ef81c21f8acddfb6207098315"
+  url "https://github.com/malaterre/GDCM/archive/v3.0.10.tar.gz"
+  sha256 "a3fd3579ca0bb4a2a41ee18770e7303b22fd5460c3a2000e51ff0be6799e1d85"
   license "BSD-3-Clause"
-  revision 1
 
   livecheck do
     url :stable
@@ -12,10 +11,11 @@ class Gdcm < Formula
   end
 
   bottle do
-    sha256 "2f416ce53cbca29849bf6d3720d289f0b778593620937ba8a833c75a257aaf89" => :big_sur
-    sha256 "d5ce02b3b5473665b241484eff50b226d7b7f800253255362c26195fc69e40eb" => :catalina
-    sha256 "3e75b52ddc6151a6f39a63e2d4403c960247b0a6b780a2488cc6bda293a773fa" => :mojave
-    sha256 "8a5ac94c29c78add6e335dd5a07ef2f2b2f2d0c7da9704d7655d9800f5278dd8" => :high_sierra
+    sha256 arm64_big_sur: "5138339123c826603f3b95494e7311fc7488503bc16ee59cfbf60d90a1a562de"
+    sha256 big_sur:       "7311b7b638ba5453aa9ac44521bd608f62c9d14fe8fb62106930268425fbf420"
+    sha256 catalina:      "61776638059c775c87c91e11f4e6ccd8c9c30d7f56d6b2c8c3544ad88f703202"
+    sha256 mojave:        "667f8feb062beb81b1d6d67404dfa6001aa1c731d39d3ed3627f5971f041647e"
+    sha256 x86_64_linux:  "1caedd52b7c3ded9819bbc89857c1ba5a7acc42ccb4e97e48c0b25f99a82d1f9" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
@@ -26,6 +26,15 @@ class Gdcm < Formula
   depends_on "openssl@1.1"
   depends_on "python@3.9"
   depends_on "vtk@8.2"
+
+  uses_from_macos "expat"
+  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "gcc"
+  end
+
+  fails_with gcc: "5"
 
   def install
     ENV.cxx11
@@ -45,6 +54,9 @@ class Gdcm < Formula
       -DGDCM_BUILD_EXAMPLES=OFF
       -DGDCM_BUILD_DOCBOOK_MANPAGES=OFF
       -DGDCM_USE_VTK=ON
+      -DGDCM_USE_SYSTEM_EXPAT=ON
+      -DGDCM_USE_SYSTEM_ZLIB=ON
+      -DGDCM_USE_SYSTEM_UUID=ON
       -DGDCM_USE_SYSTEM_OPENJPEG=ON
       -DGDCM_USE_SYSTEM_OPENSSL=ON
       -DGDCM_WRAP_PYTHON=ON

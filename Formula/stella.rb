@@ -1,62 +1,65 @@
 class Stella < Formula
   desc "Atari 2600 VCS emulator"
   homepage "https://stella-emu.github.io/"
-  url "https://github.com/stella-emu/stella/releases/download/6.4/stella-6.4-src.tar.xz"
-  sha256 "0346900e9ba4b6d532b72d956adc5078502a9bd6bbc1648bb3dd68f5ffd4859b"
+  url "https://github.com/stella-emu/stella/releases/download/6.5.3/stella-6.5.3-src.tar.xz"
+  sha256 "b49d5e5a5aa872e1f4b6f24eabd72304abdd577801d6ec349760c73b99e7f14d"
   license "GPL-2.0-or-later"
-  head "https://github.com/stella-emu/stella.git"
+  head "https://github.com/stella-emu/stella.git", branch: "master"
 
   bottle do
-    cellar :any
-    sha256 "2ff00068a630dd83b02c5ed609b557795c1b856dbedf6463cad37cd8552e3ce1" => :big_sur
-    sha256 "dd75332a71568ade603f9042f93da74bdf0eedb35461571392ca8e4b17ccb8e0" => :catalina
-    sha256 "358818331b7859ab184cecd46b3efd3de5d81156c436798840a1976a3ad346de" => :mojave
-    sha256 "18ad422ce92e764abad0cbe16fb126017be40b9d5159a37818698512290e810c" => :high_sierra
-    sha256 "c1aa29ec14b90ebb36cee026a74949433963150ada6081b0f9b85321c646333a" => :x86_64_linux
+    sha256 cellar: :any,                 big_sur:      "413ec06db90b9e5fd3f704e8181e50d4d39c88ff579c0e9dc523ee74b2ad3558"
+    sha256 cellar: :any,                 catalina:     "7765c2e205dc182aab86de151356ae6a586585a076cea5f9d0d82708447a0427"
+    sha256 cellar: :any,                 mojave:       "228ac66abf639dce733dce76c6cde14c122c84c12476c1663a64243ac609994a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "a3a543f967b0422f2076273338c3de567d2c93016c3e92f98cedd9d51d472516" # linuxbrew-core
   end
 
   depends_on xcode: :build
   depends_on "libpng"
   depends_on "sdl2"
 
-  # Stella is using c++14
-  unless OS.mac?
-    fails_with gcc: "5"
-    fails_with gcc: "6"
-    fails_with gcc: "7"
-    depends_on "gcc@8"
+  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "gcc"
   end
 
-  uses_from_macos "zlib"
+  fails_with gcc: "5"
 
   def install
     sdl2 = Formula["sdl2"]
     libpng = Formula["libpng"]
-    cd "src/macos" do
-      inreplace "stella.xcodeproj/project.pbxproj" do |s|
-        s.gsub! %r{(\w{24} /\* SDL2\.framework)}, '//\1'
-        s.gsub! %r{(\w{24} /\* png)}, '//\1'
-        s.gsub! /(HEADER_SEARCH_PATHS) = \(/,
-                "\\1 = (#{sdl2.opt_include}/SDL2, #{libpng.opt_include},"
-        s.gsub! /(LIBRARY_SEARCH_PATHS) = ("\$\(LIBRARY_SEARCH_PATHS\)");/,
-                "\\1 = (#{sdl2.opt_lib}, #{libpng.opt_lib}, \\2);"
-        s.gsub! /(OTHER_LDFLAGS) = "((-\w+)*)"/, '\1 = "-lSDL2 -lpng \2"'
+    if OS.mac?
+      cd "src/macos" do
+        inreplace "stella.xcodeproj/project.pbxproj" do |s|
+          s.gsub! %r{(\w{24} /\* SDL2\.framework)}, '//\1'
+          s.gsub! %r{(\w{24} /\* png)}, '//\1'
+          s.gsub!(/(HEADER_SEARCH_PATHS) = \(/,
+                  "\\1 = (#{sdl2.opt_include}/SDL2, #{libpng.opt_include},")
+          s.gsub!(/(LIBRARY_SEARCH_PATHS) = ("\$\(LIBRARY_SEARCH_PATHS\)");/,
+                  "\\1 = (#{sdl2.opt_lib}, #{libpng.opt_lib}, \\2);")
+          s.gsub!(/(OTHER_LDFLAGS) = "((-\w+)*)"/, '\1 = "-lSDL2 -lpng \2"')
+        end
+        xcodebuild "SYMROOT=build"
+        prefix.install "build/Release/Stella.app"
+        bin.write_exec_script "#{prefix}/Stella.app/Contents/MacOS/Stella"
       end
+    else
+      system "./configure", "--prefix=#{prefix}",
+                            "--bindir=#{bin}",
+                            "--enable-release",
+                            "--with-sdl-prefix=#{sdl2.prefix}",
+                            "--with-libpng-prefix=#{libpng.prefix}",
+                            "--with-zlib-prefix=#{Formula["zlib"].prefix}"
+      system "make", "install"
     end
-    system "./configure", "--prefix=#{prefix}",
-                          "--bindir=#{bin}",
-                          "--with-sdl-prefix=#{sdl2.prefix}",
-                          "--with-libpng-prefix=#{libpng.prefix}",
-                          "--with-zlib-prefix=#{Formula["zlib"].prefix}"
-    system "make", "install"
   end
 
   test do
-    assert_match /Stella version #{version}/, shell_output("#{bin}/Stella -help").strip if OS.mac?
-    # Test is disabled for Linux, as it is failing with:
-    # ERROR: Couldn't load settings file
-    # ERROR: Couldn't initialize SDL: No available video device
-    # ERROR: Couldn't create OSystem
-    # ERROR: Couldn't save settings file
+    if OS.mac?
+      assert_match "E.T. - The Extra-Terrestrial", shell_output("#{bin}/Stella -listrominfo").strip
+    else
+      assert_match "failed to initialize: unable to open database file",
+        shell_output("#{bin}/stella -listrominfo").strip
+    end
   end
 end

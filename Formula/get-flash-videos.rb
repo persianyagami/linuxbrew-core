@@ -6,16 +6,16 @@ class GetFlashVideos < Formula
   license "Apache-2.0"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "1a45571d40ed0c4e8b98142988156cdedafd82cfcb82108ee512cb59d34f6dcf" => :catalina
-    sha256 "ce0853c6ed07dfec3abce3ae4ca0cf073f5a8a38d530a227ffd966e7f1d946c4" => :mojave
-    sha256 "10e25788bbd00ffd0f0a5281c9c4c493c2957947ba4690cf92460c98aa72dc1b" => :high_sierra
-    sha256 "6c6e60aff2308881f4ef896b5a5c2dd1b05db9146d224be024793f042534dc6d" => :sierra
-    sha256 "0b7edca9b6518af848a6cb5f84bb34014cd017391279398ea9d796dc89ea7a57" => :el_capitan
-    sha256 "00d5ca2a5f48c1d41c8b207ee3dac89720599f828e0d2ed0291a3ac7593717e0" => :x86_64_linux
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "79a6359023b8e477bc3a033747b817c57a476cf19938a1ae484ce2a52f2ce4ef"
+    sha256 cellar: :any_skip_relocation, big_sur:       "2778b4877b9a5f717f247e73ce571db7f3215ca6a31e77dfaaebc4d7b0664bd7"
+    sha256 cellar: :any_skip_relocation, catalina:      "aac5558ccf7b7198eb48b71d7cdb9d07b93f4174926182a6e540678b0c4f9648"
+    sha256 cellar: :any_skip_relocation, mojave:        "f67cf7971842dbfaa8f8ecb24ba6692bd506688c4ff6b0e51cc05dd3d13f6d11"
   end
 
   depends_on "rtmpdump"
+
+  uses_from_macos "perl"
 
   on_linux do
     resource "Module::Find" do
@@ -67,23 +67,6 @@ class GetFlashVideos < Formula
   resource "Crypt::Rijndael" do
     url "https://cpan.metacpan.org/authors/id/L/LE/LEONT/Crypt-Rijndael-1.13.tar.gz"
     sha256 "cd7209a6dfe0a3dc8caffe1aa2233b0e6effec7572d76a7a93feefffe636214e"
-  end
-
-  unless OS.mac?
-    resource "Module::Find" do
-      url "https://cpan.metacpan.org/authors/id/C/CR/CRENZ/Module-Find-0.13.tar.gz"
-      sha256 "4a47862072ca4962fa69796907476049dc60176003e946cf4b68a6b669f18568"
-    end
-
-    resource "Try::Tiny" do
-      url "https://cpan.metacpan.org/authors/id/E/ET/ETHER/Try-Tiny-0.28.tar.gz"
-      sha256 "f1d166be8aa19942c4504c9111dade7aacb981bc5b3a2a5c5f6019646db8c146"
-    end
-
-    resource "XML::Simple" do
-      url "https://cpan.metacpan.org/authors/id/G/GR/GRANTM/XML-Simple-2.24.tar.gz"
-      sha256 "9a14819fd17c75fbb90adcec0446ceab356cab0ccaff870f2e1659205dc2424f"
-    end
   end
 
   def install

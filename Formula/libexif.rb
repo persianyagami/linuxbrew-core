@@ -1,17 +1,16 @@
 class Libexif < Formula
   desc "EXIF parsing library"
   homepage "https://libexif.github.io/"
-  url "https://github.com/libexif/libexif/releases/download/libexif-0_6_22-release/libexif-0.6.22.tar.xz"
-  sha256 "5048f1c8fc509cc636c2f97f4b40c293338b6041a5652082d5ee2cf54b530c56"
+  url "https://github.com/libexif/libexif/releases/download/v0.6.23/libexif-0.6.23.tar.xz"
+  sha256 "a740a99920eb81ae0aa802bb46e683ce6e0cde061c210f5d5bde5b8572380431"
   license "LGPL-2.1"
-  revision 1 unless OS.mac?
 
   bottle do
-    sha256 "93faf9081e80a6b1b30fd4dd941fa650d431b3064aeef00c9a7bccd042ff1bda" => :big_sur
-    sha256 "7379f6990018006122bba69098864e8877e8e6e7be3af535f7e301d8ff097e98" => :catalina
-    sha256 "c20d311fbd1846ce2603950ec9ad9b3b6e8202bf2f97e9aab328c05dc568fcfe" => :mojave
-    sha256 "8b1c7cf6ec777090ce22ccf5c426867948a54da9378e0c9b91d85175eaea4f81" => :high_sierra
-    sha256 "7139c14be05e7c75cce2b0fd3d58dc95dffe6b3b815396ce0648566cd3000369" => :x86_64_linux
+    sha256 arm64_big_sur: "f2a133f663a82d1d39ba238692f6c56de3c6bae12add2107204a75af2f6d923a"
+    sha256 big_sur:       "17a348763e827089c2d2fb2b2c631f38df87d99234d81f2bbbe1c7219577522c"
+    sha256 catalina:      "5b2a8266f5236b9fe1921040976c07d9eda3cc178a2c2d82824254de82df0e2e"
+    sha256 mojave:        "85e039d08a8668365cd7f71a9012c587028e4e6d6dfe0a9cc082bcc99ca7b643"
+    sha256 x86_64_linux:  "6b20530c09fffe2d4dcda90dfd9b8c1869e1ff58fe94eb9e74763d2f705f1a9e" # linuxbrew-core
   end
 
   depends_on "autoconf" => :build
@@ -38,7 +37,6 @@ class Libexif < Formula
           data = exif_loader_get_data(loader);
           printf(data ? "Exif data loaded" : "No Exif data");
         }
-        return 0;
       }
     EOS
     flags = %W[

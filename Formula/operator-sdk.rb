@@ -2,17 +2,22 @@ class OperatorSdk < Formula
   desc "SDK for building Kubernetes applications"
   homepage "https://coreos.com/operators/"
   url "https://github.com/operator-framework/operator-sdk.git",
-      tag:      "v1.2.0",
-      revision: "215fc50b2d4acc7d92b36828f42d7d1ae212015c"
+      tag:      "v1.13.1",
+      revision: "1659ab58a073999463e6dcdf18bdc359a315e091"
   license "Apache-2.0"
-  head "https://github.com/operator-framework/operator-sdk.git"
+  head "https://github.com/operator-framework/operator-sdk.git", branch: "master"
+
+  livecheck do
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
+  end
 
   bottle do
-    sha256 "7cfc1f066570db5c847f1e6dbe94d04047a5860a293a75cc79ef6c9ed06d7b52" => :big_sur
-    sha256 "9c5a65ecd8a7a880fb9313c9fdf00067468aaf758273dcc1c638cfcad982ce98" => :catalina
-    sha256 "30c354c68fac5ef3f2f24d5ad7b5db531c053084f2fe726755397d4342eb84c0" => :mojave
-    sha256 "f12d158290dbbe2ec76976da1082cf71b3a94b36a917b469735ab1ed66c0bc8d" => :high_sierra
-    sha256 "b070f887e9e6656b86bcc5e1f8c4b7860688e4261adf06b030af8f8e5d723a65" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "1a4b7a71081b00286227b6e41fcb8e38f8802af7eff94e099aabe2f9105f56a4"
+    sha256 cellar: :any_skip_relocation, big_sur:       "8a7c04a325f962c86b5cd7511d94ba179d959307d540665fdf0a2cf1d4679c69"
+    sha256 cellar: :any_skip_relocation, catalina:      "9293b50b9f1aaf743a96d37d43f9943d430f74f16b62add781bb1449f21b7c74"
+    sha256 cellar: :any_skip_relocation, mojave:        "5c43aaeda2865b80c09e371cb51e50aa49e7ce1503ccd075cd4921a5144a434f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "58cebc088189e114009e5b1ce76f9ca86b97dea56e213051cde42017e03d12ab" # linuxbrew-core
   end
 
   depends_on "go"
@@ -34,10 +39,11 @@ class OperatorSdk < Formula
     if build.stable?
       version_output = shell_output("#{bin}/operator-sdk version")
       assert_match "version: \"v#{version}\"", version_output
-      assert_match stable.specs[:revision], version_output
+      commit_regex = /[a-f0-9]{40}/
+      assert_match commit_regex, version_output
     end
 
-    system bin/"operator-sdk", "init", "--domain=example.com", "--repo=example.com/example/example"
-    assert_predicate testpath/"bin/manager", :exist?
+    output = shell_output("#{bin}/operator-sdk init --domain=example.com --license apache2 --owner BrewTest 2>&1", 1)
+    assert_match "failed to initialize project", output
   end
 end

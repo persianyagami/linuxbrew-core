@@ -5,22 +5,18 @@ class Notifiers < Formula
   homepage "https://pypi.org/project/notifiers/"
   url "https://files.pythonhosted.org/packages/4f/36/4c300f55949b9be84284d51253ae48d564dc2c4f2bffb94f26c8c1485f07/notifiers-1.2.1.tar.gz"
   sha256 "34625af405f4aa19293eaaefe145ccc92c6018ae9798f53a03a7fcc996e541aa"
-  revision OS.mac? ? 3 : 4
-
-  livecheck do
-    url :stable
-  end
+  license "MIT"
+  revision OS.mac? ? 4 : 5
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "84d843b6371da8b6858acda7c03126d2def410e3a1745c60a9ee2ce027740eb7" => :big_sur
-    sha256 "97f389f0f3bea37994deb5d1d8b1e4ef67fbdc2822ed73734f13f728d7bc86d3" => :catalina
-    sha256 "62bbd2a965c1feadc28ea3a1b6263f8781a42515f3bc8a23f796d1e8b11029a8" => :mojave
-    sha256 "e7cd27abdadb3f0f85c6e365cfaeb7dbe24ba1aeb7d161eff4ad9ac96f90702f" => :high_sierra
-    sha256 "4013789b491b0ba78a717b352909c5d9bb71f53ddb9a05193e3ebba537fa60da" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "e940aae460e075a8bc29d6e1c0e1bef324f5a5e1768e6bcfcf9ff833e4d5cf1f"
+    sha256 cellar: :any_skip_relocation, big_sur:       "cf12e31868906b339c00d1a07c99748c1522ea05c2d78995610421dbbde5d353"
+    sha256 cellar: :any_skip_relocation, catalina:      "15982233103b22e733b9dbf278dc5d44012b8b21e8d44589a06230a86b0d1d81"
+    sha256 cellar: :any_skip_relocation, mojave:        "612a16751cbdc438e72a9a29fe21152059d875a9c89d26ba78e7b32e4e0c0147"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "13c0206816c95be5e2bc68cd50c45914336a2ff74c57dab6def70ab6399df685" # linuxbrew-core
   end
 
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   resource "attrs" do
     url "https://files.pythonhosted.org/packages/98/c3/2c227e66b5e896e15ccdae2e00bbc69aa46e9a8ce8869cc5fa96310bf612/attrs-19.3.0.tar.gz"

@@ -1,16 +1,16 @@
 class OpencvAT3 < Formula
   desc "Open source computer vision library"
   homepage "https://opencv.org/"
-  url "https://github.com/opencv/opencv/archive/3.4.12.tar.gz"
-  sha256 "c8919dfb5ead6be67534bf794cb0925534311f1cd5c6680f8164ad1813c88d13"
+  url "https://github.com/opencv/opencv/archive/3.4.15.tar.gz"
+  sha256 "b1e8470b18e9e793bf70b4ae051bbc9bf81fa45f8cbfee1e6c88858c90be8ff7"
   license "BSD-3-Clause"
-  revision 3
 
   bottle do
-    sha256 "640ea516919445ee6d370678986093de9b7f3b27b756d76a0904687f94cec8c5" => :big_sur
-    sha256 "00b159415bc4ec16ed27f06f88fe5cb1db66f8a870d6564a7782d1ec56a6e672" => :catalina
-    sha256 "ffe594a6c6dfef0cc14dd61b21e3160e230b779abc45007d1e41a0ff4fe33861" => :mojave
-    sha256 "5be7afd889d93bc4c326d39701a8edd864d847a01528d0222868896efd2d1101" => :high_sierra
+    sha256 arm64_big_sur: "30f24b7ae1e2d3f63072e0abd4cd8c110063766abee4ea59eb885eb9a3137e7f"
+    sha256 big_sur:       "d7430cf4a9378666322b6d5fae8c9804314e7e91e1ceff20739fd133d6968c2b"
+    sha256 catalina:      "36a4597c6d285a881ae976f26b31293242865a294d67db9ae91e1c75096bc81d"
+    sha256 mojave:        "73d93954772b452010c15441e87ab429cfaed0185478463eb7d601e0fbb521a2"
+    sha256 x86_64_linux:  "dda612461ccf75df80e7317044e2334ad70b9c69f8758e44bc8c2449df595660" # linuxbrew-core
   end
 
   keg_only :versioned_formula
@@ -31,8 +31,15 @@ class OpencvAT3 < Formula
   depends_on "tbb"
 
   resource "contrib" do
-    url "https://github.com/opencv/opencv_contrib/archive/3.4.12.tar.gz"
-    sha256 "b207024589674dd2efc7c25740ef192ee4f3e0783e773e2d49a198c37e3e7570"
+    url "https://github.com/opencv/opencv_contrib/archive/3.4.15.tar.gz"
+    sha256 "5004024f2e92e520d324f235dc30a80878fd501fb03ca1f98ca3cbd53d27b6fb"
+  end
+
+  # tbb 2021 support. Backport of
+  # https://github.com/opencv/opencv/pull/19384
+  patch do
+    url "https://raw.githubusercontent.com/Homebrew/formula-patches/ec823c01d3275b13b527e4860ae542fac11da24c/opencv%403/tbb2021.patch"
+    sha256 "a125f962ea07f0656869cbd97433f0e465013effc13c97a414752e0d25ed9a7d"
   end
 
   def install
@@ -75,25 +82,19 @@ class OpencvAT3 < Formula
       -DPYTHON3_EXECUTABLE=#{Formula["python@3.9"].opt_bin}/python3
     ]
 
-    args << "-DENABLE_AVX=OFF" << "-DENABLE_AVX2=OFF"
-    args << "-DENABLE_SSE41=OFF" << "-DENABLE_SSE42=OFF" unless MacOS.version.requires_sse42?
+    if Hardware::CPU.intel?
+      args << "-DENABLE_AVX=OFF" << "-DENABLE_AVX2=OFF"
+      args << "-DENABLE_SSE41=OFF" << "-DENABLE_SSE42=OFF" unless MacOS.version.requires_sse42?
+    end
 
     mkdir "build" do
       system "cmake", "..", *args
-      if OS.mac?
-        inreplace "modules/core/version_string.inc", "#{HOMEBREW_SHIMS_PATH}/mac/super/", ""
-      else
-        inreplace "modules/core/version_string.inc", "#{HOMEBREW_SHIMS_PATH}/linux/super/", ""
-      end
+      inreplace "modules/core/version_string.inc", Superenv.shims_path, ""
       system "make"
       system "make", "install"
       system "make", "clean"
       system "cmake", "..", "-DBUILD_SHARED_LIBS=OFF", *args
-      if OS.mac?
-        inreplace "modules/core/version_string.inc", "#{HOMEBREW_SHIMS_PATH}/mac/super/", ""
-      else
-        inreplace "modules/core/version_string.inc", "#{HOMEBREW_SHIMS_PATH}/linux/super/", ""
-      end
+      inreplace "modules/core/version_string.inc", Superenv.shims_path, ""
       system "make"
       lib.install Dir["lib/*.a"]
       lib.install Dir["3rdparty/**/*.a"]

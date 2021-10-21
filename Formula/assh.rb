@@ -1,25 +1,23 @@
 class Assh < Formula
   desc "Advanced SSH config - Regex, aliases, gateways, includes and dynamic hosts"
   homepage "https://manfred.life/assh"
-  url "https://github.com/moul/assh/archive/v2.10.0.tar.gz"
-  sha256 "7cc2ff54c5fc04d2b5cbe0b073ef2fef112e5b3ef9185408b708625e572c83c1"
+  url "https://github.com/moul/assh/archive/v2.12.0.tar.gz"
+  sha256 "f4b8ef42582f86f208fe6947e5ca123e9b86d47e58e0aaecf822bbe9e9e74a26"
   license "MIT"
-  head "https://github.com/moul/assh.git"
+  head "https://github.com/moul/assh.git", branch: "master"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "6762c33fb1336c69c2291490db6a48c14117885e75dbc7567cf70bb4b1ba4fb4" => :big_sur
-    sha256 "e12956db15a33133390f2317143315710f6692aad3e5b36fafa3934e43ab3241" => :catalina
-    sha256 "2507b79a656698c02c1fb678ebe280ba44326a9f8ec17d4fd355a3843b60253b" => :mojave
-    sha256 "359270a9985af3faba8cfe637027d2a4d44ed3b0ce129bd5eb22354eb000bf45" => :high_sierra
-    sha256 "0d7438819c7f98d04af1e27290f7d466d72912917bd5289ef7ac6ab90e61ee2d" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "a2e89654afd5dd87dc505b09dd36ee2d0dd142f6a7955dce79db9a4f96713c77"
+    sha256 cellar: :any_skip_relocation, big_sur:       "b32614a996f726756faa62ca0b4e27ee7404e9f3341a8d8f1457d925e899bc65"
+    sha256 cellar: :any_skip_relocation, catalina:      "77570e18528c106267cf4fe3f7a8160d7f788681885dfe16560280d9d450ad7a"
+    sha256 cellar: :any_skip_relocation, mojave:        "46193d23bec30727a5a8b63d77e8f8a811dd4ffaf7b7023c832d7e3a24acc072"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "efa11877000c3a322c5ae8a1402910e95a122554ae80321f8c3557fbc9063625" # linuxbrew-core
   end
 
   depends_on "go" => :build
 
   def install
-    system "go", "build", "-ldflags", "-s -w", "-trimpath", "-o", bin/"assh"
-    prefix.install_metafiles
+    system "go", "build", *std_go_args, "-ldflags", "-s -w"
   end
 
   test do

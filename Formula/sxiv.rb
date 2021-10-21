@@ -5,15 +5,18 @@ class Sxiv < Formula
   sha256 "a382ad57734243818e828ba161fc0357b48d8f3a7f8c29cac183492b46b58949"
   license "GPL-2.0-or-later"
   revision 1
-  head "https://github.com/muennich/sxiv.git"
+  head "https://github.com/muennich/sxiv.git", branch: "master"
 
   bottle do
-    cellar :any
-    sha256 "0fbf88dbb8f6744d36254023302ea2c88521bd4b8b8172eff00c7dfe2bfd4495" => :big_sur
-    sha256 "caafa51424cd97f030b9156aeba0ba64f6ab5821197453136a240c7ca38869d9" => :catalina
-    sha256 "14b4f8a7137ea1ff12dde1d0a8cda063227e48d77ba75d93ecbde6193584d2cf" => :mojave
-    sha256 "b8f60f5b9bb6987f0042ac485eb0d4c5c5c3cdc4ea4c32fc13def537e51d39dc" => :high_sierra
+    sha256 cellar: :any,                 arm64_big_sur: "11aff8aaab1a32a0694672b802f9399d5002f1871329054671273a2d919b4d5d"
+    sha256 cellar: :any,                 big_sur:       "0fbf88dbb8f6744d36254023302ea2c88521bd4b8b8172eff00c7dfe2bfd4495"
+    sha256 cellar: :any,                 catalina:      "caafa51424cd97f030b9156aeba0ba64f6ab5821197453136a240c7ca38869d9"
+    sha256 cellar: :any,                 mojave:        "14b4f8a7137ea1ff12dde1d0a8cda063227e48d77ba75d93ecbde6193584d2cf"
+    sha256 cellar: :any,                 high_sierra:   "b8f60f5b9bb6987f0042ac485eb0d4c5c5c3cdc4ea4c32fc13def537e51d39dc"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "161f9fb7a64662edabd4174ed175af98d1ac5b28d3bb7b33e3341bbbab6b1ab7" # linuxbrew-core
   end
+
+  deprecate! date: "2021-09-23", because: :repo_archived
 
   depends_on "giflib"
   depends_on "imlib2"

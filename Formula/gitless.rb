@@ -3,21 +3,21 @@ class Gitless < Formula
 
   desc "Simplified version control system on top of git"
   homepage "https://gitless.com/"
-  url "https://github.com/gitless-vcs/gitless/archive/v0.8.8.tar.gz"
-  sha256 "470aab13d51baec2ab54d7ceb6d12b9a2937f72d840516affa0cb34a6360523c"
+  url "https://files.pythonhosted.org/packages/9c/2e/457ae38c636c5947d603c84fea1cf51b7fcd0c8a5e4a9f2899b5b71534a0/gitless-0.8.8.tar.gz"
+  sha256 "590d9636d2ca743fdd972d9bf1f55027c1d7bc2ab1d5e877868807c3359b78ef"
   license "MIT"
-  revision OS.mac? ? 6 : 8
+  revision OS.mac? ? 10 : 12
 
   bottle do
-    cellar :any
-    sha256 "7e42410c00782d142475e2ac03b69f0252171896d7810eca236b542f88594bb0" => :big_sur
-    sha256 "a9e98e5ccaa560eecef92231da263ca3e1664ab4cc98009a26fde08a2e139588" => :catalina
-    sha256 "7790557c2d8c054fa08df99abf55a1c37cad8dcfc57342ca5fc2923e7352f8a3" => :mojave
-    sha256 "d39cb7b4f98b8682425d5049c1caacf18d6f39269f2b4c2ac49e02ba04e93035" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "84aa2c7e09ebdb4b69e76a3d5247b3e98f8f83327f0c3ff5272129e1f42903b6"
+    sha256 cellar: :any,                 big_sur:       "e894c506c8ce6f6bdc2902881d2545ef7bd90b16e381b0dff99fe8ad1240b234"
+    sha256 cellar: :any,                 catalina:      "c20f221e93cd90aa30bf693bbae322137a01a808336b8f8d559ce1966bf18477"
+    sha256 cellar: :any,                 mojave:        "2045586480fd247520a943e761fd33ed5ed78df0463108e1de1ddfba623fcdaa"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f7bd907734b3b0e8337d79342dba7e99070f27ac2d7175bf19f557e0a05fd968" # linuxbrew-core
   end
 
   depends_on "libgit2"
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   uses_from_macos "libffi"
 
@@ -36,8 +36,8 @@ class Gitless < Formula
   end
 
   resource "cffi" do
-    url "https://files.pythonhosted.org/packages/93/1a/ab8c62b5838722f29f3daffcc8d4bd61844aa9b5f437341cc890ceee483b/cffi-1.12.3.tar.gz"
-    sha256 "041c81822e9f84b1d9c401182e174996f0bae9991f33725d059b771744290774"
+    url "https://files.pythonhosted.org/packages/66/6a/98e023b3d11537a5521902ac6b50db470c826c682be6a8c661549cb7717a/cffi-1.14.4.tar.gz"
+    sha256 "1a465cbe98a7fd391d47dce4b8f7e5b921e6cd805ef421d04f5f66ba8f06086c"
   end
 
   resource "clint" do
@@ -51,8 +51,15 @@ class Gitless < Formula
   end
 
   resource "pygit2" do
-    url "https://files.pythonhosted.org/packages/3a/42/f69de8c7a1e33f365a91fa39093f4e7a64609c2bd127203536edc813cbf7/pygit2-1.4.0.tar.gz"
-    sha256 "cbeb38ab1df9b5d8896548a11e63aae8a064763ab5f1eabe4475e6b8a78ee1c8"
+    url "https://files.pythonhosted.org/packages/6b/23/a8c5b726a58282fe2cadcc63faaddd4be147c3c8e0bd38b233114adf98fd/pygit2-1.6.1.tar.gz"
+    sha256 "c3303776f774d3e0115c1c4f6e1fc35470d15f113a7ae9401a0b90acfa1661ac"
+
+    # libgit2 1.3 support
+    # https://github.com/libgit2/pygit2/pull/1089
+    patch do
+      url "https://raw.githubusercontent.com/Homebrew/formula-patches/54d3a0d1f241fdd4e9229312ced0d8da85d964b1/pygit2/libgit2-1.3.0.patch"
+      sha256 "4d501c09d6642d50d89a1a4d691980e3a4a2ebcb6de7b45d22cce16a451b9839"
+    end
   end
 
   resource "sh" do

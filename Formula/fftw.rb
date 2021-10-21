@@ -1,30 +1,34 @@
 class Fftw < Formula
   desc "C routines to compute the Discrete Fourier Transform"
-  homepage "http://www.fftw.org"
-  url "http://fftw.org/fftw-3.3.8.tar.gz"
-  sha256 "6113262f6e92c5bd474f2875fa1b01054c4ad5040f6b0da7c03c98821d9ae303"
-  revision 2
+  homepage "https://fftw.org"
+  url "https://fftw.org/fftw-3.3.10.tar.gz"
+  sha256 "56c932549852cddcfafdab3820b0200c7742675be92179e59e6215b340e26467"
+  license all_of: ["GPL-2.0-or-later", "BSD-2-Clause"]
 
   livecheck do
-    url "http://fftw.org/"
+    url :homepage
     regex(%r{latest official release.*? <b>v?(\d+(?:\.\d+)+)</b>}i)
   end
 
   bottle do
-    cellar :any
-    sha256 "d1713d61acb8e3f52098f69572c51c695393f33cb0d11032abc672a7e83a5977" => :big_sur
-    sha256 "e021f210b7f8a785b86b82fe191408d783def6e6baec192e8133d703c51bf0de" => :catalina
-    sha256 "d4af1ee10e2eb5784874cac832f10d3e8d3010962e31102df7c6bffc34783d92" => :mojave
-    sha256 "64d050b8736eed9b127f175d39d4acc93c1ec960b096aee756bbb5ea906b6b82" => :high_sierra
-    sha256 "8a4f30a87effd1d39cd8374e03247d6b88538b3346825a1ecfefab04e4a0040d" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "bad8b35844e916b0aee957da5f50f1aaf42c400582ca9e0c531d8b1d7cbf831c"
+    sha256 cellar: :any,                 big_sur:       "7f8815d58971d1c38465556b12b2fc2cdd5c1575174984a493080cbb88efb925"
+    sha256 cellar: :any,                 catalina:      "6189ebccb8f84d6aaf8139f877a0fed20605b749404b5e5296c2a673df681841"
+    sha256 cellar: :any,                 mojave:        "694f17490cf119dba54c4ab36fe4c777d916fade8629cc1a728ff2f698c135b6"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9857c06bfd9eb89821aec3fe7a5a47283291ef9994b3167e8bbdb7e1f42784c2" # linuxbrew-core
   end
 
-  depends_on "gcc"
   depends_on "open-mpi"
+
+  on_macos do
+    depends_on "gcc"
+  end
 
   fails_with :clang
 
   def install
+    ENV.runtime_cpu_detection
+
     args = [
       "--enable-shared",
       "--disable-debug",
@@ -37,7 +41,8 @@ class Fftw < Formula
 
     # FFTW supports runtime detection of CPU capabilities, so it is safe to
     # use with --enable-avx and the code will still run on all CPUs
-    simd_args = ["--enable-sse2", "--enable-avx"]
+    simd_args = []
+    simd_args += %w[--enable-sse2 --enable-avx --enable-avx2] if Hardware::CPU.intel?
 
     # single precision
     # enable-sse2, enable-avx and enable-avx2 work for both single and double precision
@@ -63,7 +68,7 @@ class Fftw < Formula
 
   test do
     # Adapted from the sample usage provided in the documentation:
-    # http://www.fftw.org/fftw3_doc/Complex-One_002dDimensional-DFTs.html
+    # https://www.fftw.org/fftw3_doc/Complex-One_002dDimensional-DFTs.html
     (testpath/"fftw.c").write <<~EOS
       #include <fftw3.h>
       int main(int argc, char* *argv)
@@ -81,7 +86,7 @@ class Fftw < Formula
       }
     EOS
 
-    system ENV.cc, "-o", "fftw", "fftw.c", "-L#{lib}", "-lfftw3", *ENV.cflags.to_s.split
+    system ENV.cc, "-o", "fftw", "fftw.c", "-L#{lib}", "-lfftw3"
     system "./fftw"
   end
 end

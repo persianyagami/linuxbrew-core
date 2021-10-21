@@ -1,16 +1,14 @@
 class Fuseki < Formula
   desc "SPARQL server"
   homepage "https://jena.apache.org/documentation/fuseki2/"
-  url "https://www.apache.org/dyn/closer.lua?path=jena/binaries/apache-jena-fuseki-3.17.0.tar.gz"
-  mirror "https://archive.apache.org/dist/jena/binaries/apache-jena-fuseki-3.17.0.tar.gz"
-  sha256 "70008c600cb9a04662e15b057462d0ab269bc25e34e29bf201d8d1a1d6db249e"
+  url "https://www.apache.org/dyn/closer.lua?path=jena/binaries/apache-jena-fuseki-4.2.0.tar.gz"
+  mirror "https://archive.apache.org/dist/jena/binaries/apache-jena-fuseki-4.2.0.tar.gz"
+  sha256 "70784d4d92e832dfe45d0006e2079d98829df42c485793212d05f68a3d517bf4"
   license "Apache-2.0"
 
-  livecheck do
-    url :stable
+  bottle do
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "2ca9f345fa0107ac966f9505fc504e36e0c056de5678c53fc5b2bdabd170f3e3" # linuxbrew-core
   end
-
-  bottle :unneeded
 
   depends_on "openjdk"
 
@@ -41,27 +39,8 @@ class Fuseki < Formula
     (var/"log/fuseki").mkpath
   end
 
-  plist_options manual: "fuseki start"
-
-  def plist
-    <<~EOS
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-        <dict>
-          <key>Label</key>
-          <string>#{plist_name}</string>
-          <key>RunAtLoad</key>
-          <true/>
-          <key>KeepAlive</key>
-          <false/>
-          <key>ProgramArguments</key>
-          <array>
-            <string>#{opt_bin}/fuseki-server</string>
-          </array>
-        </dict>
-      </plist>
-    EOS
+  service do
+    run opt_bin/"fuseki-server"
   end
 
   test do

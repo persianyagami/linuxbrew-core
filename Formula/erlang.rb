@@ -2,48 +2,47 @@ class Erlang < Formula
   desc "Programming language for highly scalable real-time systems"
   homepage "https://www.erlang.org/"
   # Download tarball from GitHub; it is served faster than the official tarball.
-  url "https://github.com/erlang/otp/archive/OTP-23.1.5.tar.gz"
-  sha256 "31719b8681e7f9ad6f30e329a0a0e5c4dd23dea858021573395fcdbea0d7702c"
+  url "https://github.com/erlang/otp/releases/download/OTP-24.1.2/otp_src_24.1.2.tar.gz"
+  sha256 "afc227a258ac061474cdffb001b3b03e77d39d5b91c56d9f589f451b9f17a3c5"
   license "Apache-2.0"
-  head "https://github.com/erlang/otp.git"
 
   livecheck do
-    url :head
-    regex(/OTP[._-]v?(\d+(?:\.\d+)+)$/i)
+    url :stable
+    regex(/^OTP[._-]v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    cellar :any
-    sha256 "372f900edd831fe853a85d09c0c1951458c61270ddb023137d561dad0371f461" => :big_sur
-    sha256 "1318f6c495fc4063d2091d4eb8fe23841006c46d63955dcd87eadb7608bf00a3" => :catalina
-    sha256 "42167291ab2480f7b5a9dd5787cb72f2e740857dc6126b0b48eed50a274171d7" => :mojave
+    sha256 cellar: :any,                 arm64_big_sur: "35ee937da1a3bcb38d6ab1781ea15649e62d42011eae03874125f6e33992f75b"
+    sha256 cellar: :any,                 big_sur:       "e22bcb4943bb485924d5f18fc4025b7b67f441772226040b79724232837e2296"
+    sha256 cellar: :any,                 catalina:      "72b0db6660854bc759d896254d2ef3279d978760a072a82d85f871bafa3914b3"
+    sha256 cellar: :any,                 mojave:        "16b6c4bfc2f1f6f674420a56263d548c35b9a7553e1f81113dc250ab59e86126"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "bbc94ba95704cb5d7852d2057534fc1d270699b2691c2d48bdadc89845a44745" # linuxbrew-core
   end
 
-  depends_on "autoconf" => :build
-  depends_on "automake" => :build
-  depends_on "libtool" => :build
-  depends_on "openssl@1.1"
-  depends_on "wxmac" # for GUI apps like observer
+  head do
+    url "https://github.com/erlang/otp.git"
 
-  uses_from_macos "m4" => :build
+    depends_on "autoconf" => :build
+    depends_on "automake" => :build
+    depends_on "libtool" => :build
+  end
+
+  depends_on "openssl@1.1"
+  depends_on "wxwidgets" # for GUI apps like observer
 
   resource "html" do
-    url "https://www.erlang.org/download/otp_doc_html_23.1.tar.gz"
-    mirror "https://fossies.org/linux/misc/otp_doc_html_23.1.tar.gz"
-    sha256 "0e0075f174db2f9b5a0f861263062942e5a721c40ec747356e482e3be2fb8931"
+    url "https://github.com/erlang/otp/releases/download/OTP-24.1.2/otp_doc_html_24.1.2.tar.gz"
+    mirror "https://fossies.org/linux/misc/otp_doc_html_24.1.2.tar.gz"
+    sha256 "6e3ba1672a6c70f0a9c3920d8b1f217bd113bd6039344b2d774c52a4d1c80fb4"
   end
-
-  # Fix for Big Sur, remove in next version
-  # https://github.com/erlang/otp/pull/2865
-  patch :DATA
 
   def install
     # Unset these so that building wx, kernel, compiler and
-    # other modules doesn't fail with an unintelligable error.
+    # other modules doesn't fail with an unintelligible error.
     %w[LIBS FLAGS AFLAGS ZFLAGS].each { |k| ENV.delete("ERL_#{k}") }
 
     # Do this if building from a checkout to generate configure
-    system "./otp_build", "autoconf" if File.exist? "otp_build"
+    system "./otp_build", "autoconf" unless File.exist? "configure"
 
     args = %W[
       --disable-debug
@@ -51,7 +50,6 @@ class Erlang < Formula
       --prefix=#{prefix}
       --enable-dynamic-ssl-lib
       --enable-hipe
-      --enable-sctp
       --enable-shared-zlib
       --enable-smp-support
       --enable-threads
@@ -60,7 +58,7 @@ class Erlang < Formula
       --without-javac
     ]
 
-    on_macos do
+    if OS.mac?
       args << "--enable-darwin-64bit"
       args << "--enable-kernel-poll" if MacOS.version > :el_capitan
       args << "--with-dynamic-trace=dtrace" if MacOS::CLT.installed?
@@ -115,17 +113,3 @@ class Erlang < Formula
     assert_match "factorial 42 = 1405006117752879898543142606244511569936384000000000", shell_output("./factorial 42")
   end
 end
-__END__
-diff --git a/make/configure.in b/make/configure.in
-index bf6ee284343..898aa40c4a0 100644
---- a/make/configure.in
-+++ b/make/configure.in
-@@ -398,7 +398,7 @@ if test $CROSS_COMPILING = no; then
- 	       [1-9][0-9].[0-9])
- 	          int_macosx_version=`echo $macosx_version | sed 's|\([^\.]*\)\.\([^\.]*\)|\10\200|'`;;
- 	       [1-9][0-9].[0-9].[0-9])
--	          int_macosx_version=`echo $macosx_version | sed 's|\([^\.]*\)\.\([^\.]*\)\.\([^\.]*\)|\1\2\3|'`;;
-+	          int_macosx_version=`echo $macosx_version | sed 's|\([^\.]*\)\.\([^\.]*\)\.\([^\.]*\)|\10\20\3|'`;;
- 	       [1-9][0-9].[1-9][0-9])
- 	          int_macosx_version=`echo $macosx_version | sed 's|\([^\.]*\)\.\([^\.]*\)|\1\200|'`;;
- 	       [1-9][0-9].[1-9][0-9].[0-9])

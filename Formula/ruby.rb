@@ -1,9 +1,10 @@
 class Ruby < Formula
   desc "Powerful, clean, object-oriented scripting language"
   homepage "https://www.ruby-lang.org/"
-  url "https://cache.ruby-lang.org/pub/ruby/2.7/ruby-2.7.2.tar.xz"
-  sha256 "1b95ab193cc8f5b5e59d2686cb3d5dcf1ddf2a86cb6950e0b4bdaae5040ec0d6"
+  url "https://cache.ruby-lang.org/pub/ruby/3.0/ruby-3.0.2.tar.xz"
+  sha256 "570e7773100f625599575f363831166d91d49a1ab97d3ab6495af44774155c40"
   license "Ruby"
+  revision 1
 
   livecheck do
     url "https://www.ruby-lang.org/en/downloads/"
@@ -11,12 +12,11 @@ class Ruby < Formula
   end
 
   bottle do
-    sha256 "39e7896f6b1c365dcff147f41ca2072d901b4edadb16e6d9e8cd7a6084be9e04" => :big_sur
-    sha256 "bb33bb8eadf710528572a76e8c55be99eba99875798c646c9df641ccfc92201b" => :arm64_big_sur
-    sha256 "c5c8fef5a6068f0657558662aaf83abd21d4d456f2bf5f5152d932dae09ab3fd" => :catalina
-    sha256 "0c46013234250f1bea09127fa33899a51bbae47109dc9eb3ac6f883ab394e43f" => :mojave
-    sha256 "ea7555713b598bb8c21a1af1554658c65ca8e9368f663a44540343122008afc3" => :high_sierra
-    sha256 "57646a5fe27b89464990921e85773fba854fda0d2fdd17c24f2a3c303d6cea6d" => :x86_64_linux
+    sha256 arm64_big_sur: "86f9be3f7ac26e69e3c856776569b1c10039716f5787821944645c6d0f10fe87"
+    sha256 big_sur:       "b11776c7e7209ddbfee2085de7027a6f987657045171dddb0692c18ea07f4bc5"
+    sha256 catalina:      "7929b11c278737feca268f8b3ad8a7174f6e7b6034248f0c743debfea3708ab8"
+    sha256 mojave:        "435dd2553367df11b8619cc7428362a633229e3c198d701ab399413c548bcf75"
+    sha256 x86_64_linux:  "122e95641ce5f32a78814e3b9f753f8504ab513f42016c0f6dd78825e05051fe" # linuxbrew-core
   end
 
   head do
@@ -31,14 +31,15 @@ class Ruby < Formula
   depends_on "openssl@1.1"
   depends_on "readline"
 
+  uses_from_macos "libffi"
   uses_from_macos "zlib"
 
   # Should be updated only when Ruby is updated (if an update is available).
   # The exception is Rubygem security fixes, which mandate updating this
   # formula & the versioned equivalents and bumping the revisions.
   resource "rubygems" do
-    url "https://rubygems.org/rubygems/rubygems-3.1.4.tgz"
-    sha256 "d8030019d86d60469d3f4f48b7cfcd724b184157ac2881a5bec4394d9cd93f7d"
+    url "https://rubygems.org/rubygems/rubygems-3.2.22.tgz"
+    sha256 "368979ef8103b550a98fc6479543831f0d55c3567d5ee4622d5aa569ee17418b"
   end
 
   def api_version
@@ -50,17 +51,10 @@ class Ruby < Formula
   end
 
   def install
-    if OS.linux? && build.bottle?
-      # The compiler used to build Ruby is stored in the bottle.
-      # See ruby <<<'print RbConfig::CONFIG["CC"]'
-      ENV["CC"] = "cc"
-      ENV["CXX"] = "c++"
-    end
-
     # otherwise `gem` command breaks
     ENV.delete("SDKROOT")
 
-    system "autoconf" if build.head?
+    system "./autogen.sh" if build.head?
 
     paths = %w[libyaml openssl@1.1 readline].map { |f| Formula[f].opt_prefix }
     args = %W[
@@ -72,18 +66,10 @@ class Ruby < Formula
       --with-opt-dir=#{paths.join(":")}
       --without-gmp
     ]
-
-    on_macos do
-      args << "--disable-dtrace" unless MacOS::CLT.installed?
-    end
+    args << "--disable-dtrace" if OS.mac? && !MacOS::CLT.installed?
 
     # Correct MJIT_CC to not use superenv shim
-    on_macos do
-      args << "MJIT_CC=/usr/bin/clang"
-    end
-    on_linux do
-      args << "MJIT_CC=/usr/bin/gcc"
-    end
+    args << "MJIT_CC=/usr/bin/#{DevelopmentTools.default_compiler}"
 
     system "./configure", *args
 

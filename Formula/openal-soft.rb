@@ -1,18 +1,17 @@
 class OpenalSoft < Formula
   desc "Implementation of the OpenAL 3D audio API"
   homepage "https://openal-soft.org/"
-  url "https://openal-soft.org/openal-releases/openal-soft-1.21.0.tar.bz2"
-  sha256 "2916b4fc24e23b0271ce0b3468832ad8b6d8441b1830215b28cc4fee6cc89297"
+  url "https://openal-soft.org/openal-releases/openal-soft-1.21.1.tar.bz2"
+  sha256 "c8ad767e9a3230df66756a21cc8ebf218a9d47288f2514014832204e666af5d8"
   license "LGPL-2.0-or-later"
-  head "https://github.com/kcat/openal-soft.git"
+  head "https://github.com/kcat/openal-soft.git", branch: "master"
 
   bottle do
-    cellar :any
-    sha256 "4bc86ddf78328c9b229e9200b0ff0f35f2c968931558d0471f9d8ef276c9feb2" => :big_sur
-    sha256 "2f288bddf5b23b868e7ee2773877eeeab70dce4bc3ba7e95fd106753be7e361d" => :catalina
-    sha256 "a6fac3b7778cba045106631a61b7f9cf58c189cc27ca210983b3f7c73c48301e" => :mojave
-    sha256 "c1f4cf0e42e75b583ff7a78dad6850b6ed8874bb6aeb7734b8116366a5b6697e" => :high_sierra
-    sha256 "0c34fcbb869e0254ae713953309ae833ed8d7d867eabc52b6bdf99a051e78199" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "7e15f3c0087f0bce3c5bcad1efd612ffb83327b3cd25702ffc474f6513307d73"
+    sha256 cellar: :any,                 big_sur:       "275cde0ac6442628e8edbba58a7ff291adc797bcb88ed4b76649a11bf17eb09c"
+    sha256 cellar: :any,                 catalina:      "242237bdf9b18a852b185da7b479133af60693403cf2503e517461f5bb579012"
+    sha256 cellar: :any,                 mojave:        "da2ec851e3d934085169047429e299bf86c0919a742c0bceac21dd716134ea67"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ebb164e94f9187a5a787bc3f82bbe6233c1dc5e36d56e1e43f4417aebca62864" # linuxbrew-core
   end
 
   keg_only :shadowed_by_macos, "macOS provides OpenAL.framework"
@@ -21,7 +20,7 @@ class OpenalSoft < Formula
   depends_on "pkg-config" => :build
 
   def install
-    # Please don't reenable example building. See:
+    # Please don't re-enable example building. See:
     # https://github.com/Homebrew/homebrew/issues/38274
     args = std_cmake_args + %w[
       -DALSOFT_BACKEND_PORTAUDIO=OFF

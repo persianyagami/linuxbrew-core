@@ -1,22 +1,17 @@
 class Coreutils < Formula
   desc "GNU File, Shell, and Text utilities"
   homepage "https://www.gnu.org/software/coreutils"
-  url "https://ftp.gnu.org/gnu/coreutils/coreutils-8.32.tar.xz"
-  mirror "https://ftpmirror.gnu.org/coreutils/coreutils-8.32.tar.xz"
-  sha256 "4458d8de7849df44ccab15e16b1548b285224dbba5f08fac070c1c0e0bcc4cfa"
+  url "https://ftp.gnu.org/gnu/coreutils/coreutils-9.0.tar.xz"
+  mirror "https://ftpmirror.gnu.org/coreutils/coreutils-9.0.tar.xz"
+  sha256 "ce30acdf4a41bc5bb30dd955e9eaa75fa216b4e3deb08889ed32433c7b3b97ce"
   license "GPL-3.0-or-later"
 
-  livecheck do
-    url :stable
-  end
-
   bottle do
-    rebuild 1
-    sha256 "ce8e32b05a59a6a7f2bd58544ff96902164780edc2a4804a1d97e11f28bc6cb6" => :big_sur
-    sha256 "f40ba727ec1bb54300c7c79804f410a62341b63f3fba41d78ef34e5d369fe9fc" => :catalina
-    sha256 "91cd269ea5eff54a3074e0c3cd0995911c5989a4eb87a3c27b17a765c48f494e" => :mojave
-    sha256 "25c71d9d9a156cc8dfaa52b35dad1f9d49df55e97748fb5ab9522f65aeed4dca" => :high_sierra
-    sha256 "36fd64482d0a2344d1ca2288e58739ee18e48f9b9e6b94d1c9ae47c870b9f05d" => :x86_64_linux
+    sha256 arm64_big_sur: "875e9ec351a0624e65d19e742a7271fc409ce912fa4a4ad9147ab21eaa126bad"
+    sha256 big_sur:       "6c6b84b32d923e26b1c67e8c9aee801f7ab2f0b9f94d9b455b784eb3a2dc575c"
+    sha256 catalina:      "9b24df176ef9ec342e83af6880c27e0235e4fcc436d0143fb37eb24695de51a6"
+    sha256 mojave:        "6755e3bb94c35dae4ebbd525633691bc5ff1dc82a84f5b968b952d7be86652d7"
+    sha256 x86_64_linux:  "6ab4d61127fac0e193a82881b9262e3121ada87566f470abdf6a2b9c63ab6768" # linuxbrew-core
   end
 
   head do
@@ -29,8 +24,10 @@ class Coreutils < Formula
     depends_on "texinfo" => :build
     depends_on "wget" => :build
     depends_on "xz" => :build
-    depends_on "gperf" => :build unless OS.mac?
   end
+
+  depends_on "gmp"
+  uses_from_macos "gperf" => :build
 
   on_linux do
     depends_on "attr"
@@ -39,32 +36,47 @@ class Coreutils < Formula
   conflicts_with "aardvark_shell_utils", because: "both install `realpath` binaries"
   conflicts_with "b2sum", because: "both install `b2sum` binaries"
   conflicts_with "ganglia", because: "both install `gstat` binaries"
+  conflicts_with "gdu", because: "both install `gdu` binaries"
   conflicts_with "gegl", because: "both install `gcut` binaries"
   conflicts_with "idutils", because: "both install `gid` and `gid.1`"
   conflicts_with "md5sha1sum", because: "both install `md5sum` and `sha1sum` binaries"
   conflicts_with "truncate", because: "both install `truncate` binaries"
   conflicts_with "uutils-coreutils", because: "coreutils and uutils-coreutils install the same binaries"
 
-  def install
-    # Fix configure: error: you should not run configure as root
-    ENV["FORCE_UNSAFE_CONFIGURE"] = "1" if ENV["CI"]
+  # https://github.com/Homebrew/homebrew-core/pull/36494
+  def breaks_macos_users
+    %w[dir dircolors vdir]
+  end
 
+  def install
     system "./bootstrap" if build.head?
 
     args = %W[
       --prefix=#{prefix}
       --program-prefix=g
-      --without-gmp
+      --with-gmp
+      --without-selinux
     ]
-
-    args << "--without-selinux" unless OS.mac?
 
     system "./configure", *args
     system "make", "install"
 
+    no_conflict = if OS.mac?
+      []
+    else
+      %w[
+        b2sum base32 basenc chcon dir dircolors factor hostid md5sum nproc numfmt pinky ptx realpath runcon
+        sha1sum sha224sum sha256sum sha384sum sha512sum shred shuf stdbuf tac timeout truncate vdir
+      ]
+    end
+
     # Symlink all commands into libexec/gnubin without the 'g' prefix
     coreutils_filenames(bin).each do |cmd|
       (libexec/"gnubin").install_symlink bin/"g#{cmd}" => cmd
+
+      # Find non-conflicting commands on macOS
+      which_cmd = which(cmd)
+      no_conflict << cmd if OS.mac? && (which_cmd.nil? || !which_cmd.to_s.start_with?(%r{(/usr)?/s?bin}))
     end
     # Symlink all man(1) pages into libexec/gnuman without the 'g' prefix
     coreutils_filenames(man1).each do |cmd|
@@ -72,16 +84,8 @@ class Coreutils < Formula
     end
     libexec.install_symlink "gnuman" => "man"
 
+    no_conflict -= breaks_macos_users if OS.mac?
     # Symlink non-conflicting binaries
-    no_conflict = %w[
-      b2sum base32 chcon hostid md5sum nproc numfmt pinky ptx realpath runcon
-      sha1sum sha224sum sha256sum sha384sum sha512sum shred shuf stdbuf tac timeout truncate
-    ]
-    unless OS.mac?
-      no_conflict << "dir"
-      no_conflict << "dircolors"
-      no_conflict << "vdir"
-    end
     no_conflict.each do |cmd|
       bin.install_symlink "g#{cmd}" => cmd
       man1.install_symlink "g#{cmd}.1" => "#{cmd}.1"
@@ -89,11 +93,13 @@ class Coreutils < Formula
   end
 
   def caveats
-    msg = OS.mac? ? "Commands also provided by macOS" : "All commands"
+    msg = "Commands also provided by macOS and the commands #{breaks_macos_users.join(", ")}"
+    on_linux do
+      msg = "All commands"
+    end
     <<~EOS
       #{msg} have been installed with the prefix "g".
-      If you need to use these commands with their normal names, you
-      can add a "gnubin" directory to your PATH from your bashrc like:
+      If you need to use these commands with their normal names, you can add a "gnubin" directory to your PATH with:
         PATH="#{opt_libexec}/gnubin:$PATH"
     EOS
   end

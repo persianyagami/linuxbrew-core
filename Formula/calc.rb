@@ -1,22 +1,16 @@
 class Calc < Formula
   desc "Arbitrary precision calculator"
   homepage "http://www.isthe.com/chongo/tech/comp/calc/"
-  url "https://downloads.sourceforge.net/project/calc/calc/2.12.7.1/calc-2.12.7.1.tar.bz2"
-  sha256 "eb1dc5dd680019e30264109167e20539fe9ac869049d8b1639781a51d1dea84c"
+  url "https://downloads.sourceforge.net/project/calc/calc/2.13.0.1/calc-2.13.0.1.tar.bz2"
+  sha256 "6ae538f57785c5701a70112ccf007ab5553abd332ae2deaadaf564f401c734ad"
   license "LGPL-2.1-or-later"
-  revision 1
-
-  livecheck do
-    url :stable
-  end
 
   bottle do
-    sha256 "79b3844caf8d7e0bdca720aa2c8c5668c4df580e62544c418bbd8058b98906a3" => :big_sur
-    sha256 "d78863a41409a2e3eaee0b8e4c5eb21a84ee28f1c3f8a27545d6e1f3fe3ae213" => :catalina
-    sha256 "1b4e5456d4965f8b74c120590070f74896c1fca85c8aa30354ffe519c1755600" => :mojave
-    sha256 "7614247fc707caf03a96e302ab2e1324f6a3609cfd1cdd7c6389bca77511ff18" => :high_sierra
-    sha256 "c31e4ac4a08ff6f1803cfcbe2d90a2634737ed69f4c38538f7ba77fc6a3e6728" => :sierra
-    sha256 "aa397c39014605519cf2c3b441559197c4fa1f1f1dffec06d6ae8e7952f95f30" => :x86_64_linux
+    sha256 arm64_big_sur: "20a69341f5baf00f5c9fa73998ce3f02939af44146d6eee3177854488e474df4"
+    sha256 big_sur:       "cdc2b4bce30dccf2193ea5a457dfa02e4ae1ba0af97fce660221c5d3882e79a3"
+    sha256 catalina:      "95bce9b12aab68a4d8e30121e0a0be5e0e7447e09bcc11d9d7e371956c724433"
+    sha256 mojave:        "57ac9fb9353e5bd4dd6bf6f62aca96252a064e51d102fd89389934fefa999b2c"
+    sha256 x86_64_linux:  "71bf85560fa4ab29c1929b7225b7630a7f02b05cfd446a3bb5d027b0c7787e89" # linuxbrew-core
   end
 
   depends_on "readline"
@@ -41,9 +35,7 @@ class Calc < Formula
       "READLINE_LIB=-L#{Formula["readline"].opt_lib} -lreadline",
       "READLINE_EXTRAS=-lhistory -lncurses",
     ]
-    on_macos do
-      args << "INCDIR=#{MacOS.sdk_path}/usr/include"
-    end
+    args << "INCDIR=#{MacOS.sdk_path}/usr/include" if OS.mac?
     system "make", "install", *args
 
     libexec.install "#{bin}/cscript"

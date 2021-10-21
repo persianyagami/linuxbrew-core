@@ -1,21 +1,23 @@
 class Jenkins < Formula
   desc "Extendable open source continuous integration server"
-  homepage "https://jenkins.io/"
-  url "http://mirrors.jenkins.io/war/2.270/jenkins.war"
-  sha256 "64b4168a9168d07f282bf98021dff634ab2c9338b5db77b66b320708089db7fc"
+  homepage "https://www.jenkins.io/"
+  url "https://get.jenkins.io/war/2.316/jenkins.war"
+  sha256 "4128e1d9ea5a541ba620a8e94a43010694ca11fdefa9881702f934d2c2c0b970"
   license "MIT"
 
   livecheck do
-    url :head
-    regex(/^jenkins[._-]v?(\d+(?:\.\d+)+)$/i)
+    url "https://www.jenkins.io/download/"
+    regex(%r{href=.*?/war/v?(\d+(?:\.\d+)+)/jenkins\.war}i)
+  end
+
+  bottle do
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "c47134ef105af8404e42cd867965cf7d630fa3997370d69397b88d45c5f52453" # linuxbrew-core
   end
 
   head do
     url "https://github.com/jenkinsci/jenkins.git"
     depends_on "maven" => :build
   end
-
-  bottle :unneeded
 
   depends_on "openjdk@11"
 
@@ -36,30 +38,9 @@ class Jenkins < Formula
     EOS
   end
 
-  plist_options manual: "jenkins"
-
-  def plist
-    <<~EOS
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-        <dict>
-          <key>Label</key>
-          <string>#{plist_name}</string>
-          <key>ProgramArguments</key>
-          <array>
-            <string>#{Formula["openjdk@11"].opt_bin}/java</string>
-            <string>-Dmail.smtp.starttls.enable=true</string>
-            <string>-jar</string>
-            <string>#{opt_libexec}/jenkins.war</string>
-            <string>--httpListenAddress=127.0.0.1</string>
-            <string>--httpPort=8080</string>
-          </array>
-          <key>RunAtLoad</key>
-          <true/>
-        </dict>
-      </plist>
-    EOS
+  service do
+    run [Formula["openjdk@11"].opt_bin/"java", "-Dmail.smtp.starttls.enable=true", "-jar", opt_libexec/"jenkins.war",
+         "--httpListenAddress=127.0.0.1", "--httpPort=8080"]
   end
 
   test do
@@ -73,6 +54,6 @@ class Jenkins < Formula
     sleep 60
 
     output = shell_output("curl localhost:#{port}/")
-    assert_match /Welcome to Jenkins!|Unlock Jenkins|Authentication required/, output
+    assert_match(/Welcome to Jenkins!|Unlock Jenkins|Authentication required/, output)
   end
 end

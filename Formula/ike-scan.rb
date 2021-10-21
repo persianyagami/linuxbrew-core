@@ -1,19 +1,18 @@
 class IkeScan < Formula
   desc "Discover and fingerprint IKE hosts"
   homepage "https://github.com/royhills/ike-scan"
-  url "https://github.com/royhills/ike-scan/archive/1.9.4.tar.gz"
-  sha256 "2865014185c129ac443beb7bf80f3c5eb93adb504cd307c5b6709199abf7c121"
-  license "GPL-3.0"
-  revision 1
+  url "https://github.com/royhills/ike-scan/archive/1.9.5.tar.gz"
+  sha256 "5152bf06ac82d0cadffb93a010ffb6bca7efd35ea169ca7539cf2860ce2b263f"
+  license "GPL-3.0-or-later"
 
   head "https://github.com/royhills/ike-scan.git"
 
   bottle do
-    sha256 "11f8717a655e0279957d3b4464b5074e1b75b17d0b882a93c9375b116f513deb" => :catalina
-    sha256 "684cd449c88f873dec2719d9423f42732006631b923aec133c5c2a447895b241" => :mojave
-    sha256 "9be05676d382198f99911601aa83008e5a27371669728c4d70cc98e9564bd2f3" => :high_sierra
-    sha256 "cd6e8435040dd728e6dbd62c161d0c6b48d19e0f5fe69ce9bef48991cccb91f1" => :sierra
-    sha256 "edf47bd9786b16ccf098953b25a51201391f8f035e8c48433fcaad148014f6bb" => :x86_64_linux
+    sha256 arm64_big_sur: "658bb4d7106e572a7d9a0dae2d6cc9abd4e1007d73ef4ab0ab0ec6f2cbaafd1c"
+    sha256 big_sur:       "debe304378fb8939b606d81a1658f95cb71b9edf538f9e2778385341d66bb3e9"
+    sha256 catalina:      "a02fd76ac113a9dc7cb1ed267d221af790abf4f5598a512c1993ea207ad7f6cf"
+    sha256 mojave:        "29f357b9b8a36f43410495f79a87e50fcf45507aee242f670182ea7db6630c1c"
+    sha256 x86_64_linux:  "16769378c139d0abb2a6c4a05fae1cc1929486d8035c3260391cde66b533b089" # linuxbrew-core
   end
 
   depends_on "autoconf" => :build

@@ -1,25 +1,31 @@
 class Dash < Formula
   desc "POSIX-compliant descendant of NetBSD's ash (the Almquist SHell)"
   homepage "http://gondor.apana.org.au/~herbert/dash/"
-  url "http://gondor.apana.org.au/~herbert/dash/files/dash-0.5.11.2.tar.gz"
-  mirror "https://dl.bintray.com/homebrew/mirror/dash-0.5.11.2.tar.gz"
-  sha256 "00fb7d68b7599cc41ab151051c06c01e9500540183d8aa72116cb9c742bd6d5f"
+  url "http://gondor.apana.org.au/~herbert/dash/files/dash-0.5.11.5.tar.gz"
+  sha256 "db778110891f7937985f29bf23410fe1c5d669502760f584e54e0e7b29e123bd"
   license "BSD-3-Clause"
   head "https://git.kernel.org/pub/scm/utils/dash/dash.git"
 
+  livecheck do
+    url "http://gondor.apana.org.au/~herbert/dash/files/"
+    regex(/href=.*?dash[._-]v?(\d+(?:\.\d+)+)\.t/i)
+  end
+
   bottle do
-    cellar :any_skip_relocation
-    sha256 "4c4ddd8b3de3c939a1542f61f42a9461fd366a1991d420d30e31b3a87c317a96" => :big_sur
-    sha256 "6ad6adcfbf936f51525175d28e70eb4a6f887b92fb58e3d3cfb2930f43626d9d" => :catalina
-    sha256 "8c979cf6f3fb29d665bdcdf4fe27a1c58ac51e6265a9fbb2b4bf219ddd4df734" => :mojave
-    sha256 "0c0314fabb0ab26bf21606789abe3355ec1a5d9856475301d8699266b1f4689e" => :high_sierra
-    sha256 "cfded9456d398da80c3fe3239eb623900ce30b29c67c52680fa21e153a4cc2d7" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "12e8257cfc5dda342cf5df3579e4d75d6c7da1c3e5188ea2bd632f66ca9291dc"
+    sha256 cellar: :any_skip_relocation, big_sur:       "a7eafa8a473d2bfd1d9fbc207ed863d5765189b6662341420bee8a78cc6d4360"
+    sha256 cellar: :any_skip_relocation, catalina:      "b7ab66d5cea5b77081f58392eb8f8c66341cf20c94739a77c262f0a1f54716a6"
+    sha256 cellar: :any_skip_relocation, mojave:        "b7db705a81f667bde21d234b7241d9e0ae0643e9052aa836196095bbd4e98dbb"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "947fffdc8681c896ef07de1dabbd69341458de8d37c106d706d6013942d156c4" # linuxbrew-core
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
 
+  uses_from_macos "libedit"
+
   def install
+    ENV["ac_cv_func_stat64"] = "no" if Hardware::CPU.arm?
     system "./autogen.sh" if build.head?
 
     system "./configure", "--prefix=#{prefix}",

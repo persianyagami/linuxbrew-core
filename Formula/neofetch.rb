@@ -4,23 +4,19 @@ class Neofetch < Formula
   url "https://github.com/dylanaraps/neofetch/archive/7.1.0.tar.gz"
   sha256 "58a95e6b714e41efc804eca389a223309169b2def35e57fa934482a6b47c27e7"
   license "MIT"
-  head "https://github.com/dylanaraps/neofetch.git"
+  head "https://github.com/dylanaraps/neofetch.git", branch: "master"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "65997eaa4358eba12ea2eaa20d3a7daa3b30acfae81aa447eab47894d808670e" => :big_sur
-    sha256 "9d88c0c07ebdeddaf68a5512a7f4a36cbc52851dfb1c6fc63b446f6a9baaaa01" => :catalina
-    sha256 "9d88c0c07ebdeddaf68a5512a7f4a36cbc52851dfb1c6fc63b446f6a9baaaa01" => :mojave
-    sha256 "9d88c0c07ebdeddaf68a5512a7f4a36cbc52851dfb1c6fc63b446f6a9baaaa01" => :high_sierra
-    sha256 "09a8b957e3e61f847d8a169747b1afbb8cc271bfbd21d1d0a5e34f2359289f47" => :x86_64_linux
+    rebuild 2
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "c391809c141a7037056071d41afb5157f44357b922bf45e119f47d6814892453" # linuxbrew-core
   end
 
-  if OS.mac?
-    depends_on "imagemagick"
+  on_macos do
     depends_on "screenresolution"
   end
 
   def install
+    inreplace "neofetch", "/usr/local", HOMEBREW_PREFIX
     system "make", "install", "PREFIX=#{prefix}"
   end
 

@@ -4,6 +4,7 @@ class Heimdal < Formula
   url "https://github.com/heimdal/heimdal/releases/download/heimdal-7.7.0/heimdal-7.7.0.tar.gz"
   sha256 "f02d3314d634cc55eb9cf04a1eae0d96b293e45a1f837de9d894e800161b7d1b"
   license "BSD-3-Clause"
+  revision 1
 
   livecheck do
     url :stable
@@ -12,13 +13,15 @@ class Heimdal < Formula
   end
 
   bottle do
-    sha256 "7a57b6c9bd3a0279831f0ff55f104e0fd56be2d9f64d0bc36f923ff99a899960" => :big_sur
-    sha256 "339287d54592d68d27ad3420f71c02bd0bf988b901116a4609ac05560fe38ca0" => :catalina
-    sha256 "c1d88cd19ae7300789f7423ccbda607a1d08c81881e4eb697686211e9451067a" => :mojave
-    sha256 "05b2d973befd459ec885e88876f6ebe9730c684f004eadb8e13bad31ac2dc1cc" => :high_sierra
+    rebuild 1
+    sha256 arm64_big_sur: "4f9d35b8518b4dc64f3995d55a8afbc532a69d3129723ecda4afcfa874c4f371"
+    sha256 big_sur:       "8908f59611a4a8140e47e938019691611c5e2c168ae0df3060e3729f941dceab"
+    sha256 catalina:      "dc1ffe6fcbf8522c3c1720c44311fb6f183dfc2cf566a7a5ce0bc7064efa5db5"
+    sha256 mojave:        "8458b10c77f8db149e1c6853aa709c65551b2c00033ddc447e67b8d90665faad"
+    sha256 x86_64_linux:  "db6037dab528e5dd42ac37d9fe535b42f9b0dfe6ec0ad304a1252a090055ced7" # linuxbrew-core
   end
 
-  keg_only :shadowed_by_macos, "macOS provides Kerberos"
+  keg_only "conflicts with Kerberos"
 
   depends_on "bison" => :build
   depends_on "berkeley-db"
@@ -26,6 +29,8 @@ class Heimdal < Formula
   depends_on "lmdb"
   depends_on "openldap"
   depends_on "openssl@1.1"
+
+  uses_from_macos "perl"
 
   resource "JSON" do
     url "https://cpan.metacpan.org/authors/id/I/IS/ISHIGAKI/JSON-4.02.tar.gz"
@@ -54,6 +59,7 @@ class Heimdal < Formula
       --enable-pthread-support
       --disable-afs-support
       --disable-ndbm-db
+      --disable-heimdal-documentation
       --with-openldap=#{Formula["openldap"].opt_prefix}
       --with-openssl=#{Formula["openssl@1.1"].opt_prefix}
       --with-hcrypto-default-backend=ossl

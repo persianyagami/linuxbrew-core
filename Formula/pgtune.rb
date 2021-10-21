@@ -8,15 +8,18 @@ class Pgtune < Formula
   license "BSD-3-Clause"
 
   # 0.9.3 does not have settings for PostgreSQL 9.x, but the trunk does
-  head "https://github.com/gregs1104/pgtune.git"
+  head "https://github.com/gregs1104/pgtune.git", branch: "master"
 
-  bottle :unneeded
+  livecheck do
+    url "https://ftp.postgresql.org/pub/projects/pgFoundry/pgtune/pgtune/"
+    regex(%r{href=["']?v?(\d+(?:\.\d+)+)/?["' >]}i)
+  end
 
   def install
     # By default, pgtune searches for settings in the directory
     # where the script is being run from.
     inreplace "pgtune" do |s|
-      s.sub! /(parser\.add_option\('-S'.*default=).*,/, "\\1\"#{pkgshare}\","
+      s.sub!(/(parser\.add_option\('-S'.*default=).*,/, "\\1\"#{pkgshare}\",")
     end
     bin.install "pgtune"
     pkgshare.install Dir["pg_settings*"]

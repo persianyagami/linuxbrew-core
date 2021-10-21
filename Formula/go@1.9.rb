@@ -8,16 +8,17 @@ class GoAT19 < Formula
 
   bottle do
     rebuild 2
-    sha256 "f62ef79df0624c9329edb96c40e65a3dbae0519885a7a6069059234e46999a2c" => :big_sur
-    sha256 "c34c669ba94287eb0485513ad03416d531f0d4fb58908df4984ed85fd2c41b1e" => :catalina
-    sha256 "358e06f98931f9f9f2238e59c9ec40a4cc8526e518b8828c8b72543f6d40d9b0" => :mojave
-    sha256 "be1bd13af09e6bf2ee698f98d80fbd99ac86858337d90fce6e2e86ecfd67b19f" => :high_sierra
-    sha256 "455f710d0d7476169aba974c0d097394b6e95b2bd1abeb11d8a47b98f61295d2" => :x86_64_linux
+    sha256 big_sur:      "f62ef79df0624c9329edb96c40e65a3dbae0519885a7a6069059234e46999a2c"
+    sha256 catalina:     "c34c669ba94287eb0485513ad03416d531f0d4fb58908df4984ed85fd2c41b1e"
+    sha256 mojave:       "358e06f98931f9f9f2238e59c9ec40a4cc8526e518b8828c8b72543f6d40d9b0"
+    sha256 high_sierra:  "be1bd13af09e6bf2ee698f98d80fbd99ac86858337d90fce6e2e86ecfd67b19f"
   end
 
   keg_only :versioned_formula
 
-  deprecate! date: "2018-08-04", because: :unsupported
+  disable! date: "2021-02-16", because: :unsupported
+
+  depends_on arch: :x86_64
 
   resource "gotools" do
     url "https://go.googlesource.com/tools.git",
@@ -53,12 +54,6 @@ class GoAT19 < Formula
   end
 
   def install
-    # Fixes: Error: Failure while executing: ../bin/ldd ../line-clang.elf: Permission denied
-    unless OS.mac?
-      chmod "+x", Dir.glob("src/debug/dwarf/testdata/*.elf")
-      chmod "+x", Dir.glob("src/debug/elf/testdata/*-exec")
-    end
-
     (buildpath/"gobootstrap").install resource("gobootstrap")
     ENV["GOROOT_BOOTSTRAP"] = buildpath/"gobootstrap"
 

@@ -1,11 +1,10 @@
 class PamU2f < Formula
   desc "Provides an easy way to use U2F-compliant authenticators with PAM"
   homepage "https://developers.yubico.com/pam-u2f/"
-  url "https://developers.yubico.com/pam-u2f/Releases/pam_u2f-1.1.0.tar.gz"
-  sha256 "0dc3bf96ebb69c6e398b5f8991493b37a8ce1af792948af71e694f695d5edc05"
+  url "https://developers.yubico.com/pam-u2f/Releases/pam_u2f-1.2.0.tar.gz"
+  sha256 "2303e6f99b1fde8ee3c3ab28a4de2da6ddd225c953693e845d6b2d8388221fb3"
   license "BSD-2-Clause"
-  revision 1
-  head "https://github.com/Yubico/pam-u2f.git"
+  head "https://github.com/Yubico/pam-u2f.git", branch: "master"
 
   livecheck do
     url "https://developers.yubico.com/pam-u2f/Releases/"
@@ -13,11 +12,10 @@ class PamU2f < Formula
   end
 
   bottle do
-    cellar :any
-    sha256 "f839f2092a454245e7d803c2173963be8eb084574707205277121d9047ec870b" => :big_sur
-    sha256 "cdc5fa2db8788501c8fe8c9142bc0686d5ad2b1e7c3cfb4dc35d95788cb58485" => :catalina
-    sha256 "30cc76b0b4d582c076c9fed1ed880442b67b987973b57fd52e26a93356e5eef6" => :mojave
-    sha256 "bfd1309cb6deff47c4473b0af86f645b0ee29eca712ebce67d031b770f742a24" => :high_sierra
+    sha256 cellar: :any, arm64_big_sur: "d07c98078f134dd3d85eac5c0a12f545aece45d1db802cd4166f682d45d39ac2"
+    sha256 cellar: :any, big_sur:       "f94b42de1a75d06f03c5b3305fc87f5dafb31a5ffaa434eaa08b37c565393e4e"
+    sha256 cellar: :any, catalina:      "30da2a4411ea4ec28d206f74d45914c1ce3367174a0405eec7c068fbdce42c26"
+    sha256 cellar: :any, mojave:        "de010f567513cb4a87c0586a02db30e66c54730f81ee92257e95a91ece269156"
   end
 
   depends_on "asciidoc" => :build
@@ -26,8 +24,6 @@ class PamU2f < Formula
   depends_on "libtool" => :build
   depends_on "pkg-config" => :build
   depends_on "libfido2"
-  depends_on "libu2f-host"
-  depends_on "libu2f-server"
 
   def install
     system "autoreconf", "--install"

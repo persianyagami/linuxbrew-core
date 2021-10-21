@@ -1,27 +1,28 @@
 class Pgformatter < Formula
   desc "PostgreSQL syntax beautifier"
   homepage "https://sqlformat.darold.net/"
-  url "https://github.com/darold/pgFormatter/archive/v4.4.tar.gz"
-  sha256 "7db5451064425fb13ff86a723654dcedc6554b62cbf5777bc65f30ffbf833480"
+  url "https://github.com/darold/pgFormatter/archive/v5.1.tar.gz"
+  sha256 "9d9974f70002e12ea12344d4373202a637572729c297f3f85e51fb2f60519997"
   license "PostgreSQL"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "0e4436d5bcd6f06c948428e34b2afe1be57984d11aa5c8eed6161d76273f12ed" => :big_sur
-    sha256 "afcce813b73ebaa9326790850289abdfeba332e4be86c6e55fcec6220b66bbef" => :catalina
-    sha256 "d991b9830807c92d78108a2320a358d162db5749b97bcdb8dea846058392c97c" => :mojave
-    sha256 "86e00ee2a7f917e6e0e8c7409c788267faeb710b4c707f4a6463bcd0c2dd0fae" => :high_sierra
-    sha256 "960ae2e48b850cc0292fad3b3fe88bcb657f48c7629f2eacd673127f90a348fb" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "5ed75c0fecbdcf5fdc4232888cecd5201b03d1d9c1640d19cf805c61931e3176"
+    sha256 cellar: :any_skip_relocation, big_sur:       "597a79f382e5be9ec4af90f3e1499686686912c10092943f659c65b31e97b46c"
+    sha256 cellar: :any_skip_relocation, catalina:      "34ea80e6142dfee05233d417713cc517545f7b62555ccf40997acb7b52431383"
+    sha256 cellar: :any_skip_relocation, mojave:        "34ea80e6142dfee05233d417713cc517545f7b62555ccf40997acb7b52431383"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7b7ec5b32bafedef008190142250d561b0c577081db09e8df889a101294dc0cb" # linuxbrew-core
   end
 
   def install
     system "perl", "Makefile.PL", "DESTDIR=."
     system "make", "install"
 
-    unless OS.mac?
+    if OS.linux?
+      # Move man pages to share directory so they will be linked correctly on Linux
       mkdir "usr/local/share"
       mv "usr/local/man", "usr/local/share"
     end
+
     prefix.install (buildpath/"usr/local").children
     (libexec/"lib").install "blib/lib/pgFormatter"
     libexec.install bin/"pg_format"

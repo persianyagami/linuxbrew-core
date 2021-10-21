@@ -1,10 +1,10 @@
 class Kakoune < Formula
   desc "Selection-based modal text editor"
   homepage "https://github.com/mawww/kakoune"
-  url "https://github.com/mawww/kakoune/releases/download/v2020.09.01/kakoune-2020.09.01.tar.bz2"
-  sha256 "861a89c56b5d0ae39628cb706c37a8b55bc289bfbe3c72466ad0e2757ccf0175"
+  url "https://github.com/mawww/kakoune/releases/download/v2021.08.28/kakoune-2021.08.28.tar.bz2"
+  sha256 "6f6ed7dfd8c5723210dbd848708acf03af4b847016fd3ede96b2a89ad32276cb"
   license "Unlicense"
-  head "https://github.com/mawww/kakoune.git"
+  head "https://github.com/mawww/kakoune.git", branch: "master"
 
   livecheck do
     url :stable
@@ -12,27 +12,27 @@ class Kakoune < Formula
   end
 
   bottle do
-    cellar :any
-    sha256 "9578dcfc73d6c978fda9ed31194ab0a1599fbab35faf506ccf92ee8f0466e387" => :big_sur
-    sha256 "19ff009f6f44de0e54fc01736f8e145bc6a866307f18adf5a002c8053b7e2bd9" => :catalina
-    sha256 "48b2c91f86c65517c8a83a0a0083bc7c0bf54a4e8fc93b22b5744f7c0ce4fc33" => :mojave
-    sha256 "dbee14709bcbe746293b0a80852347cc53cb646c9013b6fc119ee37aab4ab859" => :high_sierra
-    sha256 "c2b565e53df96ef5b838475a85f0a904d9c7c2adb1e3f7331729585eed04546d" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "cf56529386ac094bf0cefac9c50a60a7234127c9d1c3ed22e853f8cf917dee91"
+    sha256 cellar: :any_skip_relocation, big_sur:       "6fdb7731b67b916f43c85d1674982a5801af161878446eba999de72a492e586e"
+    sha256 cellar: :any_skip_relocation, catalina:      "cdd59d3c8978b2c8f2ca0899867be322ce4d23eac3600a3b0684e199d5020e42"
+    sha256 cellar: :any_skip_relocation, mojave:        "af3a8f431b72c684b26bbbd115bf08ad9d8c12b95e83f7c0cea3f8881946d6a9"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9797d57cd6184e1b12a2c6120ccbfc51bbb369cf932400c0e556d0f9074b5d8e" # linuxbrew-core
   end
 
   depends_on macos: :high_sierra # needs C++17
   depends_on "ncurses"
 
-  unless OS.mac?
-    fails_with gcc: "5"
-    fails_with gcc: "6"
+  uses_from_macos "libxslt" => :build
+
+  on_linux do
     depends_on "binutils" => :build
-    depends_on "linux-headers" => :build
+    depends_on "linux-headers@4.4" => :build
     depends_on "pkg-config" => :build
-    depends_on "gcc@7"
+    depends_on "gcc"
   end
 
-  uses_from_macos "libxslt" => :build
+  fails_with gcc: "5"
+  fails_with gcc: "6"
 
   def install
     cd "src" do

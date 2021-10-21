@@ -1,19 +1,16 @@
 class GdkPixbuf < Formula
   desc "Toolkit for image loading and pixel buffer manipulation"
   homepage "https://gtk.org"
-  url "https://download.gnome.org/sources/gdk-pixbuf/2.42/gdk-pixbuf-2.42.2.tar.xz"
-  sha256 "83c66a1cfd591d7680c144d2922c5955d38b4db336d7cd3ee109f7bcf9afef15"
+  url "https://download.gnome.org/sources/gdk-pixbuf/2.42/gdk-pixbuf-2.42.6.tar.xz"
+  sha256 "c4a6b75b7ed8f58ca48da830b9fa00ed96d668d3ab4b1f723dcf902f78bde77f"
   license "LGPL-2.1-or-later"
 
-  livecheck do
-    url :stable
-  end
-
   bottle do
-    sha256 "30685ea260245bc1a4e6c5e3b1301f7b603e64c98a83386e1b71515787e1a130" => :big_sur
-    sha256 "fe5c2b2bc7a942a6cab4d091be0c9f88703919cc75b6ec92d51ef0ed24ebcdbc" => :catalina
-    sha256 "a76668fe271e79d4a74ed56657130dda2012c4cf78e9d7e5c417f010ca35ad8c" => :mojave
-    sha256 "bc3e86109c412b2fbab72d051f72e9cc9c7e18fe164ea89d6300e065dba750a3" => :x86_64_linux
+    sha256 arm64_big_sur: "1aa92bcea0846fe0b37a4d65bf5947f5c27ffc750a93bd94db69bfe25369fda3"
+    sha256 big_sur:       "f4cf795b20c84fb5074ceeeeaf7b1d22e164b7af13adb6d0b95e3655d867fd41"
+    sha256 catalina:      "94835aba06d5e7160fd19bb14e05d3aad2f27be4c7030c019e42208369cf6014"
+    sha256 mojave:        "4bd3543b83cd74bfd0de1bd94a9e0200374c0834ef636cfe99621fe3c2145aaa"
+    sha256 x86_64_linux:  "42616ca80146683a0b7be66ad731af92844e572ee828b52a1ded7753807f18e8" # linuxbrew-core
   end
 
   depends_on "gobject-introspection" => :build
@@ -52,11 +49,9 @@ class GdkPixbuf < Formula
       -Dgir=true
       -Drelocatable=false
       -Dnative_windows_loaders=false
+      -Dinstalled_tests=false
       -Dman=false
     ]
-
-    args << "-Dinstalled_tests=false" if OS.mac?
-    args << "--libdir=#{lib}" unless OS.mac?
 
     ENV["DESTDIR"] = "/"
     mkdir "build" do
@@ -114,7 +109,9 @@ class GdkPixbuf < Formula
       -lglib-2.0
       -lgobject-2.0
     ]
-    flags << "-lintl" if OS.mac?
+    on_macos do
+      flags << "-lintl"
+    end
     system ENV.cc, "test.c", "-o", "test", *flags
     system "./test"
   end

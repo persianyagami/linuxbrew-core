@@ -1,52 +1,53 @@
-require "os/linux/glibc"
-
 class GccAT7 < Formula
   desc "GNU compiler collection"
   homepage "https://gcc.gnu.org/"
   url "https://ftp.gnu.org/gnu/gcc/gcc-7.5.0/gcc-7.5.0.tar.xz"
   mirror "https://ftpmirror.gnu.org/gcc/gcc-7.5.0/gcc-7.5.0.tar.xz"
   sha256 "b81946e7f01f90528a1f7352ab08cc602b9ccc05d4e44da4bd501c5a189ee661"
-  revision 2
+  license all_of: [
+    "LGPL-2.1-or-later",
+    "GPL-3.0-or-later" => { with: "GCC-exception-3.1" },
+  ]
+  revision 4
 
   livecheck do
     url :stable
     regex(%r{href=.*?gcc[._-]v?(7(?:\.\d+)+)(?:/?["' >]|\.t)}i)
   end
 
-  # gcc is designed to be portable.
   bottle do
-    sha256 "4c0fc49fe4d65a7ab06a9417987cc2c1367959f885d0c77cd3ba36ca78e129d6" => :big_sur
-    sha256 "4dca3b07173bffba262e003b345970119626a4d60a25c167d6bc216c46f1d83e" => :catalina
-    sha256 "5d4086421866078dc4d9bfe623a38160dbcf04ff88b4d0284dee9da66ff50f4c" => :mojave
-    sha256 "3c2135fc0b1c7f0ce048c1f610d2131a237911bdbd66d8bff731bbf9c6d84bcc" => :high_sierra
-    sha256 "6437a3ac47e16db165b34c81eb9baffd9615821ba62cf038db14a4bb64da9183" => :x86_64_linux
+    sha256 big_sur:      "f53816251cabd7c7cc5818af052ad0cccab189156fd63243be2b1bee21d8a0b7"
+    sha256 catalina:     "359aee8f81fae1591bb685a6c38dbcace62d32d1ba7a69b01c15061ce29e61bb"
+    sha256 mojave:       "95659aa77c264356df8c2eb9d24800aba62f0d308b86d601e0d259885700aebf"
+    sha256 x86_64_linux: "adaf4e7c39a410021bb2cc5527a9c29ccdd25d169581582b78730ecacd5ebbf4" # linuxbrew-core
   end
 
   # The bottles are built on systems with the CLT installed, and do not work
   # out of the box on Xcode-only systems due to an incorrect sysroot.
-  pour_bottle? do
-    reason "The bottle needs the Xcode CLT to be installed."
-    satisfy { !OS.mac? || MacOS::CLT.installed? }
-  end
+  pour_bottle? only_if: :clt_installed
 
+  depends_on arch: :x86_64
   depends_on "gmp"
   depends_on "isl"
   depends_on "libmpc"
   depends_on "mpfr"
 
-  unless OS.mac?
-    depends_on "zlib"
+  uses_from_macos "zlib"
+
+  on_linux do
     depends_on "binutils"
   end
 
   # GCC bootstraps itself, so it is OK to have an incompatible C++ stdlib
   cxxstdlib_check :skip
 
+  def version_suffix
+    version.major.to_s
+  end
+
   def install
     # GCC will suffer build errors if forced to use a particular linker.
     ENV.delete "LD"
-
-    version_suffix = version.major.to_s
 
     # Even when suffixes are appended, the info pages conflict when
     # install-info is run so pretend we have an outdated makeinfo
@@ -59,31 +60,7 @@ class GccAT7 < Formula
     #  - BRIG
     languages = %w[c c++ objc obj-c++ fortran]
 
-    args = []
-
-    if OS.mac?
-      args += [
-        "--build=x86_64-apple-darwin#{OS.kernel_version}",
-        "--with-system-zlib",
-        "--with-bugurl=https://github.com/Homebrew/homebrew-core/issues",
-      ]
-    else
-      args += [
-        "--with-bugurl=https://github.com/Homebrew/linuxbrew-core/issues",
-        # Fix Linux error: gnu/stubs-32.h: No such file or directory.
-        "--disable-multilib",
-      ]
-
-      # Change the default directory name for 64-bit libraries to `lib`
-      # http://www.linuxfromscratch.org/lfs/view/development/chapter06/gcc.html
-      inreplace "gcc/config/i386/t-linux64", "m64=../lib64", "m64="
-
-      # Set the search path for glibc libraries and objects, using the system's glibc
-      # Fix the error: ld: cannot find crti.o: No such file or directory
-      ENV.prepend_path "LIBRARY_PATH", Pathname.new(Utils.safe_popen_read(ENV.cc, "-print-file-name=crti.o")).parent
-    end
-
-    args += [
+    args = [
       "--prefix=#{prefix}",
       "--libdir=#{lib}/gcc/#{version_suffix}",
       "--enable-languages=#{languages.join(",")}",
@@ -95,13 +72,17 @@ class GccAT7 < Formula
       "--with-isl=#{Formula["isl"].opt_prefix}",
       "--enable-checking=release",
       "--with-pkgversion=Homebrew GCC #{pkg_version} #{build.used_options*" "}".strip,
+      "--with-bugurl=#{tap.issues_url}",
       "--disable-nls",
     ]
 
-    # Xcode 10 dropped 32-bit support
-    args << "--disable-multilib" if OS.mac? && DevelopmentTools.clang_build_version >= 1000
-
     if OS.mac?
+      args << "--build=x86_64-apple-darwin#{OS.kernel_version}"
+      args << "--with-system-zlib"
+
+      # Xcode 10 dropped 32-bit support
+      args << "--disable-multilib" if DevelopmentTools.clang_build_version >= 1000
+
       # System headers may not be in /usr/include
       sdk = MacOS.sdk_path_if_needed
       if sdk
@@ -109,21 +90,27 @@ class GccAT7 < Formula
         args << "--with-sysroot=#{sdk}"
       end
 
-      # Avoid reference to sed shim
-      args << "SED=/usr/bin/sed"
-    end
-
-    # Ensure correct install names when linking against libgcc_s;
-    # see discussion in https://github.com/Homebrew/homebrew/pull/34303
-    if OS.mac?
+      # Ensure correct install names when linking against libgcc_s;
+      # see discussion in https://github.com/Homebrew/homebrew/pull/34303
       inreplace "libgcc/config/t-slibgcc-darwin", "@shlib_slibdir@", "#{HOMEBREW_PREFIX}/lib/gcc/#{version_suffix}"
+    else
+      # Fix Linux error: gnu/stubs-32.h: No such file or directory.
+      args << "--disable-multilib"
+
+      # Change the default directory name for 64-bit libraries to `lib`
+      # http://www.linuxfromscratch.org/lfs/view/development/chapter06/gcc.html
+      inreplace "gcc/config/i386/t-linux64", "m64=../lib64", "m64="
     end
 
     mkdir "build" do
       system "../configure", *args
 
       system "make"
-      system "make", OS.mac? ? "install" : "install-strip"
+      if OS.mac?
+        system "make", "install"
+      else
+        system "make", "install-strip"
+      end
     end
 
     # Handle conflicts between GCC formulae and avoid interfering
@@ -142,8 +129,8 @@ class GccAT7 < Formula
   end
 
   def post_install
-    unless OS.mac?
-      gcc = bin/"gcc-7"
+    if OS.linux?
+      gcc = bin/"gcc-#{version_suffix}"
       libgcc = Pathname.new(Utils.safe_popen_read(gcc, "-print-libgcc-file-name")).parent
       raise "command failed: #{gcc} -print-libgcc-file-name" if $CHILD_STATUS.exitstatus.nonzero?
 
@@ -201,7 +188,7 @@ class GccAT7 < Formula
       #     Noted that it should only be passed for the `gcc@*` formulae.
       #   * `-L#{HOMEBREW_PREFIX}/lib` instructs gcc to find the rest
       #     brew libraries.
-      libdir = HOMEBREW_PREFIX/"lib/gcc/7"
+      libdir = HOMEBREW_PREFIX/"lib/gcc/#{version_suffix}"
       specs.write specs_string + <<~EOS
         *cpp_unique_options:
         + -isysroot #{HOMEBREW_PREFIX}/nonexistent #{system_header_dirs.map { |p| "-idirafter #{p}" }.join(" ")}

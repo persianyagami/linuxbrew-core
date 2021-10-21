@@ -2,10 +2,11 @@ class Puzzles < Formula
   desc "Collection of one-player puzzle games"
   homepage "https://www.chiark.greenend.org.uk/~sgtatham/puzzles/"
   # Extract https://www.chiark.greenend.org.uk/~sgtatham/puzzles/puzzles.tar.gz to get the version number
-  url "https://www.chiark.greenend.org.uk/~sgtatham/puzzles/puzzles-20201208.84cb4c6.tar.gz"
-  version "20201208"
-  sha256 "fd49aabdd7c7e521c990991dab59700a40719cca172113ac8df693afe11d284d"
-  head "https://git.tartarus.org/simon/puzzles.git"
+  url "https://www.chiark.greenend.org.uk/~sgtatham/puzzles/puzzles-20210914.42cbd76.tar.gz"
+  version "20210914"
+  sha256 "42d2c20afaf8cbcef5bdbeda3ebd95f120f8c0edd473bccd7fc4b0f03d3d82c2"
+  license "MIT"
+  head "https://git.tartarus.org/simon/puzzles.git", branch: "main"
 
   # There's no directory listing page and the homepage only lists an unversioned
   # tarball. The Git repository doesn't report any tags when we use that. The
@@ -17,24 +18,39 @@ class Puzzles < Formula
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "40e28c1005919ab7dcbb215f5d51abbca00297816e0a4b170f4e0410d17cb713" => :big_sur
-    sha256 "ecdd353296ae643d50a67f5abbdac3d878ab3bc4fcb044b7a9d38b39ac281f43" => :catalina
-    sha256 "aaf4ab9bb3026b8749235052b2f82eb7fb3f4eb8ad4ff418ebe35256f0421d99" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "e91c37625afa7469e2498f5a471ad3925a819679db44244a88c04c2ac46d677e"
+    sha256 cellar: :any_skip_relocation, big_sur:       "cf2e11cd4e6cb94a0cb4989f2e03f7aaf098abb816e13bc9a65f41cefbed7141"
+    sha256 cellar: :any_skip_relocation, catalina:      "fcf2f14a0750f0fae886b30b79d6927d90749ba9887038050cbfcc68ee95b160"
+    sha256 cellar: :any_skip_relocation, mojave:        "5bb134a4e1a289bb34e9d898be215448decb30af17af925744efac8a287ac7b9"
   end
 
-  depends_on "halibut"
+  depends_on "cmake" => :build
+  depends_on "halibut" => :build
+
+  on_linux do
+    depends_on "imagemagick" => :build
+    depends_on "pkg-config" => :build
+    depends_on "cairo"
+    depends_on "gdk-pixbuf"
+    depends_on "glib"
+    depends_on "gtk+3"
+    depends_on "pango"
+  end
 
   def install
-    # Do not build for i386
-    inreplace "mkfiles.pl", /@osxarchs = .*/, "@osxarchs = ('x86_64');"
+    system "cmake", ".", *std_cmake_args
+    system "make", "install"
 
-    system "perl", "mkfiles.pl"
-    system "make", "-d", "-f", "Makefile.osx", "all"
-    prefix.install "Puzzles.app"
+    bin.write_exec_script prefix/"Puzzles.app/Contents/MacOS/Puzzles" if OS.mac?
   end
 
   test do
-    assert_predicate prefix/"Puzzles.app/Contents/MacOS/Puzzles", :executable?
+    on_macos do
+      assert_predicate prefix/"Puzzles.app/Contents/MacOS/Puzzles", :executable?
+    end
+
+    on_linux do
+      assert_match "Mines, from Simon Tatham's Portable Puzzle Collection", shell_output(bin/"mines")
+    end
   end
 end

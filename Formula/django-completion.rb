@@ -1,17 +1,15 @@
 class DjangoCompletion < Formula
   desc "Bash completion for Django"
-  homepage "https://github.com/django/django"
-  url "https://github.com/django/django/archive/3.1.4.tar.gz"
-  sha256 "393f64a8d7f9843323aa99684e908f9a1d1f2f685601a53a4aef6f00ff69f855"
+  homepage "https://www.djangoproject.com/"
+  url "https://github.com/django/django/archive/3.2.7.tar.gz"
+  sha256 "f3a439d4521e9c76a828f743ee7130c95065cc05aa3fa6287708cc0919ed9fc1"
   license "BSD-3-Clause"
   head "https://github.com/django/django.git"
 
   livecheck do
-    url :head
+    url :stable
     regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
-
-  bottle :unneeded
 
   def install
     bash_completion.install "extras/django_bash_completion" => "django"

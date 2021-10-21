@@ -1,23 +1,31 @@
 class Openexr < Formula
   desc "High dynamic-range image file format"
   homepage "https://www.openexr.com/"
-  url "https://github.com/openexr/openexr/archive/v2.5.3.tar.gz"
-  sha256 "6a6525e6e3907715c6a55887716d7e42d09b54d2457323fcee35a0376960bebf"
+  # NOTE: Please keep these values in sync with imath.rb when updating.
+  url "https://github.com/openexr/openexr/archive/v3.1.2.tar.gz"
+  sha256 "f5c8f148e8f972e76b47e802aada1c59ef1837f0a9259c6677756e7cd347640f"
   license "BSD-3-Clause"
 
   bottle do
-    sha256 "32281289a0172057d12178a4d267e6facb04b27d03f9ab7dad3248e200592d33" => :big_sur
-    sha256 "7ab2025ad66f69797e93c0e912860a828acdd244fa231358c9edd49105aa852b" => :catalina
-    sha256 "56cb6dd7c7bf57642ca718308a438d512c3064475b5286343838e1218820b3b7" => :mojave
-    sha256 "e2aba00b452411237f263b8dda16cff59fc82ece2a0b8e2f93166f902886348a" => :high_sierra
-    sha256 "b86941a6c269617c5c298c4e2656d7a02abdb9abe08a83167e3278cd5e7370ae" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "ab723009a94026ae725e87542aebd00bc69992ac3f672ff6960930eb158819a1"
+    sha256 cellar: :any,                 big_sur:       "922846fff4a126532cbba994521b8768f3ad9c6e4d11c175df4a51f333b8da87"
+    sha256 cellar: :any,                 catalina:      "f9bf9db8861ba9c96ca5b76a03e986a20c4545528c7770dc1915044b7ef3c25e"
+    sha256 cellar: :any,                 mojave:        "e2ab720e00d56143302a0c3af337e7605c8e2768cce9d5dadba3d28dfa28b904"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "495abc0e610d1ea0fc8bb21fbef41e3527b61c46f1faa6eeacf1e744600ca67c" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
   depends_on "pkg-config" => :build
-  depends_on "ilmbase"
+  depends_on "imath"
 
   uses_from_macos "zlib"
+
+  # These used to be provided by `ilmbase`
+  link_overwrite "include/OpenEXR"
+  link_overwrite "lib/libIex.dylib"
+  link_overwrite "lib/libIex.so"
+  link_overwrite "lib/libIlmThread.dylib"
+  link_overwrite "lib/libIlmThread.so"
 
   resource "exr" do
     url "https://github.com/openexr/openexr-images/raw/master/TestImages/AllHalfValues.exr"
@@ -25,8 +33,8 @@ class Openexr < Formula
   end
 
   def install
-    cd "OpenEXR" do
-      system "cmake", ".", *std_cmake_args
+    mkdir "build" do
+      system "cmake", "..", *std_cmake_args
       system "make", "install"
     end
   end

@@ -4,14 +4,14 @@ class Znc < Formula
   url "https://znc.in/releases/archive/znc-1.8.2.tar.gz"
   sha256 "ff238aae3f2ae0e44e683c4aee17dc8e4fdd261ca9379d83b48a7d422488de0d"
   license "Apache-2.0"
-  revision 1
+  revision 3
 
   bottle do
-    sha256 "3ee6a7b433414a20d4497d267711ae787f1f0c985e89f40352ae0e8db8fd7a6e" => :big_sur
-    sha256 "0968a0d12ce30428023911e4074b276b1d5e80f689fabf5cdb4ff72a3f57e721" => :catalina
-    sha256 "476fe82c16953d5e0645f59128e8dd86cb1cba86bb798a483d2b3ef394b8e28e" => :mojave
-    sha256 "512c83a43b82c84dc773a603e3ccc21f1f315fd8bcef1e259cc4a50c46359e2e" => :high_sierra
-    sha256 "745a7581baa89cca0f4eb52982d22d189da5482ba65edf16e41e2d3501701b08" => :x86_64_linux
+    sha256 arm64_big_sur: "e3aae77ed8c97b6495e5f04fabe977206239ee83d3b8cb96b20e3618364b2e18"
+    sha256 big_sur:       "37a5eaf20286fab88bd11f0f6f44ebf5bd2bb787deac43529d01cde28ef94188"
+    sha256 catalina:      "dc2145a17c2d550c367c1de12ab1e8c20bfc273cd92fe02da55678892b75a29c"
+    sha256 mojave:        "85a43a2796ec9d97fbe224a09501b82ae5495202dfffcc1ce8f9515a399076a5"
+    sha256 x86_64_linux:  "31d08922763099437dfe1f4c7f32df239a2955ae98a799d9dac9b9e751c0e360" # linuxbrew-core
   end
 
   head do
@@ -37,7 +37,7 @@ class Znc < Formula
     ENV.append "CXXFLAGS", "-std=c++11"
     ENV.append "CXXFLAGS", "-stdlib=libc++" if ENV.compiler == :clang
 
-    on_linux do
+    if OS.linux?
       ENV.append "CXXFLAGS", "-I#{Formula["zlib"].opt_include}"
       ENV.append "LIBS", "-L#{Formula["zlib"].opt_lib}"
     end

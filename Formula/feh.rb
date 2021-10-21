@@ -1,8 +1,8 @@
 class Feh < Formula
   desc "X11 image viewer"
   homepage "https://feh.finalrewind.org/"
-  url "https://feh.finalrewind.org/feh-3.6.1.tar.bz2"
-  sha256 "9b1edec52cbae97b17530cb5db10666abfb9983f51a5d820c89added6f7b1ea8"
+  url "https://feh.finalrewind.org/feh-3.7.2.tar.bz2"
+  sha256 "84718fd2720cf540d245768494fe0eb4e598f44b39e2326bae8c368a829c8258"
   license "MIT-feh"
 
   livecheck do
@@ -11,9 +11,11 @@ class Feh < Formula
   end
 
   bottle do
-    sha256 "e1d1f215337bc782e22c0be9bab3d21724bc39d5ed7e4e79ed08d409e9c1a862" => :big_sur
-    sha256 "c99b3a9f524feaae060b15d8d5707a95cc73345934d30038726be58519fe7855" => :catalina
-    sha256 "2f0068a025b73f6906e7235359cb0aed127ac236db2d89874f1c61e0465c62c3" => :mojave
+    sha256 arm64_big_sur: "f4867d78c1eb739f3ae5c99a228a3f2a4933071ad59923bdcba47e7f1439ca84"
+    sha256 big_sur:       "a37c2f2c6a11d3f35b57cf5068a948b2066efd90a1969b3a0074323b1dd35989"
+    sha256 catalina:      "4c5c9aa1cb0b260c6b0df9af37859cecc40d60007b4743fe1e90cbdae87dc8fe"
+    sha256 mojave:        "879ae5dfc7e464976b39420290d06f6238e9037dd24e9e387308221fca0b81e9"
+    sha256 x86_64_linux:  "dff9c6adbc299a3fd0278bd06435261772b1936a2ce1da814f27dc5f3a89876e" # linuxbrew-core
   end
 
   depends_on "imlib2"
@@ -21,6 +23,8 @@ class Feh < Formula
   depends_on "libx11"
   depends_on "libxinerama"
   depends_on "libxt"
+
+  uses_from_macos "curl"
 
   def install
     system "make", "PREFIX=#{prefix}", "verscmp=0", "exif=1"

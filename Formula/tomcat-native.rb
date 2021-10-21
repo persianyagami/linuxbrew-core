@@ -1,28 +1,23 @@
 class TomcatNative < Formula
   desc "Lets Tomcat use some native resources for performance"
   homepage "https://tomcat.apache.org/native-doc/"
-  url "https://www.apache.org/dyn/closer.lua?path=tomcat/tomcat-connectors/native/1.2.25/source/tomcat-native-1.2.25-src.tar.gz"
-  mirror "https://archive.apache.org/dist/tomcat/tomcat-connectors/native/1.2.25/source/tomcat-native-1.2.25-src.tar.gz"
-  sha256 "b62f29ebd1f5df25ea33698427d7eb53e3bbde953dfbcc0c9c4c6c13ed23a33b"
+  url "https://www.apache.org/dyn/closer.lua?path=tomcat/tomcat-connectors/native/1.2.31/source/tomcat-native-1.2.31-src.tar.gz"
+  mirror "https://archive.apache.org/dist/tomcat/tomcat-connectors/native/1.2.31/source/tomcat-native-1.2.31-src.tar.gz"
+  sha256 "acc0e6e342fbdda54b029564405322823c93d83f9d64363737c1cbcc3af1c1fd"
   license "Apache-2.0"
 
-  livecheck do
-    url :stable
-  end
-
   bottle do
-    cellar :any
-    sha256 "d3836e9add8c77dc8985898e5247fd2179b8e01c28fcbe20b33ea32b98a0671a" => :big_sur
-    sha256 "4b6c29db536582d170a979ca5fec140d3a252576a0ac587de45f0cc4517917a0" => :catalina
-    sha256 "48d5b5a3e06e33fb8c861caa75817e95081e5198f872090c97b2d247f355b895" => :mojave
-    sha256 "9fa1374046bc6bd35c13e6f82c1066a50fbda6ed31cd18efc658816caa5ea561" => :high_sierra
+    sha256 cellar: :any,                 arm64_big_sur: "c6f4dd11e7fbf16ad6f7e11b7d4c81e1ee6159bc025e0464430d920588fd1f24"
+    sha256 cellar: :any,                 big_sur:       "41a3d1bd142f9af9709a09ef08fa9c1d4afba8c1df9afcf206680abef9cdc561"
+    sha256 cellar: :any,                 catalina:      "49cb291540334f5a2b15ddbd2b597df9993cd958aa55d301b45b36389178c10e"
+    sha256 cellar: :any,                 mojave:        "24a026ac8fbbaf58b678c8cb8b8eaaf6d1ffca5774fd761943bc49b1e1179366"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a963eec7a04821345f16c6edbe8f9c6c99af4ac14bb87eb120baf344d1230c6d" # linuxbrew-core
   end
 
   depends_on "libtool" => :build
   depends_on "apr"
   depends_on "openjdk"
   depends_on "openssl@1.1"
-  depends_on "tomcat"
 
   def install
     cd "native" do

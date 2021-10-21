@@ -1,34 +1,33 @@
 class Dub < Formula
   desc "Build tool for D projects"
   homepage "https://code.dlang.org/getting_started"
-  url "https://github.com/dlang/dub/archive/v1.23.0.tar.gz"
-  sha256 "9c7196fd76efce50e8606b3f0ab103bb8b3984842dcc7c0970eb07aba63dbaa5"
+  url "https://github.com/dlang/dub/archive/v1.27.0.tar.gz"
+  sha256 "fb800f3355f167ac7f997f77e31e331db9d33477779fdaaf2851b3abcecc801a"
   license "MIT"
   version_scheme 1
   head "https://github.com/dlang/dub.git"
 
   livecheck do
-    url :head
+    url :stable
     regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "ffbc50022b9ee128b0ba6ba5d2833612d16b060ca79f98dfea410bce0252a635" => :big_sur
-    sha256 "3a1c773ad05662b24ddecacd2b008029e731178eab826a4945db34638ecad06a" => :catalina
-    sha256 "cb6ae1c85097a78aa6e0bccc14a5c485159058d5697defe48890648d5e68476e" => :mojave
-    sha256 "25b8feb7408b60d13bcd61bd71acc3cf77ba31405a2a626cdd731140d2548c0a" => :high_sierra
-    sha256 "8ceb27d24d70939c8846ee68f6d32c0fb785a259bda2244c3ddbab92d6bc90b2" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "20c67d16147775d49407fae421cef74e323cef53dab0a663b562e9710cde031f"
+    sha256 cellar: :any_skip_relocation, big_sur:       "522469719933702ba030cce31f83a4f19638e17945efce2786eaa6ab29b38d4b"
+    sha256 cellar: :any_skip_relocation, catalina:      "a708c2b342b00718471ec8427e56f7d36f91d1029939469110ca830d0a961748"
+    sha256 cellar: :any_skip_relocation, mojave:        "5da8b64546f9436fcc1210c7acf63a9f95a2c300b7eec8192610e3ec25d7c124"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a2db86cb8961dcd8bd71e45a2dc0f729efe48bee337df58e19002d1705a2019d" # linuxbrew-core
   end
 
-  depends_on "dmd" => :build
+  depends_on "ldc" => :build
   depends_on "pkg-config"
 
   uses_from_macos "curl"
 
   def install
     ENV["GITVER"] = version.to_s
-    system "./build.d"
+    system "ldc2", "-run", "./build.d"
     system "bin/dub", "scripts/man/gen_man.d"
     bin.install "bin/dub"
     man1.install Dir["scripts/man/*.1"]

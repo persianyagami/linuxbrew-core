@@ -1,10 +1,10 @@
 class ScummvmTools < Formula
   desc "Collection of tools for ScummVM"
   homepage "https://www.scummvm.org/"
-  url "https://www.scummvm.org/frs/scummvm-tools/2.2.0/scummvm-tools-2.2.0.tar.xz"
-  sha256 "1e72aa8f21009c1f7447c755e7f4cf499fe9b8ba3d53db681ea9295666cb48a4"
+  url "https://downloads.scummvm.org/frs/scummvm-tools/2.5.0/scummvm-tools-2.5.0.tar.xz"
+  sha256 "5cdc8173e1ee3fb74d62834e79995be0c5b1d999f72a0a125fab611222f927da"
   license "GPL-2.0-or-later"
-  head "https://github.com/scummvm/scummvm-tools.git"
+  head "https://github.com/scummvm/scummvm-tools.git", branch: "master"
 
   livecheck do
     url "https://www.scummvm.org/downloads/"
@@ -12,12 +12,10 @@ class ScummvmTools < Formula
   end
 
   bottle do
-    cellar :any
-    sha256 "4b1a47fd6bd0890f4c10b2feb784b5c2cece304cfd106bd214ce8233688e72a3" => :big_sur
-    sha256 "4d43c5933986b4c011c5cf9f45bd853cf0faabb652aab2ce53f9e5cfc5d95ae0" => :catalina
-    sha256 "64cce3aa4cfbb11ee9223bb1037cf85e8cec3ab78d2206aeb93f2605ea7cf327" => :mojave
-    sha256 "0c207fc3e8ee9b54b1c6f85d1461458cbe3ba05b591f87807ff4e534c4baec17" => :high_sierra
-    sha256 "da91d947e60c147ca4c6ec92971cf28c141ca4adf5fe4593d7ef90fa12ca14d2" => :x86_64_linux
+    sha256 cellar: :any,                 big_sur:      "3259bdb62e715d7e14892449fb05c7bc2ca95f9717e0de856196168921d61ccc"
+    sha256 cellar: :any,                 catalina:     "6657cc2a94b8564c480ef0f1528ec8722939b550f6b0e1f09f7b69cb8b0401cc"
+    sha256 cellar: :any,                 mojave:       "aa47046cdfe324770d8bbe51f55ec086273b839dd40d97034506b607e837c431"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "fad140bbc7bd0857a92374964ed1ff268dc620e89ee3ee91767847be76523119" # linuxbrew-core
   end
 
   depends_on "boost"
@@ -26,10 +24,22 @@ class ScummvmTools < Formula
   depends_on "libpng"
   depends_on "libvorbis"
   depends_on "mad"
-  depends_on "wxmac"
+  depends_on "wxwidgets@3.0"
 
   def install
-    system "./configure", "--prefix=#{prefix}"
+    # configure will happily carry on even if it can't find wxwidgets,
+    # so let's make sure the install method keeps working even when
+    # the wxwidgets dependency version changes
+    wxwidgets = deps.find { |dep| dep.name.match?(/^wxwidgets(@\d+(\.\d+)?)?$/) }
+                    .to_formula
+
+    # The configure script needs a little help finding our wx-config
+    wxconfig = "wx-config-#{wxwidgets.version.major_minor}"
+    inreplace "configure", /^_wxconfig=wx-config$/, "_wxconfig=#{wxconfig}"
+
+    system "./configure", "--prefix=#{prefix}",
+                          "--disable-debug",
+                          "--enable-verbose-build"
     system "make", "install"
   end
 

@@ -4,7 +4,7 @@ class Libspectre < Formula
   url "https://libspectre.freedesktop.org/releases/libspectre-0.2.9.tar.gz"
   sha256 "49ae9c52b5af81b405455c19fe24089d701761da2c45d22164a99576ceedfbed"
   license "GPL-2.0-or-later"
-  revision 1
+  revision 3
 
   livecheck do
     url "https://libspectre.freedesktop.org/releases/"
@@ -12,12 +12,11 @@ class Libspectre < Formula
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "57c4aea04a762a93d7633ea05e15a7b128deedb03ef87a7d2b3c1c429f01bba9" => :big_sur
-    sha256 "3b6f844c11905a3dbe1c5a4b78c62416fd047c399be7dcb5887d9357a79a7802" => :catalina
-    sha256 "8bbc1229a48f1cedc29c54bd9ef15dca1e9e513e534b648e0ad8300c340e51e9" => :mojave
-    sha256 "53f4b9429b90c0dfe84a759bd21f26e668ea19143424d141bfe83fcc83e76394" => :high_sierra
-    sha256 "2ca2612aac1bf943fca2fec96640dd53e158588bbc2c3faf2907a66405cc4b7a" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "3d5c0d07bfb27f55e4cd938e5e12ced37b0fa8b0776460bfa8748e8d113ca0af"
+    sha256 cellar: :any,                 big_sur:       "0690d94faad89f7c1bacf2729dbcc0f965475080cc94be1bebcfa352d605507f"
+    sha256 cellar: :any,                 catalina:      "7b2dbf0cce05aba6282aa3090b519c95584dc2021eaccecfc97b6c66c67ba4bd"
+    sha256 cellar: :any,                 mojave:        "aa33dcb97455ec208315f8a3d57b904bfa98e219b705f3992776f167b08b35bd"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "467c578adafbc5e93ae51017635192aa8696a642fe6ec458afce221092fc6049" # linuxbrew-core
   end
 
   depends_on "ghostscript"

@@ -2,24 +2,23 @@ class Krew < Formula
   desc "Package manager for kubectl plugins"
   homepage "https://sigs.k8s.io/krew/"
   url "https://github.com/kubernetes-sigs/krew.git",
-      tag:      "v0.4.0",
-      revision: "8bebb56d7295f361db3780fa18bd9f2f995ed48f"
+      tag:      "v0.4.2",
+      revision: "6fcdb794c532d3f2849bb4a8a942a19c09ef3002"
   license "Apache-2.0"
+  head "https://github.com/kubernetes-sigs/krew.git"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "ca2d7f7574bf8ff75dff88a4248db5374c161cfbd9461b0bbb7897381ffe61a7" => :big_sur
-    sha256 "0d9829908a9d668fc86eb86a675201202d42091ab93931b25f6b0f6f097191a1" => :catalina
-    sha256 "c4e11ef97fc169636f581737325617cc64e672c995c916bd6fb6a49d90268ab9" => :mojave
-    sha256 "cd01a286df37159eec08266e02ab5637fcb953418ec5c220c4718f73bac43d5d" => :high_sierra
-    sha256 "ac2aa521bb70a70d23d966cefea3f6bbc33b56e4d0179dc4ca7380222e571311" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "9bd45bf4ce538f251c393ba6279d18c7599866abb46e556fb9fa26e2e7473249"
+    sha256 cellar: :any_skip_relocation, big_sur:       "17c8fd8f71c8a92ede7c9f9d56382b1c6ffc962d4a7f6e9719e7e9a9d9f1755a"
+    sha256 cellar: :any_skip_relocation, catalina:      "3405b2bbbedd29dad0cec63a9a74d959ff9f8ef1ee1ce8c9d540156a225492ed"
+    sha256 cellar: :any_skip_relocation, mojave:        "500cfe13d69c132e42b689b2c575317dbdb1d4d1364d0edaeb53a3db07ebf055"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5d7b37896695e5f9c59b76c0f47714554205a28021775a7a1b80b80875af3b23" # linuxbrew-core
   end
 
   depends_on "go" => :build
   depends_on "kubernetes-cli"
 
   def install
-    commit = Utils.safe_popen_read("git", "rev-parse", "--short=8", "HEAD").chomp
     ENV["CGO_ENABLED"] = "0"
     # build in local dir to avoid this error:
     # go build: cannot write multiple packages to non-directory /usr/local/Cellar/krew/0.3.2/bin/krew
@@ -27,8 +26,8 @@ class Krew < Formula
 
     ldflags = %W[
       -w
-      -X sigs.k8s.io/krew/pkg/version.gitCommit=#{commit}
-      -X sigs.k8s.io/krew/pkg/version.gitTag=v#{version}
+      -X sigs.k8s.io/krew/internal/version.gitCommit=#{Utils.git_short_head(length: 8)}
+      -X sigs.k8s.io/krew/internal/version.gitTag=v#{version}
     ]
 
     system "go", "build", "-o", "build", "-tags", "netgo",
@@ -43,6 +42,7 @@ class Krew < Formula
     system "#{bin}/kubectl-krew", "version"
     system "#{bin}/kubectl-krew", "update"
     system "#{bin}/kubectl-krew", "install", "ctx"
+    assert_match "v#{version}", shell_output("#{bin}/kubectl-krew version")
     assert_predicate testpath/"bin/kubectl-ctx", :exist?
   end
 end

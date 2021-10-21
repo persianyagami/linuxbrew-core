@@ -1,23 +1,20 @@
 class Gnuplot < Formula
   desc "Command-driven, interactive function plotting"
   homepage "http://www.gnuplot.info/"
-  url "https://downloads.sourceforge.net/project/gnuplot/gnuplot/5.4.1/gnuplot-5.4.1.tar.gz"
-  sha256 "6b690485567eaeb938c26936e5e0681cf70c856d273cc2c45fabf64d8bc6590e"
+  url "https://downloads.sourceforge.net/project/gnuplot/gnuplot/5.4.2/gnuplot-5.4.2.tar.gz"
+  sha256 "e57c75e1318133951d32a83bcdc4aff17fed28722c4e71f2305cfc2ae1cae7ba"
   license "gnuplot"
-  revision 1
-
-  livecheck do
-    url :stable
-  end
 
   bottle do
-    sha256 "796d40d70299b5528aaa962506a000b9c7287a7185730bf5a04a9021868bbe06" => :big_sur
-    sha256 "820888da02746b6c31747ba1244b9b668e757d28445e12b2f6e56ca72ae07e2b" => :catalina
-    sha256 "a0089a7ae448a0f387cf70b69f0e8d9ffe4adc5c5ae40ee1026e66db34769d8c" => :mojave
+    sha256 arm64_big_sur: "27a1fe2a1a18339f161cf3e8e5798864265bea2e7c826d2c4f73f644656b0098"
+    sha256 big_sur:       "c2ee49f0e0df611f3955e6380a30020d2d4a2b7cfff4a769d32f20b9bf46b250"
+    sha256 catalina:      "8419141f6d01b54a0df20e6f1606f8555fbb915bf236a0a225711eaea4886ac5"
+    sha256 mojave:        "a617cb5b3bcc7f961f1b107ee56d5da12108b51797f92b11081b2c1ff54c279e"
+    sha256 x86_64_linux:  "7fb406cddb4dc1a2ba23afd3c40f1deef9081d9143c4f97363b3ed179317d83a" # linuxbrew-core
   end
 
   head do
-    url "https://git.code.sf.net/p/gnuplot/gnuplot-main.git"
+    url "https://git.code.sf.net/p/gnuplot/gnuplot-main.git", branch: "master"
 
     depends_on "autoconf" => :build
     depends_on "automake" => :build
@@ -29,8 +26,14 @@ class Gnuplot < Formula
   depends_on "libcerf"
   depends_on "lua"
   depends_on "pango"
-  depends_on "qt"
+  depends_on "qt@5"
   depends_on "readline"
+
+  on_linux do
+    depends_on "gcc"
+  end
+
+  fails_with gcc: "5"
 
   def install
     # Qt5 requires c++11 (and the other backends do not care)
@@ -45,6 +48,7 @@ class Gnuplot < Formula
       --disable-wxwidgets
       --with-qt
       --without-x
+      --without-latex
     ]
 
     system "./prepare" if build.head?

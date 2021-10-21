@@ -3,18 +3,17 @@ class GitFilterRepo < Formula
 
   desc "Quickly rewrite git repository history"
   homepage "https://github.com/newren/git-filter-repo"
-  url "https://github.com/newren/git-filter-repo/releases/download/v2.29.0/git-filter-repo-2.29.0.tar.xz"
-  sha256 "eb269f6e9b91fcacf676f7d5b8174d962dab5facce2022cc59cb672cd33cd602"
+  url "https://github.com/newren/git-filter-repo/releases/download/v2.33.0/git-filter-repo-2.33.0.tar.xz"
+  sha256 "7bcf11da134bbd82a4171f7fb28a3ab7bc4d478fe8ec3a3d9580e4bbdc32e6e9"
   license "MIT"
+  revision 1
 
-  bottle :unneeded
+  bottle do
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "2f40e7daa98d667dfdee97ae3ea9e589d42518baabf07d0fc128fe70f41cfe34" # linuxbrew-core
+  end
 
-  # ignore git dependency audit:
-  #  * Don't use git as a dependency (it's always available)
-  # But we require Git 2.22.0+
-  # https://github.com/Homebrew/homebrew-core/pull/46550#issuecomment-563229479
-  depends_on "git"
-  depends_on "python@3.9"
+  depends_on "python@3.10"
+  uses_from_macos "git", since: :catalina # git 2.22.0+ is required
 
   def install
     rewrite_shebang detected_python_shebang, "git-filter-repo"

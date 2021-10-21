@@ -1,26 +1,22 @@
 class Guile < Formula
   desc "GNU Ubiquitous Intelligent Language for Extensions"
   homepage "https://www.gnu.org/software/guile/"
-  url "https://ftp.gnu.org/gnu/guile/guile-3.0.4.tar.xz"
-  mirror "https://ftpmirror.gnu.org/guile/guile-3.0.4.tar.xz"
-  sha256 "6b7947dc2e3d115983846a268b8f5753c12fd5547e42fbf2b97d75a3b79f0d31"
+  url "https://ftp.gnu.org/gnu/guile/guile-3.0.7.tar.xz"
+  mirror "https://ftpmirror.gnu.org/guile/guile-3.0.7.tar.xz"
+  sha256 "f57d86c70620271bfceb7a9be0c81744a033f08adc7ceba832c9917ab3e691b7"
   license "LGPL-3.0-or-later"
-
-  livecheck do
-    url :stable
-  end
+  revision 2
 
   bottle do
-    rebuild 2
-    sha256 "fb9d84289c4bcb60f7e455b7a00438c9dd955c213ef4ff5c2d9362631d07f337" => :big_sur
-    sha256 "677c227a6a9b67df6592ffc26478ce5daa10f84eec4ed2ec7818f2012bb582f7" => :catalina
-    sha256 "a4f0eeab635c5360ba0dea52358aa9ee8ebd841d2a53e3ccda8b65f5684f679f" => :mojave
-    sha256 "5f83affb2fa8fda3734c2379260a4df5372432b3b399cd9af195fa0fb94da578" => :high_sierra
-    sha256 "db8a927301c5b1b497fbd32ae376e01fa96c596f0f96532e46b81c3d6aedd615" => :x86_64_linux
+    sha256 arm64_big_sur: "9f383d7cc5fe926b957e1f6d280a0dbb1752c822e4e28170331060c8284a83ae"
+    sha256 big_sur:       "707b16f2249da069f21acadc2a2d1c0721c84251a3fe455b97e0d02b82d4a471"
+    sha256 catalina:      "e6933c219cefd49ff8d0600dc7b6f484319978da91beb6896c5d3d8b8048e876"
+    sha256 mojave:        "4f71c527bff738902cb2412242c445bd25927af19e6705faac59e633b41c956e"
+    sha256 x86_64_linux:  "854869c91fecac8238edfa3f0611b0d207566e46a7b33a8752db8d1bba2e5af0" # linuxbrew-core
   end
 
   head do
-    url "https://git.savannah.gnu.org/git/guile.git"
+    url "https://git.savannah.gnu.org/git/guile.git", branch: "main"
 
     depends_on "autoconf" => :build
     depends_on "automake" => :build
@@ -37,8 +33,14 @@ class Guile < Formula
   depends_on "pkg-config" # guile-config is a wrapper around pkg-config.
   depends_on "readline"
 
-  on_linux do
-    depends_on "gperf"
+  uses_from_macos "gperf"
+
+  # This patch fixes an issue where Guile >= 3.0.6 doesn't properly load dynamic
+  # libraries on macOS.
+  # To be removed after Guile 3.0.8 is released.
+  patch do
+    url "https://git.savannah.gnu.org/cgit/guile.git/patch/?id=1f100a4f20c3a6e57922fb26fce212997e2a03cb"
+    sha256 "a5adf2586b30381cf24524c7fc0364115f7cb1f568d2b69a9f3fb49ad8355b55"
   end
 
   def install

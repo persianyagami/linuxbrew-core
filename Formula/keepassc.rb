@@ -1,24 +1,20 @@
 class Keepassc < Formula
   desc "Curses-based password manager for KeePass v.1.x and KeePassX"
-  homepage "https://raymontag.github.com/keepassc/"
+  homepage "https://github.com/raymontag/keepassc"
   url "https://files.pythonhosted.org/packages/c8/87/a7d40d4a884039e9c967fb2289aa2aefe7165110a425c4fb74ea758e9074/keepassc-1.8.2.tar.gz"
   sha256 "2e1fc6ccd5325c6f745f2d0a3bb2be26851b90d2095402dd1481a5c197a7b24e"
   license "ISC"
-  revision 2
-
-  livecheck do
-    url :stable
-  end
+  revision 4
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "d45c0751c541f70f630d57b6de4be54c7e404fa447b00c645da081baecf4ef07" => :catalina
-    sha256 "278b472373d6b75a37833a23a7bfe472c4bdd56ee582534a82a28b0a9dcd5248" => :mojave
-    sha256 "6304afecfb788ee22bf327d47ca046fc905db8383b348393eb7907f7b1479ce4" => :high_sierra
-    sha256 "69350832c62ff693c78b23de88aa9046a6993a09a19fd3d696ad69bc9211ce42" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "c84dd256b4392893dc1b756f16486f8c98ba6f6fbffdfb2573100b4bfd3efbc1"
+    sha256 cellar: :any_skip_relocation, big_sur:       "e1cf6e43638026d1deaa3e90e07ff03dec482e6f8fb19be895309c9be2a9abe9"
+    sha256 cellar: :any_skip_relocation, catalina:      "c3b6090b7cb27dfcbd563b152bac02444979535a97aa422f3458bd701246c0eb"
+    sha256 cellar: :any_skip_relocation, mojave:        "512d04b7df021f0a3a29dad0a2efc0262483a4cfe3e9385938afa346f73ac92e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a7e2ad5c0e719d472c67fe553fdfe8d06bef14735bbc7b5a9b1f45f9f5e53cc0" # linuxbrew-core
   end
 
-  depends_on "python@3.8"
+  depends_on "python@3.10"
 
   resource "kppy" do
     url "https://files.pythonhosted.org/packages/c8/d9/6ced04177b4790ccb1ba44e466c5b67f3a1cfe4152fb05ef5f990678f94f/kppy-1.5.2.tar.gz"
@@ -26,29 +22,34 @@ class Keepassc < Formula
   end
 
   resource "pycryptodomex" do
-    url "https://files.pythonhosted.org/packages/7f/3c/80cfaec41c3a9d0f524fe29bca9ab22d02ac84b5bfd6e22ade97d405bdba/pycryptodomex-3.9.7.tar.gz"
-    sha256 "50163324834edd0c9ce3e4512ded3e221c969086e10fdd5d3fdcaadac5e24a78"
+    url "https://files.pythonhosted.org/packages/14/90/f4a934bffae029e16fb33f3bd87014a0a18b4bec591249c4fc01a18d3ab6/pycryptodomex-3.9.9.tar.gz"
+    sha256 "7b5b7c5896f8172ea0beb283f7f9428e0ab88ec248ce0a5b8c98d73e26267d51"
   end
 
   def install
     pyver = Language::Python.major_minor_version "python3"
-    ENV.prepend_create_path "PYTHONPATH", libexec+"lib/python#{pyver}/site-packages"
+    ENV.prepend_create_path "PYTHONPATH", libexec/"lib/python#{pyver}/site-packages"
     install_args = %W[setup.py install --prefix=#{libexec}]
 
-    resource("pycryptodomex").stage { system "python3", *install_args }
-    resource("kppy").stage { system "python3", *install_args }
+    resource("pycryptodomex").stage do
+      system "python3", *install_args, "--single-version-externally-managed", "--record=installed.txt"
+    end
+
+    resource("kppy").stage do
+      system "python3", *install_args
+    end
 
     system "python3", *install_args
 
     man1.install Dir["*.1"]
 
     bin.install Dir[libexec/"bin/*"]
-    bin.env_script_all_files(libexec+"bin", PYTHONPATH: ENV["PYTHONPATH"])
+    bin.env_script_all_files libexec/"bin", PYTHONPATH: ENV["PYTHONPATH"]
   end
 
   test do
     # Fetching help is the only non-interactive action we can perform, and since
     # interactive actions are un-scriptable, there nothing more we can do.
-    system "#{bin}/keepassc", "--help"
+    system bin/"keepassc", "--help"
   end
 end

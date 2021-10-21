@@ -1,22 +1,21 @@
 class Cgrep < Formula
   desc "Context-aware grep for source code"
   homepage "https://github.com/awgn/cgrep"
-  url "https://github.com/awgn/cgrep/archive/v6.6.32.tar.gz"
-  sha256 "c45d680a2a00ef9524fc921e4c10fc7e68f02e57f4d6f1e640b7638a2f49c198"
-  license "GPL-2.0"
-  revision 1
-  head "https://github.com/awgn/cgrep.git"
+  url "https://github.com/awgn/cgrep/archive/v6.7.0.tar.gz"
+  sha256 "a61dfdc97d29a61ab196ed4d4d68a2a31d690185e6cf42cf9d37b9d1a725a426"
+  license "GPL-2.0-or-later"
+  head "https://github.com/awgn/cgrep.git", branch: "master"
 
   bottle do
-    sha256 "5b2e43b90ecf1dea0c622b55266feb1c0689580ac50d99311095c1a0814ebeb0" => :big_sur
-    sha256 "cee7f82d8e3e6b46e2afae649e13cf55202771da2473fbbebc6a712aa2f46496" => :catalina
-    sha256 "0ac8d5bcfc0ce6d295aa617cf0e5c624c61df4fc28a2ddb8c7b21bf753c7e369" => :mojave
-    sha256 "55118e5aa9a1999081105f7b2aa3e00793de45623fa61c0e69c6830e598d045a" => :high_sierra
-    sha256 "faed5ae9e1b22ce868f4ec9605a6efe66b093017475f6b6eeed44c30b6de8b65" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "25858aa7c4f6851083589571653bf47b278d304276596e475319f7165b28b18e"
+    sha256 cellar: :any,                 big_sur:       "c802cbb5bae4c207cf1aa50add2c115621a20632a05129a386589c4b73ff036b"
+    sha256 cellar: :any,                 catalina:      "1cde998562c4510e121298c30c12ccdc3b30f875950c6748103ab1d12469f740"
+    sha256 cellar: :any,                 mojave:        "89bf1c8dacd4e56fd902ac26b5d0f89bac3fd314220fdb4c57f1fbb996d4db1c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "202a97fb00be894490060594e5f817cd22c2ddbc689ca61b4e411e729bd068de"
   end
 
   depends_on "cabal-install" => :build
-  depends_on "ghc@8.8" => :build
+  depends_on "ghc" => :build
   depends_on "pkg-config" => :build
   depends_on "pcre"
 

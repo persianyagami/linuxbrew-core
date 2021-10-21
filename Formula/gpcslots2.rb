@@ -7,10 +7,8 @@ class Gpcslots2 < Formula
 
   livecheck do
     url :stable
-    regex(%r{url=.*?/gpcslots2[._-]v?(\d+(?:[-_.]\d+)+[a-z]?)}i)
+    regex(%r{url=.*?/gpcslots2[._-]v?(\d+(?:[._-]\d+)+[a-z]?)}i)
   end
-
-  bottle :unneeded
 
   def install
     bin.install "gpcslots2_0-4-5b" => "gpcslots2"

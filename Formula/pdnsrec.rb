@@ -1,21 +1,21 @@
 class Pdnsrec < Formula
   desc "Non-authoritative/recursing DNS server"
   homepage "https://www.powerdns.com/recursor.html"
-  url "https://downloads.powerdns.com/releases/pdns-recursor-4.4.1.tar.bz2"
-  sha256 "f97fa34635d42c68acee5d4da9db0e5ff619fd49e62acace7b4bdb7ee3675698"
+  url "https://downloads.powerdns.com/releases/pdns-recursor-4.5.6.tar.bz2"
+  sha256 "bb89cdd3810467ed848d13cac99f6f3456bf0ddcce5f47b9d38673629ee79200"
   license "GPL-2.0-only"
-  revision 1
 
   livecheck do
     url "https://downloads.powerdns.com/releases/"
-    regex(/href=.*?pdns-recursor[._-]v?(\d+(?:\.\d+)*)\.t/i)
+    regex(/href=.*?pdns-recursor[._-]v?(\d+(?:\.\d+)+)\.t/i)
   end
 
   bottle do
-    sha256 "0f080e316dd2d20e656f7ae48dbb881fc9824a5ca35b468dd9fd153c9e2a3c22" => :big_sur
-    sha256 "f38be52b2d55015172cc0e89dac5a29eadffdd12e8f7b21c4247050237ffc246" => :catalina
-    sha256 "f1e89927a21f517c6e96668149735b838fa1f9e96e36878fbbddc52d61253900" => :mojave
-    sha256 "d457c35465a16903cf3e55c8812c24ee62a72e460f128cdef68357cf95bbb1c2" => :x86_64_linux
+    sha256 arm64_big_sur: "17d294f7b29f9206dbe09d04d2b2fd856295ed2e26caebeb226dbb926cb62225"
+    sha256 big_sur:       "84db4d875f98e655ef4f2b33ee923ad77a3b5077e333e1dad1e5d601035c7256"
+    sha256 catalina:      "f5816c04766329c60b7643a07dc9652ee710001806d4fbf80ba4a0915be0639f"
+    sha256 mojave:        "0c93c4cc2b542487d278db7797ffe6519292125358215bed274f2cf4ccb9a82c"
+    sha256 x86_64_linux:  "1cd52ed5142b0a14015554a5edf760dca9b1c32c136409fdc05334fe6793f208"
   end
 
   depends_on "pkg-config" => :build
@@ -23,8 +23,30 @@ class Pdnsrec < Formula
   depends_on "lua"
   depends_on "openssl@1.1"
 
+  on_macos do
+    # This shouldn't be needed for `:test`, but there's a bug in `brew`:
+    # CompilerSelectionError: pdnsrec cannot be built with any available compilers.
+    depends_on "llvm" => [:build, :test] if DevelopmentTools.clang_build_version <= 1100
+  end
+
+  on_linux do
+    depends_on "gcc"
+  end
+
+  fails_with :clang do
+    build 1100
+    cause <<-EOS
+      Undefined symbols for architecture x86_64:
+        "MOADNSParser::init(bool, std::__1::basic_string_view<char, std::__1::char_traits<char> > const&)"
+    EOS
+  end
+
+  fails_with gcc: "5"
+
   def install
     ENV.cxx11
+    ENV.remove "HOMEBREW_LIBRARY_PATHS", Formula["llvm"].opt_lib
+    ENV.llvm_clang if OS.mac? && (DevelopmentTools.clang_build_version <= 1100)
 
     args = %W[
       --prefix=#{prefix}

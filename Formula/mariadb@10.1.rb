@@ -6,10 +6,10 @@ class MariadbAT101 < Formula
   license "GPL-2.0-only"
 
   bottle do
-    sha256 "6f47a7d1b4ad988b5a15e44b12a21774323b5dd6daf63525bebdeec98eda0599" => :big_sur
-    sha256 "e1335be8a1627fec5f9f8b423b81498805f15ce3daf4169f7449eeb974094b6f" => :catalina
-    sha256 "1b8eae6c589b426797896a602d2d4aa7220795f570da203a6f6b1bb9e8b71075" => :mojave
-    sha256 "ffe12de401d534d7aa812650cf2fa74edf7e6ec04adfa9ee59689bd0a7910714" => :high_sierra
+    rebuild 1
+    sha256 big_sur:      "589a7ef3e92f6dc2d4c5e5db501286a839b747a37b454bdd81231a4ed7531a43"
+    sha256 catalina:     "fcc29400068999b2b5126af489d88dcc4af98169b9132d6aeb99876247b1a412"
+    sha256 mojave:       "f568cbdbc7a6f86d08251456e6eb4d22e16c065a68865ce83b7c2c1f0d2b61f6"
   end
 
   keg_only :versioned_formula
@@ -24,6 +24,10 @@ class MariadbAT101 < Formula
 
   uses_from_macos "bzip2"
   uses_from_macos "ncurses"
+
+  on_linux do
+    depends_on "linux-pam"
+  end
 
   def install
     # Set basedir and ldata so that mysql_install_db can find the server
@@ -63,7 +67,7 @@ class MariadbAT101 < Formula
     system "make", "install"
 
     # Avoid references to the Homebrew shims directory
-    inreplace bin/"mysqlbug", HOMEBREW_SHIMS_PATH/"mac/super/", ""
+    inreplace bin/"mysqlbug", "#{Superenv.shims_path}/", ""
 
     # Fix my.cnf to point to #{etc} instead of /etc
     (etc/"my.cnf.d").mkpath
@@ -113,6 +117,10 @@ class MariadbAT101 < Formula
   def post_install
     # Make sure the var/mysql directory exists
     (var/"mysql").mkpath
+
+    # Don't initialize database, it clashes when testing other MySQL-like implementations.
+    return if ENV["HOMEBREW_GITHUB_ACTIONS"]
+
     unless File.exist? "#{var}/mysql/mysql/user.frm"
       ENV["TMPDIR"] = nil
       system "#{bin}/mysql_install_db", "--verbose", "--user=#{ENV["USER"]}",
@@ -159,6 +167,19 @@ class MariadbAT101 < Formula
   end
 
   test do
-    system bin/"mysqld", "--version"
+    (testpath/"mysql").mkpath
+    (testpath/"tmp").mkpath
+    system bin/"mysql_install_db", "--no-defaults", "--user=#{ENV["USER"]}",
+      "--basedir=#{prefix}", "--datadir=#{testpath}/mysql", "--tmpdir=#{testpath}/tmp",
+      "--auth-root-authentication-method=normal"
+    port = free_port
+    fork do
+      system "#{bin}/mysqld", "--no-defaults", "--user=#{ENV["USER"]}",
+        "--datadir=#{testpath}/mysql", "--port=#{port}", "--tmpdir=#{testpath}/tmp"
+    end
+    sleep 5
+    assert_match "information_schema",
+      shell_output("#{bin}/mysql --port=#{port} --user=root --password= --execute='show databases;'")
+    system "#{bin}/mysqladmin", "--port=#{port}", "--user=root", "--password=", "shutdown"
   end
 end

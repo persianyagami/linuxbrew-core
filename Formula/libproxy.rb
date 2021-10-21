@@ -1,35 +1,32 @@
 class Libproxy < Formula
   desc "Library that provides automatic proxy configuration management"
   homepage "https://libproxy.github.io/libproxy/"
-  url "https://github.com/libproxy/libproxy/archive/0.4.16.tar.gz"
-  sha256 "9e7959d6ae1d6c817f0ac1e253105ce8d99f55d7821c1b6eaef32bf6879c6f0a"
+  url "https://github.com/libproxy/libproxy/archive/0.4.17.tar.gz"
+  sha256 "88c624711412665515e2800a7e564aabb5b3ee781b9820eca9168035b0de60a9"
   license "LGPL-2.1-or-later"
+  revision OS.mac? ? 1 : 3
   head "https://github.com/libproxy/libproxy.git"
 
   bottle do
-    sha256 "f3d87ec7e6d5ee417691c26a776886216436ab1b190bf6674c8dede66da0ec00" => :big_sur
-    sha256 "76cde5260a836b3ce6c3ed0d1e588c29159018d702866209fe36c0be24995603" => :catalina
-    sha256 "69e02ca786abaa1fb825995039e67750f2315a8d93206c15ec60e839830c0bf7" => :mojave
-    sha256 "ee3dc851cceae671fd5020c87abaa8b4c8a7940be1a06e140c884cdfd87894c4" => :x86_64_linux
+    sha256 arm64_big_sur: "535133b549c369ced715e3e017d0ddeec32376a4b29469d2b18cef030b50fbe0"
+    sha256 big_sur:       "b2d8852168ed2484cadb96d11dc3e69126822dcd544ec7e5c66d0694287ad451"
+    sha256 catalina:      "c4811050c47e7178cb3ae6a5e675925d0448a39883a4a76b9d0f2d63e6ea1d53"
+    sha256 mojave:        "9e6c0ba9fb2215eb447b9613bdc62c18fc95fb0f3e681c44c794671189a20b56"
+    sha256 x86_64_linux:  "eed0eacea1a6124014e2c50924ba1726ee59afed35ec1652476079a7992b13eb" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
-  uses_from_macos "perl"
-
-  unless OS.mac?
-    fails_with gcc: "5"
-    fails_with gcc: "6"
-    depends_on "gcc@7"
+  on_linux do
+    depends_on "dbus"
     depends_on "glib"
   end
 
   def install
-    xy = Language::Python.major_minor_version Formula["python@3.9"].opt_bin/"python3"
     args = std_cmake_args + %W[
       ..
-      -DPYTHON3_SITEPKG_DIR=#{lib}/python#{xy}/site-packages
+      -DPYTHON3_SITEPKG_DIR=#{prefix/Language::Python.site_packages("python3")}
       -DWITH_PERL=OFF
       -DWITH_PYTHON2=OFF
     ]

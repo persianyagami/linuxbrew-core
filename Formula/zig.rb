@@ -1,24 +1,24 @@
 class Zig < Formula
   desc "Programming language designed for robustness, optimality, and clarity"
   homepage "https://ziglang.org/"
-  url "https://ziglang.org/download/0.7.0/zig-0.7.0.tar.xz"
-  sha256 "0efd2cf6c3b05723db80e9cf193bc55150bba84ca41f855a90f53fc756445f83"
+  url "https://ziglang.org/download/0.8.1/zig-0.8.1.tar.xz"
+  sha256 "8c428e14a0a89cb7a15a6768424a37442292858cdb695e2eb503fa3c7bf47f1a"
   license "MIT"
-  head "https://github.com/ziglang/zig.git"
+  head "https://github.com/ziglang/zig.git", branch: "master"
 
   bottle do
-    sha256 "49ed801fbd9d811765e6154805bcb259c4efa831d729c65e2d8d97edc1e770da" => :big_sur
-    sha256 "e1961b8c92810f085db84f43d4a20e3f14efdfe4d8d816cbd4620e412761edc7" => :catalina
-    sha256 "fe8d287d02eaea270f69a51455f4aa27dda3bc4984231e592e9f56eaafba194a" => :mojave
-    sha256 "e1cf0c30406fc5b9b0cbc00c56879674118b89cb40e2b1b840cac04996df29b4" => :high_sierra
-    sha256 "74f6999c696443a9eca19ee2a18b7f34e9538ae47d4a12d50b98e90190ffa6b3" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "6c1d8057521dcb3f8f46374a33b10b8cd650b3e72d082781fb6f89d86ee42f6e"
+    sha256 cellar: :any,                 big_sur:       "e1be8baf52c6146c23701345969e40f580ffbf4c14273bce206c4be26989f82d"
+    sha256 cellar: :any,                 catalina:      "91244d050c13d67518e0311dfc1e2d2233f42102b2fca5be06a9f5dbba8e6970"
+    sha256 cellar: :any,                 mojave:        "acd62f790db0e7d1a8379185c36394f9c97c96022e37cd8dbf46a56995543a75"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b0f60191e5f4bdab19e3368f705d43921760eede861efe51cbe0a4207740d60b" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
   depends_on "llvm"
 
   def install
-    system "cmake", ".", *std_cmake_args
+    system "cmake", ".", *std_cmake_args, "-DZIG_STATIC_LLVM=ON"
     system "make", "install"
   end
 
@@ -26,11 +26,21 @@ class Zig < Formula
     (testpath/"hello.zig").write <<~EOS
       const std = @import("std");
       pub fn main() !void {
-          var stdout_file: std.fs.File = std.io.getStdOut();
-          _ = try stdout_file.write("Hello, world!");
+          const stdout = std.io.getStdOut().writer();
+          try stdout.print("Hello, world!", .{});
       }
     EOS
     system "#{bin}/zig", "build-exe", "hello.zig"
+    assert_equal "Hello, world!", shell_output("./hello")
+
+    (testpath/"hello.c").write <<~EOS
+      #include <stdio.h>
+      int main() {
+        fprintf(stdout, "Hello, world!");
+        return 0;
+      }
+    EOS
+    system "#{bin}/zig", "cc", "hello.c", "-o", "hello"
     assert_equal "Hello, world!", shell_output("./hello")
   end
 end

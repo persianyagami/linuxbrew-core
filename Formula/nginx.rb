@@ -3,35 +3,33 @@ class Nginx < Formula
   homepage "https://nginx.org/"
   # Use "mainline" releases only (odd minor version number), not "stable"
   # See https://www.nginx.com/blog/nginx-1-12-1-13-released/ for why
-  url "https://nginx.org/download/nginx-1.19.5.tar.gz"
-  sha256 "5c0a46afd6c452d4443f6ec0767f4d5c3e7c499e55a60cd6542b35a61eda799c"
+  url "https://nginx.org/download/nginx-1.21.3.tar.gz"
+  sha256 "14774aae0d151da350417efc4afda5cce5035056e71894836797e1f6e2d1175a"
   license "BSD-2-Clause"
   head "https://hg.nginx.org/nginx/", using: :hg
 
   livecheck do
     url :homepage
-    regex(%r{nginx[._-]v?(\d+(?:\.\d+)+)</a>\nmainline version has been released}i)
+    regex(%r{nginx[._-]v?(\d+(?:\.\d+)+)</a>\nmainline version}i)
   end
 
   bottle do
-    sha256 "9deda8734db308f21e3c8601e0a62a22dc91260fa9155f3695fe9bdb294af69a" => :big_sur
-    sha256 "aff0c071bc1b2e8e84e0dd99ffe01a6a29fc6fc933372099bb2aa55d312e501d" => :catalina
-    sha256 "9f8c235119144279a014e3b88db1658f139bc1bbc9f81ea714a99b3dbba887f1" => :mojave
-    sha256 "22ae73389dcce31573eee08c1acb1526713d96f68baf8617e4aacc9fd3cfd3df" => :x86_64_linux
+    sha256 arm64_big_sur: "4060ccd3d6d64aebb74c0f0b4bd8f5d1e8218561bd8fcfd75c76f00b0f28735f"
+    sha256 big_sur:       "f26befe4e1b89ea7635fc96526f8770c92c88349e2fa696d1836d173beed0554"
+    sha256 catalina:      "8002b3221c5428be509f727892dbd185245354a15259308055a97c9818a889f1"
+    sha256 mojave:        "f5ee76946462f2a88d63993bb1241b5cd3a0ad8da95e8bfbf7dcd58495811a7c"
+    sha256 x86_64_linux:  "1b51a4bcedc0c62e763493f8f10ce01a7f45d727aa6af33787c3cd68ee8da17b" # linuxbrew-core
   end
 
   depends_on "openssl@1.1"
   depends_on "pcre"
 
-  uses_from_macos "xz" => :build # for the tar command in the install step
+  uses_from_macos "xz" => :build
 
   def install
     # keep clean copy of source for compiling dynamic modules e.g. passenger
     (pkgshare/"src").mkpath
-    system "tar", "-cJf",
-           (pkgshare/"src/src.tar.xz"),
-           *("--options" if OS.mac?),
-           *("compression-level=9" if OS.mac?), "."
+    system "tar", "-cJf", (pkgshare/"src/src.tar.xz"), "."
 
     # Changes default port to 8080
     inreplace "conf/nginx.conf" do |s|
@@ -143,31 +141,10 @@ class Nginx < Formula
     EOS
   end
 
-  plist_options manual: "nginx"
-
-  def plist
-    <<~EOS
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-        <dict>
-          <key>Label</key>
-          <string>#{plist_name}</string>
-          <key>RunAtLoad</key>
-          <true/>
-          <key>KeepAlive</key>
-          <false/>
-          <key>ProgramArguments</key>
-          <array>
-              <string>#{opt_bin}/nginx</string>
-              <string>-g</string>
-              <string>daemon off;</string>
-          </array>
-          <key>WorkingDirectory</key>
-          <string>#{HOMEBREW_PREFIX}</string>
-        </dict>
-      </plist>
-    EOS
+  service do
+    run [opt_bin/"nginx", "-g", "daemon off;"]
+    keep_alive false
+    working_dir HOMEBREW_PREFIX
   end
 
   test do

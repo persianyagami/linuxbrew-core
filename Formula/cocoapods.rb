@@ -1,18 +1,21 @@
 class Cocoapods < Formula
   desc "Dependency manager for Cocoa projects"
   homepage "https://cocoapods.org/"
-  url "https://github.com/CocoaPods/CocoaPods/archive/1.10.0.tar.gz"
-  sha256 "d44c70047020ea114ca950df6d4499b1f86e5e7bbd3536a46f6fa3e32f1df21e"
+  url "https://github.com/CocoaPods/CocoaPods/archive/1.11.2.tar.gz"
+  sha256 "c1f7454a93e334484cc15ec8a88ded4080bf5e39df2b0dff729a2e77044dc3df"
   license "MIT"
+  revision 1
 
   bottle do
-    sha256 "5fec9be27505bf6858fdbd409f50247987a03471dd0dfe0af15ddb58c267f604" => :big_sur
-    sha256 "e134955d0501635a62e16c9c9b10e01c5f8b9e0ffdeee3d7b778db5845bd88a1" => :catalina
-    sha256 "9977145a066bf2545f5fe3d1ddd41f0360c7efe46523087d56cf06ac305eb069" => :mojave
-    sha256 "783448183d3bb63dc46c8148fe1f3b783b705bfda763fb6f6237760e30b94ff6" => :high_sierra
+    sha256 cellar: :any,                 arm64_big_sur: "d792e6ff2dbbc51e436000addd1bcf86edb34feb4b53194e64f6889d48527ee0"
+    sha256                               big_sur:       "a62461a2f591e9a765801d02ea83e0977782839e68a1886920a0928423683501"
+    sha256                               catalina:      "560c574cd0a9ae0958ae32ad136476982552186d6d500ac1167d43eff72d2007"
+    sha256 cellar: :any,                 mojave:        "f24d3cde3c06c8fd3806979d2c34c9edd8ad67e014c8f3aee69a487ccb1058c8"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "daf76f0d786ff1c0c75a78b1abbef803622b4becb48ee626050013fc67558604" # linuxbrew-core
   end
 
   depends_on "pkg-config" => :build
+  depends_on "ruby" if Hardware::CPU.arm?
 
   uses_from_macos "libffi", since: :catalina
   uses_from_macos "ruby", since: :catalina

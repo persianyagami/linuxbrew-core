@@ -12,12 +12,12 @@ class DcosCli < Formula
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "b5badc96ebf2b3b474d05e9899e9d9538e3818913a6cb707ad5896d8158e5716" => :big_sur
-    sha256 "f761361ad67f93ddb2e437ba807522ed6b6216f8bbc317d6eaa04981900019cd" => :catalina
-    sha256 "6e93ffb09f31d29705faf1b2296cf4559514460e2231c23e871f43c1e87b569f" => :mojave
-    sha256 "54d43e8f4b694bf552454fec21ca9aae5408416729d5d1c21be61108c7ddd1d9" => :high_sierra
-    sha256 "f24009f5e05696f81c9402ee6be19d5b00c181eee566799bb848d6e9d4e714e4" => :x86_64_linux
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "f86f45ed4b5244b46a83cb5bf5bc5ac869dfbae3af926f175bee78a0ebd9b47a"
+    sha256 cellar: :any_skip_relocation, big_sur:       "1391a435f38b3a70514d0ef7f0a20f19a2d7027e64cad5c1b413730a89aaec4f"
+    sha256 cellar: :any_skip_relocation, catalina:      "3f64db455d356a65dbb8be7bce2346b9b8afec968082bdad1efafb174bbde1b8"
+    sha256 cellar: :any_skip_relocation, mojave:        "759770809a74366f84721771b18702a3d27c9e6aa9099f25895200462df17ab8"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ac5309e878ba5fdbd922560053d8a730f3d13d90ba428c1676052d38300a7fa1" # linuxbrew-core
   end
 
   depends_on "go" => :build
@@ -25,10 +25,10 @@ class DcosCli < Formula
   def install
     ENV["NO_DOCKER"] = "1"
     ENV["VERSION"] = version.to_s
+    kernel_name = OS.kernel_name.downcase
 
-    platform = OS.mac? ? "darwin" : "linux"
-    system "make", platform
-    bin.install "build/#{platform}/dcos"
+    system "make", kernel_name
+    bin.install "build/#{kernel_name}/dcos"
   end
 
   test do

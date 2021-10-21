@@ -1,20 +1,28 @@
 class Helib < Formula
   desc "Implementation of homomorphic encryption"
   homepage "https://github.com/homenc/HElib"
-  url "https://github.com/homenc/HElib/archive/v1.3.0.tar.gz"
-  sha256 "f3c7411a4d1cdb935b49df68dbb6a2dcd77f597fb4e3abaae2f15b70db691a19"
+  url "https://github.com/homenc/HElib/archive/v2.2.1.tar.gz"
+  sha256 "cbe030c752c915f1ece09681cadfbe4f140f6752414ab000b4cf076b6c3019e4"
   license "Apache-2.0"
 
   bottle do
-    cellar :any
-    sha256 "004ce4122626f0f6bc5ffc0bf97dd8b8be979ab6025898ec413d270b220e0985" => :big_sur
-    sha256 "0d3a2af4c976d6c83a3ce2885006e8c6c1aeba6b841df97241d34b15ed2b1141" => :catalina
-    sha256 "0b4c9c77add39afa71a846e56cd59b7ecffe001556d8f8ca7fb3fb17559c9f72" => :mojave
+    sha256 cellar: :any,                 arm64_big_sur: "86a2b67a36f009f5da7031f426a62516ba43683636a7f124d0592fbd827e048b"
+    sha256 cellar: :any,                 big_sur:       "7ec83df94881c5a6e6219e22c4d2f7676f6ccd6d1def7315d443316a47e92b07"
+    sha256 cellar: :any,                 catalina:      "479118627ff0025805e67dbbe8a75a4097a66fc5eb900adb307bb72372b813c6"
+    sha256 cellar: :any,                 mojave:        "503957a2db03e7df3255616e8e51b430133ae5e7b91985edddafd18e1317db99"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "61758fb498cd2ead0b91ec6c975b10b1e42c84160036ae9ba208ba4a8b017eb8" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
   depends_on "bats-core" => :test
+  depends_on "gmp"
   depends_on "ntl"
+
+  on_linux do
+    depends_on "gcc" # for C++17
+  end
+
+  fails_with gcc: "5"
 
   def install
     mkdir "build" do
@@ -27,8 +35,8 @@ class Helib < Formula
   test do
     cp pkgshare/"examples/BGV_country_db_lookup/BGV_country_db_lookup.cpp", testpath/"test.cpp"
     mkdir "build"
-    system ENV.cxx, "-std=c++17", "-L#{lib}", "-L#{Formula["ntl"].opt_lib}",
-                    "-lhelib", "-lntl", "test.cpp", "-o", "build/BGV_country_db_lookup"
+    system ENV.cxx, "test.cpp", "-std=c++17", "-L#{lib}", "-L#{Formula["ntl"].opt_lib}",
+                    "-pthread", "-lhelib", "-lntl", "-o", "build/BGV_country_db_lookup"
 
     cp_r pkgshare/"examples/tests", testpath
     system "bats", "."

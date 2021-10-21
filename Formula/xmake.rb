@@ -1,17 +1,17 @@
 class Xmake < Formula
   desc "Cross-platform build utility based on Lua"
   homepage "https://xmake.io/"
-  url "https://github.com/xmake-io/xmake/releases/download/v2.3.9/xmake-v2.3.9.tar.gz"
-  sha256 "74ac394a71a137874393ff0f112b048a3c1c88c05efaa0059bb2268de9f4f672"
+  url "https://github.com/xmake-io/xmake/releases/download/v2.5.8/xmake-v2.5.8.tar.gz"
+  sha256 "9f0eaa823ff4d0fab5b52e01b62f6db860a2ed32402ab51738903a07584c91cb"
   license "Apache-2.0"
-  head "https://github.com/xmake-io/xmake.git"
+  head "https://github.com/xmake-io/xmake.git", branch: "master"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "9102ec2c17817f4aaf96710c73f568078ceba2201d35fd33cbeb09fc5a52c3e7" => :big_sur
-    sha256 "97601c30b48b566feede80e8c546fa8a7f8f47340d5fa99775ae89fa21ebf798" => :catalina
-    sha256 "1d38ca72d9c6b48a735ad97896956a795a74e85f99318eb84eb8ac856d363628" => :mojave
-    sha256 "73d9f61f8d68b6b85e9bd51cca62ed1d226c5fe059caf021c923bf11e1ac6cd4" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "90b63301078c6c9108acf749ebd791cde422a27a4eec32408dcbb4fb15c03d7e"
+    sha256 cellar: :any_skip_relocation, big_sur:       "ad540f2a7efeb396a3236c074877401b72e8b49aea70e8bcf420ac1d87db5b26"
+    sha256 cellar: :any_skip_relocation, catalina:      "7d5d1d19cb34c212319f0f742be4f76fa5bd7c1c4475a4c299dba3f2550d40d5"
+    sha256 cellar: :any_skip_relocation, mojave:        "62071446891eaa516a884653279610fdc555d0f3a68106186fb13c3d7ce59db4"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "32b361d06b7b2be843bbc7af048fb2764b5921246c0ffe9e6bb83018a18a7b47" # linuxbrew-core
   end
 
   on_linux do
@@ -19,15 +19,16 @@ class Xmake < Formula
   end
 
   def install
-    on_linux do
-      ENV["XMAKE_ROOT"] = "y" if ENV["CI"]
-    end
-    system "make", "build"
+    ENV["XMAKE_ROOT"] = "y" if OS.linux? && ENV["HOMEBREW_GITHUB_ACTIONS"]
+
+    system "make"
     system "make", "install", "prefix=#{prefix}"
   end
 
   test do
-    ENV["XMAKE_ROOT"] = "y" unless OS.mac?
+    on_linux do
+      ENV["XMAKE_ROOT"] = "y" if ENV["HOMEBREW_GITHUB_ACTIONS"]
+    end
     system bin/"xmake", "create", "test"
     cd "test" do
       system bin/"xmake"

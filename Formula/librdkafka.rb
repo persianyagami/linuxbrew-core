@@ -1,21 +1,22 @@
 class Librdkafka < Formula
   desc "Apache Kafka C/C++ library"
   homepage "https://github.com/edenhill/librdkafka"
-  url "https://github.com/edenhill/librdkafka/archive/v1.5.3.tar.gz"
-  sha256 "2105ca01fef5beca10c9f010bc50342b15d5ce6b73b2489b012e6d09a008b7bf"
+  url "https://github.com/edenhill/librdkafka/archive/refs/tags/v1.8.0.tar.gz"
+  sha256 "93b12f554fa1c8393ce49ab52812a5f63e264d9af6a50fd6e6c318c481838b7f"
   license "BSD-2-Clause"
   head "https://github.com/edenhill/librdkafka.git"
 
   livecheck do
-    url :head
+    url :stable
     regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    sha256 "b2e4bc434128ae0051500313fb75f584590edcc52801727c3a7a56667377100e" => :big_sur
-    sha256 "694b593d8b0c3a3e36b3583c59d5df46096839b7efe94144498bf2e784b438c5" => :catalina
-    sha256 "7c9b9a039460637f5271309113080485e5b32a75c7b28f0669441e52e6b1bab7" => :mojave
-    sha256 "691e472a7a78e4194e4a1d4540f20e3851051e9f17a98aa6d9f4af83a3a26054" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "7699e0c5c5fa9468030abdfe81e6f359e748fde2226ce72cef666990b96ed390"
+    sha256                               big_sur:       "24514c561488b0a0ddbb2a86293ed18b9a3a28d200a442c09d393df039e10d5f"
+    sha256                               catalina:      "e0131515c1197694e11241e8ae5bb264fc1ed77d28963c6cd9ded892c9e12c54"
+    sha256                               mojave:        "672ed2b535d7de9eb7a7fd7a21621cc265e3ed2fdc890a46b12ae0133ea45fd7"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ee39317000a4923c6ae4afa644feb0450b2afb02bfa752253dd921ebfd71cd37" # linuxbrew-core
   end
 
   depends_on "pkg-config" => :build

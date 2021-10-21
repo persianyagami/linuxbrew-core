@@ -1,21 +1,17 @@
 class Pango < Formula
   desc "Framework for layout and rendering of i18n text"
   homepage "https://www.pango.org/"
-  url "https://download.gnome.org/sources/pango/1.48/pango-1.48.0.tar.xz"
-  sha256 "391f26f3341c2d7053e0fb26a956bd42360dadd825efe7088b1e9340a65e74e6"
+  url "https://download.gnome.org/sources/pango/1.48/pango-1.48.10.tar.xz"
+  sha256 "21e1f5798bcdfda75eabc4280514b0896ab56f656d4e7e66030b9a2535ecdc98"
   license "LGPL-2.0-or-later"
-  head "https://gitlab.gnome.org/GNOME/pango.git"
-
-  livecheck do
-    url :stable
-  end
+  head "https://gitlab.gnome.org/GNOME/pango.git", branch: "main"
 
   bottle do
-    sha256 "48d12081cc6415724e0b6f73fef7ac2df3d5c523a408d65c5105f7c83e4a2f40" => :big_sur
-    sha256 "8efc7e43fabedde9160927212857a7fa950a0ee4768374a5f36fc7b7a4e79c44" => :catalina
-    sha256 "39a4c6fd12e5a6cb12902e272e95358d1ef925b3bfadf41d67a43b7ab608b8c5" => :mojave
-    sha256 "bbb19280fb8b85544c566fc0b668508d5363b2fa4a062091dea7bae115be5c6a" => :high_sierra
-    sha256 "08798cd937e992dc36a421b6d90cfba171d3c498f52416c871d5745076923bec" => :x86_64_linux
+    sha256 cellar: :any, arm64_big_sur: "8c0c48d5ff91e88db64b6792c7f74ce417fd56ed9fa7a6476ffc71991dd3ef1d"
+    sha256 cellar: :any, big_sur:       "ea25146681018c99e13404ee299f006679397c082a388c486c7a685ec8d8eca9"
+    sha256 cellar: :any, catalina:      "251360bab0dd655f7272a262d35a25d3e9e10514a6c0d0074567e6095c7c92d5"
+    sha256 cellar: :any, mojave:        "3328f7fa94c12d18ee87556f817f56516d93dc5bc5c6cefee26f4f471758dfac"
+    sha256               x86_64_linux:  "8d5e2d136b1c8edce54dac94621344e5cb94c5f5a53ccc9aa2b14d722599908f" # linuxbrew-core
   end
 
   depends_on "gobject-introspection" => :build

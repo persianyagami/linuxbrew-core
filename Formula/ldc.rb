@@ -1,10 +1,11 @@
 class Ldc < Formula
   desc "Portable D programming language compiler"
   homepage "https://wiki.dlang.org/LDC"
-  url "https://github.com/ldc-developers/ldc/releases/download/v1.24.0/ldc-1.24.0-src.tar.gz"
-  sha256 "fd9561ade916e9279bdcc166cf0e4836449c24e695ab4470297882588adbba3c"
+  url "https://github.com/ldc-developers/ldc/releases/download/v1.27.1/ldc-1.27.1-src.tar.gz"
+  sha256 "93c8f500b39823dcdabbd73e1bcb487a1b93cb9a60144b0de1c81ab50200e59c"
   license "BSD-3-Clause"
-  head "https://github.com/ldc-developers/ldc.git", shallow: false
+  revision 2
+  head "https://github.com/ldc-developers/ldc.git"
 
   livecheck do
     url :stable
@@ -12,51 +13,65 @@ class Ldc < Formula
   end
 
   bottle do
-    sha256 "50fbf7f844bdbf0b7ddadfd4e028509192fe0c12f7c2dfafd57158d649856a82" => :catalina
-    sha256 "fbb02c825000d7e2d68061d390279769eb0ee332f8dffc5fabb405e42df0dee6" => :mojave
-    sha256 "64cd2a36a85803fe72ee075f35b1a71d4e5f3ddf06115c8885df72874abfec0d" => :high_sierra
-    sha256 "7b85dc2f7ea7f54bae4b665a5751ac7ddb2c4f43e32d796cdb67e6dcf20b6a16" => :x86_64_linux
+    sha256 arm64_big_sur: "edba6cdbd6aeec055f9d73e83113d6d9f6ef8283ec5097aa11c542a5b2f42bec"
+    sha256 big_sur:       "cfe36977e1b7607e066c3978328195d475be77e040bc8562916e0c0c1edba187"
+    sha256 catalina:      "6a26dea81c20e12e65b8d118dff491cb0706374dc32a18beae194062f47b30fb"
+    sha256 mojave:        "3b837b63e0bf55c9f61ab69031b5c1b300c2d6f5e5b933418fae4b18630dad1d"
+    sha256 x86_64_linux:  "78474522d4e50754e8255e1ca836e43d0476d5b6a760b52870a502437382da50" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
   depends_on "libconfig" => :build
-  depends_on "llvm@9" # due to a bug in llvm 10 https://bugs.llvm.org/show_bug.cgi?id=47226
+  depends_on "pkg-config" => :build
+  depends_on "llvm@12"
 
   uses_from_macos "libxml2" => :build
+  # CompilerSelectionError: ldc cannot be built with any available compilers.
+  uses_from_macos "llvm" => [:build, :test]
 
-  on_linux do
-    depends_on "pkg-config" => :build
-  end
+  fails_with :gcc
 
   resource "ldc-bootstrap" do
     on_macos do
-      url "https://github.com/ldc-developers/ldc/releases/download/v1.24.0/ldc2-1.24.0-osx-x86_64.tar.xz"
-      sha256 "91b74856982d4d5ede6e026f24e33887d931db11b286630554fc2ad0438cda44"
+      if Hardware::CPU.intel?
+        url "https://github.com/ldc-developers/ldc/releases/download/v1.27.1/ldc2-1.27.1-osx-x86_64.tar.xz"
+        sha256 "52d9958c424683d93c61c791029934df6812f32f76872c6647269e8a55939e6b"
+      else
+        url "https://github.com/ldc-developers/ldc/releases/download/v1.27.1/ldc2-1.27.1-osx-arm64.tar.xz"
+        sha256 "d9b5a4c1dbcde921912c7a1a6a719fc8010318036bc75d844bafe20b336629db"
+      end
     end
 
     on_linux do
-      url "https://github.com/ldc-developers/ldc/releases/download/v1.24.0/ldc2-1.24.0-linux-x86_64.tar.xz"
-      sha256 "868e070fe90b06549f5fb19882a58a920c0052fad29b764eee9f409f08892ba3"
+      # ldc 1.27 requires glibc 2.27, which is too new for Ubuntu 16.04 LTS.  The last version we can bootstrap with
+      # is 1.26.  Change this when we migrate to Ubuntu 18.04 LTS.
+      url "https://github.com/ldc-developers/ldc/releases/download/v1.26.0/ldc2-1.26.0-linux-x86_64.tar.xz"
+      sha256 "06063a92ab2d6c6eebc10a4a9ed4bef3d0214abc9e314e0cd0546ee0b71b341e"
     end
   end
 
-  def install
-    # Fix the error:
-    # CMakeFiles/LDCShared.dir/build.make:68: recipe for target 'dmd2/id.h' failed
-    ENV.deparallelize unless OS.mac?
+  def llvm
+    deps.reject { |d| d.build? || d.test? }
+        .map(&:to_formula)
+        .find { |f| f.name.match? "^llvm" }
+  end
 
+  def install
     ENV.cxx11
     (buildpath/"ldc-bootstrap").install resource("ldc-bootstrap")
 
-    # Fix ldc-bootstrap/bin/ldmd2: error while loading shared libraries: libxml2.so.2
-    ENV.prepend_path "LD_LIBRARY_PATH", Formula["libxml2"].lib
+    if OS.linux?
+      # Fix ldc-bootstrap/bin/ldmd2: error while loading shared libraries: libxml2.so.2
+      ENV.prepend_path "LD_LIBRARY_PATH", Formula["libxml2"].lib
+    end
 
     mkdir "build" do
       args = std_cmake_args + %W[
-        -DLLVM_ROOT_DIR=#{Formula["llvm@9"].opt_prefix}
+        -DLLVM_ROOT_DIR=#{llvm.opt_prefix}
         -DINCLUDE_INSTALL_DIR=#{include}/dlang/ldc
         -DD_COMPILER=#{buildpath}/ldc-bootstrap/bin/ldmd2
       ]
+      args << "-DCMAKE_INSTALL_RPATH=#{rpath};@loader_path/#{llvm.opt_lib.relative_path_from(lib)}" if OS.mac?
 
       system "cmake", "..", *args
       system "make"
@@ -73,13 +88,10 @@ class Ldc < Formula
     EOS
     system bin/"ldc2", "test.d"
     assert_match "Hello, world!", shell_output("./test")
-    # Fix Error: The LLVMgold.so plugin (needed for LTO) was not found.
-    if OS.mac?
-      system bin/"ldc2", "-flto=thin", "test.d"
-      assert_match "Hello, world!", shell_output("./test")
-      system bin/"ldc2", "-flto=full", "test.d"
-      assert_match "Hello, world!", shell_output("./test")
-    end
+    system bin/"ldc2", "-flto=thin", "test.d"
+    assert_match "Hello, world!", shell_output("./test")
+    system bin/"ldc2", "-flto=full", "test.d"
+    assert_match "Hello, world!", shell_output("./test")
     system bin/"ldmd2", "test.d"
     assert_match "Hello, world!", shell_output("./test")
   end

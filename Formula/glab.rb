@@ -1,29 +1,29 @@
 class Glab < Formula
   desc "Open-source GitLab command-line tool"
   homepage "https://glab.readthedocs.io/"
-  url "https://github.com/profclems/glab/archive/v1.12.1.tar.gz"
-  sha256 "ba7c186de70cad22178bca9fac5933a99546365c249ab957251f03188e31ee03"
+  url "https://github.com/profclems/glab/archive/v1.21.1.tar.gz"
+  sha256 "878c13d064ca6010437de90ca3711962fd87441fcae39bf01cb0af5aa5efd79e"
   license "MIT"
-  head "https://github.com/profclems/glab.git"
+  head "https://github.com/profclems/glab.git", branch: "trunk"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "067a8bb9cfaa93259199eccd5a547305c24580de4d379c35ce530d6431342c9f" => :big_sur
-    sha256 "8772f1729514811539f8f52bb42101205e1a1bcb1fa3afc49f0196476c4ed3b7" => :catalina
-    sha256 "e3a24235b21b7f5e929aee5125ba571a84452233337eda85ff03393b82947cf1" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "c1a989fc60ce6bf9071350d9ce9d48d59858e490d92cb23fed6c979ea3a4dfc8"
+    sha256 cellar: :any_skip_relocation, big_sur:       "82a903f4d6f4866fa55c93250d63467c8f83003389343cec63e8bc70e0e9dc5e"
+    sha256 cellar: :any_skip_relocation, catalina:      "766192bb22eba3e0219aae40b4898d4e0993788154a5885d865ae1e6074ac722"
+    sha256 cellar: :any_skip_relocation, mojave:        "60e7f1b0149b2c767b3324bed1719b573db47db3120250c9c596a372a639a06a"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "6c2494a7790d8b3a0391842bc0b70b645a459630a264501becb96d893420768e" # linuxbrew-core
   end
 
   depends_on "go" => :build
 
   def install
+    ENV["CGO_ENABLED"] = "1" if OS.mac?
+
     system "make", "GLAB_VERSION=#{version}"
     bin.install "bin/glab"
-    output = Utils.safe_popen_read({ "SHELL" => "bash" }, bin/"glab", "completion", "bash")
-    (bash_completion/"glab").write output
-    output = Utils.safe_popen_read({ "SHELL" => "zsh" }, bin/"glab", "completion", "zsh")
-    (zsh_completion/"_glab").write output
-    output = Utils.safe_popen_read({ "SHELL" => "fish" }, bin/"glab", "completion", "fish")
-    (fish_completion/"glab.fish").write output
+    (bash_completion/"glab").write Utils.safe_popen_read(bin/"glab", "completion", "--shell=bash")
+    (zsh_completion/"_glab").write Utils.safe_popen_read(bin/"glab", "completion", "--shell=zsh")
+    (fish_completion/"glab.fish").write Utils.safe_popen_read(bin/"glab", "completion", "--shell=fish")
   end
 
   test do

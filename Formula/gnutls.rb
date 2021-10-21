@@ -1,28 +1,29 @@
 class Gnutls < Formula
   desc "GNU Transport Layer Security (TLS) Library"
   homepage "https://gnutls.org/"
-  url "https://www.gnupg.org/ftp/gcrypt/gnutls/v3.6/gnutls-3.6.15.tar.xz"
-  mirror "https://www.mirrorservice.org/sites/ftp.gnupg.org/gcrypt/gnutls/v3.6/gnutls-3.6.15.tar.xz"
-  sha256 "0ea8c3283de8d8335d7ae338ef27c53a916f15f382753b174c18b45ffd481558"
-  # license "LGPL-2.1-or-later AND GPL-3.0-only" - review syntax after resolving https://github.com/Homebrew/brew/pull/8260
-  license "GPL-3.0-only"
+  url "https://www.gnupg.org/ftp/gcrypt/gnutls/v3.6/gnutls-3.6.16.tar.xz"
+  mirror "https://www.mirrorservice.org/sites/ftp.gnupg.org/gcrypt/gnutls/v3.6/gnutls-3.6.16.tar.xz"
+  sha256 "1b79b381ac283d8b054368b335c408fedcb9b7144e0c07f531e3537d4328f3b3"
+  license all_of: ["LGPL-2.1-or-later", "GPL-3.0-only"]
+  revision 1
 
   livecheck do
     url "https://www.gnupg.org/ftp/gcrypt/gnutls/v3.6/"
-    regex(/href=.*?gnutls[._-]v?(\d+(?:\.\d+)*)\.t/i)
+    regex(/href=.*?gnutls[._-]v?(\d+(?:\.\d+)+)\.t/i)
   end
 
   bottle do
-    sha256 "6f523e8ce74c567d17a4a5b69794e897074a016b895a5d8ef7122ac006b770fc" => :big_sur
-    sha256 "513407ec28ac63623dbc05ac6880d59cf7c082827687dfda7d0f065232151878" => :catalina
-    sha256 "cd25205fbf27599b4186f8549324a50f045fa680b8c02a98230dcf910dff0941" => :mojave
-    sha256 "5a1c108c598159c9d3dc203bed684cf70ca5dae5ee875166b35420fd2415a61e" => :high_sierra
-    sha256 "a1378c9909a53fa4a65a12ebeb75fdbf1c0160ad0f3ac6e2da3aa87ac553489d" => :x86_64_linux
+    sha256 arm64_big_sur: "e1ec9389285dca7c52c0346cdd5112a2bfacfd31b1958d0267408573f1fb5ed0"
+    sha256 big_sur:       "f165f3c8e4ecac781e269e08c39f8af457d1d634ee21f0d8edb2ca6d1808f03a"
+    sha256 catalina:      "464f68e7e6f9c7698f921e3b8e23bd2302681041bb98c5f58c0be90833b4f48f"
+    sha256 mojave:        "ea18603d9f6337b7e9a77bec91124102a7a4680ab8358f1ee8d17023223816ed"
+    sha256 x86_64_linux:  "41e3d22d3117829ab83d8d06625732bda5bcc68b362f29318a777b4d884443cb" # linuxbrew-core
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "pkg-config" => :build
+  depends_on "ca-certificates"
   depends_on "gmp"
   depends_on "guile"
   depends_on "libidn2"
@@ -66,30 +67,12 @@ class Gnutls < Formula
   end
 
   def post_install
-    return unless OS.mac?
-
-    keychains = %w[
-      /System/Library/Keychains/SystemRootCertificates.keychain
-    ]
-
-    certs_list = `security find-certificate -a -p #{keychains.join(" ")}`
-    certs = certs_list.scan(/-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----/m)
-
-    valid_certs = certs.select do |cert|
-      IO.popen("openssl x509 -inform pem -checkend 0 -noout", "w") do |openssl_io|
-        openssl_io.write(cert)
-        openssl_io.close_write
-      end
-
-      $CHILD_STATUS.success?
-    end
-
-    pkgetc.mkpath
-    (pkgetc/"cert.pem").atomic_write(valid_certs.join("\n"))
+    rm_f pkgetc/"cert.pem"
+    pkgetc.install_symlink Formula["ca-certificates"].pkgetc/"cert.pem"
 
     # Touch gnutls.go to avoid Guile recompilation.
     # See https://github.com/Homebrew/homebrew-core/pull/60307#discussion_r478917491
-    touch "#{lib}/guile/3.0/site-ccache/gnutls.go"
+    touch lib/"guile/3.0/site-ccache/gnutls.go"
   end
 
   def caveats
@@ -97,7 +80,7 @@ class Gnutls < Formula
       If you are going to use the Guile bindings you will need to add the following
       to your .bashrc or equivalent in order for Guile to find the TLS certificates
       database:
-        export GUILE_TLS_CERTIFICATE_DIRECTORY=/usr/local/etc/gnutls/
+        export GUILE_TLS_CERTIFICATE_DIRECTORY=#{pkgetc}/
     EOS
   end
 

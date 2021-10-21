@@ -1,9 +1,10 @@
 class Mpg123 < Formula
   desc "MP3 player for Linux and UNIX"
   homepage "https://www.mpg123.de/"
-  url "https://www.mpg123.de/download/mpg123-1.26.3.tar.bz2"
-  mirror "https://downloads.sourceforge.net/project/mpg123/mpg123/1.26.3/mpg123-1.26.3.tar.bz2"
-  sha256 "30c998785a898f2846deefc4d17d6e4683a5a550b7eacf6ea506e30a7a736c6e"
+  url "https://www.mpg123.de/download/mpg123-1.29.0.tar.bz2"
+  mirror "https://downloads.sourceforge.net/project/mpg123/mpg123/1.29.0/mpg123-1.29.0.tar.bz2"
+  sha256 "135e0172dfb6c7937a81f1188c27f9a47b0a337f7637680039ff3ee5fea3ce7d"
+  license "LGPL-2.1-only"
 
   livecheck do
     url "https://www.mpg123.de/download/"
@@ -11,11 +12,11 @@ class Mpg123 < Formula
   end
 
   bottle do
-    sha256 "eaca212bd2fbd93cae9dff2142868c8ab2ba63c8f757657fa0f24a780f21b555" => :big_sur
-    sha256 "95a40afc24b7ab30eff21a988421d9b172f5b073fe3291cf01db8b42531f5ca4" => :catalina
-    sha256 "9b4f0e5aa8a80ff30ffa01c4076f76112d7252015416c5b58a7e5b4a5862d786" => :mojave
-    sha256 "426a0e2c5650cd89be77a3aa78f8ebcb7bd5a2fd220675dc58c630be0ab0ec15" => :high_sierra
-    sha256 "d7d9519895f1551580708a1e673448ef46b8cbf2f57e057f2fb512c21c8d4fe0" => :x86_64_linux
+    sha256 arm64_big_sur: "2bdee7fd0a435ee6fbfaeb3b045d9e47508aac20224c763d87076b533e213dd9"
+    sha256 big_sur:       "230c0e10a82c7b64faf1b8c68a5974806fd0c5fb05e700629e2dff2270276d63"
+    sha256 catalina:      "ee6a701ac1d90feeaf7320674667ada58ae9c0a7d1cf5601e496011a13a3da8e"
+    sha256 mojave:        "0b9dd2fcac658e721a6bb764c409e085bd3accacdac223aaf928f42f1acab6ba"
+    sha256 x86_64_linux:  "4b1d43c7f072efc93f3445001f9adda4b36cb4fc60d699f53571132699ecdc33" # linuxbrew-core
   end
 
   def install
@@ -24,8 +25,16 @@ class Mpg123 < Formula
       --disable-dependency-tracking
       --prefix=#{prefix}
       --with-module-suffix=.so
-      --with-cpu=x86-64
     ]
+
+    args << "--with-default-audio=coreaudio" if OS.mac?
+
+    args << if Hardware::CPU.arm?
+      "--with-cpu=aarch64"
+    else
+      "--with-cpu=x86-64"
+    end
+
     system "./configure", *args
     system "make", "install"
   end

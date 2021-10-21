@@ -1,16 +1,16 @@
 class Proj < Formula
   desc "Cartographic Projections Library"
   homepage "https://proj.org/"
-  url "https://github.com/OSGeo/PROJ/releases/download/7.2.0/proj-7.2.0.tar.gz"
-  sha256 "2957798e5fe295ff96a2af1889d0428e486363d210889422f76dd744f7885763"
+  url "https://github.com/OSGeo/PROJ/releases/download/8.1.1/proj-8.1.1.tar.gz"
+  sha256 "82f1345e5fa530c407cb1fc0752e83f8d08d2b98772941bbdc7820241f7fada2"
   license "MIT"
 
   bottle do
-    sha256 "495e52db81783a1a043c21c22b56feea8c28f3eee8e7bc0f8023e1ab83247f07" => :big_sur
-    sha256 "29d73567f5e9bef026df4f1d52578d4220cf14ff3b855d1e3ac3754514071722" => :catalina
-    sha256 "c531a12ccc387d6e05f159ce6dd8dca7e01da4ffeff590728cb0861c9838f7aa" => :mojave
-    sha256 "4fa482aa21e501e70b3954d633d45ba2dd9fd3e17af02811646d283e8f9db144" => :high_sierra
-    sha256 "93304a0458907bdfa986c693c3da94eac500f8803308167ab2aa5a5a4764fa0e" => :x86_64_linux
+    sha256 arm64_big_sur: "d4abd8f4d48c37d171cd694078b2f6fbc0c21f6c650b060429a90f0d6805ea4e"
+    sha256 big_sur:       "1bd3193543e722b62af850ca4c303db1b510ed63abb9e15d9f255c635fb51732"
+    sha256 catalina:      "e5f1494677c8ee96f79d517bf2facbaa8de6761538f1101907fd45e4d1ec8806"
+    sha256 mojave:        "f94155a3593b64f43e1e4eba81e10ce398194d069658d360501388129c82011c"
+    sha256 x86_64_linux:  "119ba4f1fa22615fa28a629bd714da2d8db5c194b83ef59b642edca5c986090b" # linuxbrew-core
   end
 
   head do

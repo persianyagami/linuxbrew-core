@@ -1,30 +1,29 @@
-require "os/linux/glibc"
-
 class GccAT10 < Formula
   desc "GNU compiler collection"
   homepage "https://gcc.gnu.org/"
-  url "https://ftp.gnu.org/gnu/gcc/gcc-10.2.0/gcc-10.2.0.tar.xz"
-  mirror "https://ftpmirror.gnu.org/gcc/gcc-10.2.0/gcc-10.2.0.tar.xz"
-  sha256 "b8dd4368bb9c7f0b98188317ee0254dd8cc99d1e3a18d0ff146c855fe16c1d8c"
-  license "GPL-3.0"
+  url "https://ftp.gnu.org/gnu/gcc/gcc-10.3.0/gcc-10.3.0.tar.xz"
+  mirror "https://ftpmirror.gnu.org/gcc/gcc-10.3.0/gcc-10.3.0.tar.xz"
+  sha256 "64f404c1a650f27fc33da242e1f2df54952e3963a49e06e73f6940f3223ac344"
+  license "GPL-3.0-or-later" => { with: "GCC-exception-3.1" }
 
-  # gcc is designed to be portable.
-  # always add cellar :any
+  livecheck do
+    url :stable
+    regex(%r{href=.*?gcc[._-]v?(10(?:\.\d+)+)(?:/?["' >]|\.t)}i)
+  end
+
   bottle do
-    cellar :any
-    sha256 "8dbccea194c20b1037b7e8180986e98a8ee3e37eaac12c7d223c89be3deaac6a" => :catalina
-    sha256 "79d2293ce912dc46af961f30927b31eb06844292927be497015496f79ac41557" => :mojave
-    sha256 "5ed870a39571614dc5d83be26d73a4164911f4356b80d9345258a4c1dc3f1b70" => :high_sierra
-    sha256 "e9e51cd64087aacc4cb30ed4fb4a5007275aaff0d41f0ca6546d81bd26fc4d34" => :x86_64_linux
+    rebuild 1
+    sha256 big_sur:      "a2d5df73c659132ff4e393696a30076def85936855461701956aac62bf1a4c4f"
+    sha256 catalina:     "42679d2d37117fd2c0243b61f1ee36d470fd293737f5f58a7b25ac816f733793"
+    sha256 mojave:       "83af850b34188c1706d690153de1653f5289db2f6be04e1a1349d15ace86e1d9"
+    sha256 x86_64_linux: "046c367fe35d95307c15d60fb4120bf060854ca95e3e0083252416357b218ac0" # linuxbrew-core
   end
 
   # The bottles are built on systems with the CLT installed, and do not work
   # out of the box on Xcode-only systems due to an incorrect sysroot.
-  pour_bottle? do
-    reason "The bottle needs the Xcode CLT to be installed."
-    satisfy { !OS.mac? || MacOS::CLT.installed? }
-  end
+  pour_bottle? only_if: :clt_installed
 
+  depends_on arch: :x86_64
   depends_on "gmp"
   depends_on "isl"
   depends_on "libmpc"
@@ -40,16 +39,17 @@ class GccAT10 < Formula
   cxxstdlib_check :skip
 
   def version_suffix
-    if build.head?
-      "HEAD"
-    else
-      version.to_s.slice(/\d+/)
-    end
+    version.major.to_s
   end
 
   def install
     # GCC will suffer build errors if forced to use a particular linker.
     ENV.delete "LD"
+
+    # Even when suffixes are appended, the info pages conflict when
+    # install-info is run so pretend we have an outdated makeinfo
+    # to prevent their build.
+    ENV["gcc_cv_prog_makeinfo_modern"] = "no"
 
     # We avoiding building:
     #  - Ada, which requires a pre-existing GCC Ada compiler to bootstrap
@@ -57,11 +57,9 @@ class GccAT10 < Formula
     #  - BRIG
     languages = %w[c c++ objc obj-c++ fortran]
 
-    osmajor = `uname -r`.chomp
     pkgversion = "Homebrew GCC #{pkg_version} #{build.used_options*" "}".strip
 
     args = %W[
-      --build=x86_64-apple-darwin#{osmajor}
       --prefix=#{prefix}
       --libdir=#{lib}/gcc/#{version_suffix}
       --disable-nls
@@ -72,26 +70,14 @@ class GccAT10 < Formula
       --with-mpfr=#{Formula["mpfr"].opt_prefix}
       --with-mpc=#{Formula["libmpc"].opt_prefix}
       --with-isl=#{Formula["isl"].opt_prefix}
-      --with-system-zlib
       --with-pkgversion=#{pkgversion}
-      --with-bugurl=#{CoreTap.instance.issues_url}
+      --with-bugurl=#{tap.issues_url}
     ]
 
-    if OS.linux?
-      # macOS specific build flags
-      args -= %W[--build=x86_64-apple-darwin#{osmajor} --with-system-zlib]
+    if OS.mac?
+      args << "--build=x86_64-apple-darwin#{OS.kernel_version.major}"
+      args << "--with-system-zlib"
 
-      # Fix Linux error: gnu/stubs-32.h: No such file or directory.
-      args << "--disable-multilib"
-
-      # Change the default directory name for 64-bit libraries to `lib`
-      # http://www.linuxfromscratch.org/lfs/view/development/chapter06/gcc.html
-      inreplace "gcc/config/i386/t-linux64", "m64=../lib64", "m64="
-
-      # Set the search path for glibc libraries and objects, using the system's glibc
-      # Fix the error: ld: cannot find crti.o: No such file or directory
-      ENV.prepend_path "LIBRARY_PATH", Pathname.new(Utils.safe_popen_read(ENV.cc, "-print-file-name=crti.o")).parent
-    else
       # Xcode 10 dropped 32-bit support
       args << "--disable-multilib" if DevelopmentTools.clang_build_version >= 1000
 
@@ -102,27 +88,34 @@ class GccAT10 < Formula
         args << "--with-sysroot=#{sdk}"
       end
 
-      # Avoid reference to sed shim
-      args << "SED=/usr/bin/sed"
-
       # Ensure correct install names when linking against libgcc_s;
-      # see discussion in https://github.com/Homebrew/homebrew/pull/34303
+      # see discussion in https://github.com/Homebrew/legacy-homebrew/pull/34303
       inreplace "libgcc/config/t-slibgcc-darwin", "@shlib_slibdir@", "#{HOMEBREW_PREFIX}/lib/gcc/#{version_suffix}"
+    else
+      # Fix cc1: error while loading shared libraries: libisl.so.15
+      args << "--with-boot-ldflags=-static-libstdc++ -static-libgcc #{ENV["LDFLAGS"]}"
+
+      # Fix Linux error: gnu/stubs-32.h: No such file or directory.
+      args << "--disable-multilib"
+
+      # Change the default directory name for 64-bit libraries to `lib`
+      # http://www.linuxfromscratch.org/lfs/view/development/chapter06/gcc.html
+      inreplace "gcc/config/i386/t-linux64", "m64=../lib64", "m64="
     end
 
     mkdir "build" do
       system "../configure", *args
 
-      make_args = []
-      # Use -headerpad_max_install_names in the build,
-      # otherwise updated load commands won't fit in the Mach-O header.
-      # This is needed because `gcc` avoids the superenv shim.
-      make_args << "BOOT_LDFLAGS=-Wl,-headerpad_max_install_names" if OS.mac?
-
-      system "make", *make_args
-      system "make", OS.mac? ? "install" : "install-strip"
-
-      bin.install_symlink bin/"gfortran-#{version_suffix}" => "gfortran" if OS.mac?
+      if OS.mac?
+        # Use -headerpad_max_install_names in the build,
+        # otherwise updated load commands won't fit in the Mach-O header.
+        # This is needed because `gcc` avoids the superenv shim.
+        system "make", "BOOT_LDFLAGS=-Wl,-headerpad_max_install_names"
+        system "make", "install"
+      else
+        system "make"
+        system "make", "install-strip"
+      end
     end
 
     # Handle conflicts between GCC formulae and avoid interfering
@@ -141,7 +134,7 @@ class GccAT10 < Formula
   end
 
   def post_install
-    unless OS.mac?
+    if OS.linux?
       gcc = bin/"gcc-#{version_suffix}"
       libgcc = Pathname.new(Utils.safe_popen_read(gcc, "-print-libgcc-file-name")).parent
       raise "command failed: #{gcc} -print-libgcc-file-name" if $CHILD_STATUS.exitstatus.nonzero?
@@ -224,18 +217,22 @@ class GccAT10 < Formula
         return 0;
       }
     EOS
-    system "#{bin}/gcc-#{version_suffix}", "-o", "hello-c", "hello-c.c"
+    system "#{bin}/gcc-#{version.major}", "-o", "hello-c", "hello-c.c"
     assert_equal "Hello, world!\n", `./hello-c`
 
     (testpath/"hello-cc.cc").write <<~EOS
       #include <iostream>
+      struct exception { };
       int main()
       {
         std::cout << "Hello, world!" << std::endl;
+        try { throw exception{}; }
+          catch (exception) { }
+          catch (...) { }
         return 0;
       }
     EOS
-    system "#{bin}/g++-#{version_suffix}", "-o", "hello-cc", "hello-cc.cc"
+    system "#{bin}/g++-#{version.major}", "-o", "hello-cc", "hello-cc.cc"
     assert_equal "Hello, world!\n", `./hello-cc`
 
     (testpath/"test.f90").write <<~EOS
@@ -249,7 +246,7 @@ class GccAT10 < Formula
       write(*,"(A)") "Done"
       end
     EOS
-    system "#{bin}/gfortran-#{version_suffix}", "-o", "test", "test.f90"
+    system "#{bin}/gfortran-#{version.major}", "-o", "test", "test.f90"
     assert_equal "Done\n", `./test`
   end
 end

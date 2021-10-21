@@ -1,29 +1,21 @@
 class Libvmaf < Formula
   desc "Perceptual video quality assessment based on multi-method fusion"
   homepage "https://github.com/Netflix/vmaf"
-  url "https://github.com/Netflix/vmaf/archive/v1.5.3.tar.gz"
-  sha256 "440652ae417d88be083ffd9fa5967662172601e31c458a9743f6008d7150c900"
+  url "https://github.com/Netflix/vmaf/archive/v2.3.0.tar.gz"
+  sha256 "d8dcc83f8e9686e6855da4c33d8c373f1735d87294edbd86ed662ba2f2f89277"
   license "BSD-2-Clause-Patent"
 
   bottle do
-    cellar :any_skip_relocation
-    rebuild 1
-    sha256 "42337edc375b2eaebf63621360edc0bf827c03f2c5f6e07ffe472a65a7603a29" => :big_sur
-    sha256 "e7b3a833cd602d12291441709a60808e89d6d48c00232fdea155e96fe91911fa" => :catalina
-    sha256 "45d4ff0d068b03980d6192e2a636f6ca37fa429fa0c0aecdc8d5d55dcd8b06bd" => :mojave
-    sha256 "761fb74fec4a5cd6147bb01a0a9f7af580dba089f3d80494738b00a853f3c41f" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "1977b1939d44b8871ef1d856203b364b761872be00c6654fdfd7c4edc53b7513"
+    sha256 cellar: :any,                 big_sur:       "8392899eaf6b8b44a5c2da81711928f69f1eb6ebcc2ceedd7552cb63d73e9b11"
+    sha256 cellar: :any,                 catalina:      "f98f34e7b0950ef2599c7ec880114a58beb37c4eebe328cbaff29ed9e4f0e839"
+    sha256 cellar: :any,                 mojave:        "d1fa30cd6767fb44fdd01d03877ec8fcbd7aa140a243d74b85eb3ab7c49391d9"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7e9b2b1c38c6bf47985c77509bc5f6458a84d90e06cc9aac18459ce9b5f79726" # linuxbrew-core
   end
 
   depends_on "meson" => :build
   depends_on "nasm" => :build
   depends_on "ninja" => :build
-
-  # Upstream patch for Xcode 12, remove in next version
-  # https://github.com/Netflix/vmaf/pull/676
-  patch do
-    url "https://github.com/Netflix/vmaf/commit/b7851292.patch?full_index=1"
-    sha256 "686a01b0cc0f6b0e07a12964492e7702ac0b54cc92f5370f1a31d44fd0855ced"
-  end
 
   def install
     Dir.chdir("libvmaf") do

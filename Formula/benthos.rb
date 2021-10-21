@@ -1,16 +1,16 @@
 class Benthos < Formula
   desc "Stream processor for mundane tasks written in Go"
   homepage "https://www.benthos.dev"
-  url "https://github.com/Jeffail/benthos/archive/v3.35.0.tar.gz"
-  sha256 "c864c6f47efa759ae90828926cc18de5ea9dc355bd34ac5cebf352a41e6ea2c7"
+  url "https://github.com/Jeffail/benthos/archive/v3.57.0.tar.gz"
+  sha256 "719be1a20755970762034dfa8ddbefd38598204992fa9782ddc9de5862405249"
   license "MIT"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "4280bb501aad44f6c6b10085f3d02d332634add6591945a7fbe2f71d06308767" => :big_sur
-    sha256 "a0083686cf1075499fdeea14ce5fc92bbb151c474e08b868c7d3eb4c13f86020" => :catalina
-    sha256 "5fc67b8df86ebb14b35837564bb0c7d4d1701026c1e9e1ec9ee00a2134d7b73b" => :mojave
-    sha256 "cbbbd8ccd21e8d4088d741f4f5b8363eaa8548bb96e87c59bacd19f7f124daf5" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "258fa1f0fe1dd1ccfb868076ebdd8e54388dd0769cd8aff738362c4cd629cbaa"
+    sha256 cellar: :any_skip_relocation, big_sur:       "3825412846e2aa3846588e8008e9bab2ad375b4338ff19e9752a9789cae34307"
+    sha256 cellar: :any_skip_relocation, catalina:      "91365a38238a6a87c8a8048ea49f0bbe72fcebbd82db915525928d1460abc6d9"
+    sha256 cellar: :any_skip_relocation, mojave:        "2392b1b5a94e215b568919ad54345fb7f0362ee3f791d20775d7b679a35b96d8"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "81002564ae02e5231418d8f8b110d61da27afd40735eecabfc9ba6c5085738d9" # linuxbrew-core
   end
 
   depends_on "go" => :build

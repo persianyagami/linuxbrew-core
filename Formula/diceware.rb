@@ -3,21 +3,20 @@ class Diceware < Formula
 
   desc "Passphrases to remember"
   homepage "https://github.com/ulif/diceware"
-  url "https://github.com/ulif/diceware/archive/v0.9.6.tar.gz"
-  sha256 "ff55832e725abff212dec1a2cb6e1c3545ae782b5f49ec91ec870a2b50e1f0e8"
+  url "https://files.pythonhosted.org/packages/d7/af/85373be6b11706fa1392e52d7fcd47df47f661e238251c931d469e62c5bf/diceware-0.9.6.tar.gz"
+  sha256 "7ef924ca05ece8eaa5e2746246ab94600b831f1428c70d231790fee5b5078b4e"
   license "GPL-3.0"
-  revision OS.mac? ? 3 : 5
+  revision OS.mac? ? 4 : 6
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "07a4acde7cb1b987552c155ed7f961d444cb1e9b84e1a42d007bce600983d06a" => :big_sur
-    sha256 "98142655d4892f15af5f4063171df2004ff3d394bfbd4d783af9fe03cbcb0add" => :catalina
-    sha256 "4c2751c3a7d2f0049f0080eb6b8b0def6febe62252ef0957d06dbfced55271f0" => :mojave
-    sha256 "5128fb4da8f9189651bf0b164c92ce58fc64290dc2539dc0b70a103799fb9405" => :high_sierra
-    sha256 "984d6c1bf60cb0d5dfd64f87542e962ffbd91ce8cae95a34fc98b66fe17c26b8" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "2132a0edadb2a5374057d739624a028b10e3dbb11a3db965ef58c4bd24c02d30"
+    sha256 cellar: :any_skip_relocation, big_sur:       "7d3214626147512e9733a5a3e5acafcacf5b2b3321dadf72b932d8c42272f8da"
+    sha256 cellar: :any_skip_relocation, catalina:      "7d3214626147512e9733a5a3e5acafcacf5b2b3321dadf72b932d8c42272f8da"
+    sha256 cellar: :any_skip_relocation, mojave:        "7d3214626147512e9733a5a3e5acafcacf5b2b3321dadf72b932d8c42272f8da"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4f1d5aa25eb59c32daf1c4469db8a3932fe4fa9c62cee4137d749c4c453e3c01" # linuxbrew-core
   end
 
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   def install
     virtualenv_install_with_resources

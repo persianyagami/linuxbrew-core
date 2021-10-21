@@ -1,19 +1,20 @@
 class Petsc < Formula
   desc "Portable, Extensible Toolkit for Scientific Computation (real)"
   homepage "https://www.mcs.anl.gov/petsc/"
-  url "https://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.14.2.tar.gz"
-  sha256 "87a04fd05cac20a2ec47094b7d18b96e0651257d8c768ced2ef7db270ecfb9cb"
+  url "https://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.16.0.tar.gz"
+  sha256 "5aaad7deea127a4790c8aa95c42fd9451ab10b5d6c68b226b92d4853002f438d"
   license "BSD-2-Clause"
 
   livecheck do
-    url "https://www.mcs.anl.gov/petsc/download/index.html"
+    url "https://ftp.mcs.anl.gov/pub/petsc/release-snapshots/"
     regex(/href=.*?petsc-lite[._-]v?(\d+(?:\.\d+)+)\.t/i)
   end
 
   bottle do
-    sha256 "a44cc2867d3a39ea75cdd7483cb17b89deaefb639b506fd5c92e3f3390dc53b3" => :big_sur
-    sha256 "5f920a35a55180bd4cfa581ce2aacfb78d9fe070d2efd8b6b4e4e4e5f6297f5d" => :catalina
-    sha256 "5cac29ac6daae9e3b1bb368493db86697e41eced8ef4392bc6eca7d82ff8259a" => :mojave
+    sha256 arm64_big_sur: "67162eed855947193dd55c2bde8ba5c4e09daa7b92a531701b4c3b4a1ac531c8"
+    sha256 big_sur:       "c3c6f6eeddb511a99d13ed5a47249b554afb7e6d200de0e9480fa9f5ce9a567c"
+    sha256 catalina:      "fb0a9466262cd039c75b690e05b5c0667071519fa383e26f288fa4de21e48e9f"
+    sha256 mojave:        "3b9f1faa6c3853583d090dafd2485a621d123bf4e6e10a40a53f8a17ea1e5b03"
   end
 
   depends_on "hdf5"
@@ -21,6 +22,7 @@ class Petsc < Formula
   depends_on "metis"
   depends_on "netcdf"
   depends_on "open-mpi"
+  depends_on "openblas"
   depends_on "scalapack"
   depends_on "suite-sparse"
 
@@ -41,7 +43,12 @@ class Petsc < Formula
 
     # Avoid references to Homebrew shims
     rm_f lib/"petsc/conf/configure-hash"
-    inreplace lib/"petsc/conf/petscvariables", "#{HOMEBREW_SHIMS_PATH}/mac/super/", ""
+
+    if OS.mac?
+      inreplace lib/"petsc/conf/petscvariables", Superenv.shims_path, ""
+    elsif File.readlines("#{lib}/petsc/conf/petscvariables").grep(Superenv.shims_path.to_s).any?
+      inreplace lib/"petsc/conf/petscvariables", Superenv.shims_path, ""
+    end
   end
 
   test do
@@ -51,7 +58,7 @@ class Petsc < Formula
     # This PETSc example prints several lines of output. The last line contains
     # an error norm, expected to be small.
     line = output.lines.last
-    assert_match /^Norm of error .+, Iterations/, line, "Unexpected output format"
+    assert_match(/^Norm of error .+, Iterations/, line, "Unexpected output format")
     error = line.split[3].to_f
     assert (error >= 0.0 && error < 1.0e-13), "Error norm too large"
   end

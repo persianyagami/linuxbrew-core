@@ -6,31 +6,26 @@ class Jinja2Cli < Formula
   url "https://files.pythonhosted.org/packages/23/67/6f05f5f8a9fc108c58e4eac9b9b7876b400985d33149fe2faa87a9ca502b/jinja2-cli-0.7.0.tar.gz"
   sha256 "9ccd8d530dad5d031230afd968cf54637b49842a13ececa6e17c2f67f6e9336e"
   license "BSD-2-Clause"
-  revision OS.mac? ? 3 : 4
-
-  livecheck do
-    url :stable
-  end
+  revision OS.mac? ? 4 : 5
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "7dd9ea3c9d12a0a9d1d3be2d521d3c7fcefb10843bf62dd7914e35e66a387d63" => :big_sur
-    sha256 "f87af5f900907686304e0937303eadeb5050d48e3ae85c340ec39e8918177d1e" => :catalina
-    sha256 "a64bc73445720cf2a272854643c6f66aa0dfec769bd96f292b134054d5b1f84a" => :mojave
-    sha256 "6ae50d5282b186cbf0a8b46b44a173a685a8798fec0606efc6d15bccae9b6a92" => :high_sierra
-    sha256 "815e04d4d0a41e12add189de22318fef1c1484a02f9f43b3398f7faa509f66e2" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "11a23f02be9916f831a4e8639e9c581a1a22495086e36dbc9155d1e02c08ef66"
+    sha256 cellar: :any_skip_relocation, big_sur:       "7fbc8bb7f975a94812101fd094963fd43605e463ca6e18ac524cb292eda60863"
+    sha256 cellar: :any_skip_relocation, catalina:      "9c776168317a1180b6a8f517bba3821f98fb5ff23fda662f1398b98cbab5df2f"
+    sha256 cellar: :any_skip_relocation, mojave:        "5cbea09cdfdc17b06ecd92cb8e209fc1a97996b7a3db2624d86c80da889f6c6d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "205afeaaa3027c123663d13251b6f33ca75291a8a5e782b6a7e41027450c4722" # linuxbrew-core
   end
 
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
-  resource "jinja2" do
-    url "https://files.pythonhosted.org/packages/93/ea/d884a06f8c7f9b7afbc8138b762e80479fb17aedbbe2b06515a12de9378d/Jinja2-2.10.1.tar.gz"
-    sha256 "065c4f02ebe7f7cf559e49ee5a95fb800a9e4528727aec6f24402a5374c65013"
+  resource "Jinja2" do
+    url "https://files.pythonhosted.org/packages/f8/86/7c0eb6e8b05385d1ce682abc0f994abd1668e148fb52603fa86e15d4c110/Jinja2-3.0.2.tar.gz"
+    sha256 "827a0e32839ab1600d4eb1c4c33ec5a8edfbc5cb42dafa13b81f182f97784b45"
   end
 
   resource "MarkupSafe" do
-    url "https://files.pythonhosted.org/packages/b9/2e/64db92e53b86efccfaea71321f597fa2e1b2bd3853d8ce658568f7a13094/MarkupSafe-1.1.1.tar.gz"
-    sha256 "29872e92839765e546828bb7754a68c418d927cd064fd4708fab9fe9c8bb116b"
+    url "https://files.pythonhosted.org/packages/bf/10/ff66fea6d1788c458663a84d88787bae15d45daa16f6b3ef33322a51fc7e/MarkupSafe-2.0.1.tar.gz"
+    sha256 "594c67807fb16238b30c44bdf74f36c02cdf22d1c8cda91ef8a0ed8dabf5620a"
   end
 
   def install
@@ -38,9 +33,10 @@ class Jinja2Cli < Formula
   end
 
   test do
-    if OS.mac?
+    on_macos do
       assert_match version.to_s, shell_output("script -q /dev/null #{bin}/jinja2 --version")
-    else
+    end
+    on_linux do
       assert_match version.to_s, shell_output("script -q /dev/null -e -c \"#{bin}/jinja2 --version\"")
     end
     expected_result = <<~EOS

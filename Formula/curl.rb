@@ -1,21 +1,25 @@
 class Curl < Formula
   desc "Get a file from an HTTP, HTTPS or FTP server"
-  homepage "https://curl.haxx.se/"
-  url "https://curl.haxx.se/download/curl-7.74.0.tar.bz2"
-  sha256 "0f4d63e6681636539dc88fa8e929f934cd3a840c46e0bf28c73be11e521b77a5"
+  homepage "https://curl.se"
+  url "https://curl.se/download/curl-7.79.1.tar.bz2"
+  mirror "https://github.com/curl/curl/releases/download/curl-7_79_1/curl-7.79.1.tar.bz2"
+  mirror "http://fresh-center.net/linux/www/curl-7.79.1.tar.bz2"
+  mirror "http://fresh-center.net/linux/www/legacy/curl-7.79.1.tar.bz2"
+  sha256 "de62c4ab9a9316393962e8b94777a570bb9f71feb580fb4475e412f2f9387851"
   license "curl"
+  revision 1
 
   livecheck do
-    url "https://curl.haxx.se/download/"
+    url "https://curl.se/download/"
     regex(/href=.*?curl[._-]v?(.*?)\.t/i)
   end
 
   bottle do
-    cellar :any
-    sha256 "4e85f5e083888ddb215cc7cb445748b5a35baf1853214b2d9ef11ba2c1cc89e0" => :big_sur
-    sha256 "35edb3fd3ce31448b290ce441d43235d004e36de4b8f299e8a5c2e2b5118b7fe" => :catalina
-    sha256 "36496011f345bd36b4ca83aca7bca3efbc5d30da0b7b039ab847b64aca5ca48d" => :mojave
-    sha256 "62a7f6106f084ebedc78586d402892180366b1f7646c4ffe9b420247b9a30361" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "fb8bc11a92e6b9c69415ebcc0ac30a69d5fa7399ed48eda8f39acd08fb030f91"
+    sha256 cellar: :any,                 big_sur:       "67eb98cd0d153e0e7ca5aadde8141da15cd6f47990136722e49e4a40b3d53c41"
+    sha256 cellar: :any,                 catalina:      "c623592e8eb8cd9c4e60598f58e9e716b7daea398e75f207c23339624b8f4a71"
+    sha256 cellar: :any,                 mojave:        "097d1eb078e53456d952030e0186eb153a515044336db22da0d7942eba21a7e0"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "730a10df5cd6086457c2ed329b0e881c6a8cd70590f5d7e5e731361438b822c3" # linuxbrew-core
   end
 
   head do
@@ -31,37 +35,41 @@ class Curl < Formula
   depends_on "pkg-config" => :build
   depends_on "brotli"
   depends_on "libidn2"
-  depends_on "libmetalink"
+  depends_on "libnghttp2"
   depends_on "libssh2"
-  depends_on "nghttp2"
   depends_on "openldap"
   depends_on "openssl@1.1"
   depends_on "rtmpdump"
   depends_on "zstd"
 
+  uses_from_macos "krb5"
   uses_from_macos "zlib"
 
   def install
     system "./buildconf" if build.head?
 
-    openssl = Formula["openssl@1.1"]
     args = %W[
       --disable-debug
       --disable-dependency-tracking
       --disable-silent-rules
       --prefix=#{prefix}
-      --with-ssl=#{openssl.opt_prefix}
-      --with-ca-bundle=#{openssl.pkgetc}/cert.pem
-      --with-ca-path=#{openssl.pkgetc}/certs
+      --with-ssl=#{Formula["openssl@1.1"].opt_prefix}
+      --without-ca-bundle
+      --without-ca-path
+      --with-ca-fallback
       --with-secure-transport
       --with-default-ssl-backend=openssl
-      --with-gssapi
       --with-libidn2
-      --with-libmetalink
       --with-librtmp
       --with-libssh2
       --without-libpsl
     ]
+
+    args << if OS.mac?
+      "--with-gssapi"
+    else
+      "--with-gssapi=#{Formula["krb5"].opt_prefix}"
+    end
 
     system "./configure", *args
     system "make", "install"

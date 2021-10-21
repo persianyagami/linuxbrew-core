@@ -1,22 +1,18 @@
 class Storm < Formula
   desc "Distributed realtime computation system to process data streams"
   homepage "https://storm.apache.org"
-  url "https://www.apache.org/dyn/closer.lua?path=storm/apache-storm-2.2.0/apache-storm-2.2.0.tar.gz"
-  mirror "https://archive.apache.org/dist/storm/apache-storm-2.2.0/apache-storm-2.2.0.tar.gz"
-  sha256 "f621163f349a8e85130bc3d2fbb34e3b08f9c039ccac5474f3724e47a3a38675"
+  url "https://www.apache.org/dyn/closer.lua?path=storm/apache-storm-2.3.0/apache-storm-2.3.0.tar.gz"
+  mirror "https://archive.apache.org/dist/storm/apache-storm-2.3.0/apache-storm-2.3.0.tar.gz"
+  sha256 "49c2255b26633c6fd96399c520339e459fcda29a0e7e6d0c8775cefcff6c3636"
   license "Apache-2.0"
 
-  livecheck do
-    url :stable
-  end
-
-  bottle :unneeded
+  depends_on "openjdk"
 
   conflicts_with "stormssh", because: "both install 'storm' binary"
 
   def install
     libexec.install Dir["*"]
-    bin.install_symlink libexec/"bin/storm"
+    (bin/"storm").write_env_script libexec/"bin/storm", Language::Java.overridable_java_home_env
   end
 
   test do

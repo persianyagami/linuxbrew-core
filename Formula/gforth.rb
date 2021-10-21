@@ -3,14 +3,14 @@ class Gforth < Formula
   homepage "https://www.gnu.org/software/gforth/"
   url "https://www.complang.tuwien.ac.at/forth/gforth/gforth-0.7.3.tar.gz"
   sha256 "2f62f2233bf022c23d01c920b1556aa13eab168e3236b13352ac5e9f18542bb0"
-  revision 2
+  revision 3
 
   bottle do
-    cellar :any
-    sha256 "bb4ac1848dbc2ed28dd2aa7f1dbd44161e10f11f30e4aa0ec255cbda16e5bc4d" => :big_sur
-    sha256 "e9063c35a2df4513ecb8c1aae8c02273c3da22487d90071db416c0b2b9bf1668" => :catalina
-    sha256 "25fd07e36c780229c02e3243b7aa71c3b3b2744e1626409f6321ad2d99c67471" => :mojave
-    sha256 "c5f42bd1b46307d521ccd626d7a5a4b030c48dd1788d4d580efb2d8aaa6d04bc" => :high_sierra
+    sha256 arm64_big_sur: "8a0195117bbc39e675d17c3b7fd0015cccd13c98be46d47e6f56e027b666d571"
+    sha256 big_sur:       "9ccd086cd3885b5eb3b82459902f3a52516019d833a83f0253036c9eb3a34dfd"
+    sha256 catalina:      "391af03b52dcc608abc5d796b9dd517ac1a5c3b70c56dc1ca5264003fe8643c6"
+    sha256 mojave:        "e77595f6933d861063bbd5c91a668abb9608434f777f4c8e8c2bee99eba1e102"
+    sha256 x86_64_linux:  "de05258c0513ddae3298bc835723bf4eeae85e7b04b365dba6079f41013e857b" # linuxbrew-core
   end
 
   depends_on "emacs" => :build

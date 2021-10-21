@@ -1,25 +1,23 @@
 class ApacheGeode < Formula
   desc "In-memory Data Grid for fast transactional data processing"
   homepage "https://geode.apache.org/"
-  url "https://www.apache.org/dyn/closer.lua?path=geode/1.13.1/apache-geode-1.13.1.tgz"
-  mirror "https://archive.apache.org/dist/geode/1.13.1/apache-geode-1.13.1.tgz"
-  mirror "https://downloads.apache.org/geode/1.13.1/apache-geode-1.13.1.tgz"
-  sha256 "3239522afee932e0a06246b2b4130bc8a5cbae71aa5244cc4dcb24d4329044c3"
+  url "https://www.apache.org/dyn/closer.lua?path=geode/1.14.0/apache-geode-1.14.0.tgz"
+  mirror "https://archive.apache.org/dist/geode/1.14.0/apache-geode-1.14.0.tgz"
+  mirror "https://downloads.apache.org/geode/1.14.0/apache-geode-1.14.0.tgz"
+  sha256 "d8a72225caf63889e41f8909cffc9303fb288515387f216d3207bc6d5457b947"
   license "Apache-2.0"
 
-  livecheck do
-    url :stable
+  bottle do
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "fd7052dbad16cfa3abf8a7236bb87d47292d81b338aea599bef184093e1cf3cb" # linuxbrew-core
   end
 
-  bottle :unneeded
-
-  depends_on "openjdk@8"
+  depends_on "openjdk@11"
 
   def install
     rm_f "bin/gfsh.bat"
     bash_completion.install "bin/gfsh-completion.bash" => "gfsh"
     libexec.install Dir["*"]
-    (bin/"gfsh").write_env_script libexec/"bin/gfsh", Language::Java.java_home_env("1.8")
+    (bin/"gfsh").write_env_script libexec/"bin/gfsh", Language::Java.java_home_env("11")
   end
 
   test do

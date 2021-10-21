@@ -2,22 +2,25 @@ class Helm < Formula
   desc "Kubernetes package manager"
   homepage "https://helm.sh/"
   url "https://github.com/helm/helm.git",
-      tag:      "v3.4.2",
-      revision: "23dd3af5e19a02d4f4baa5b2f242645a1a3af629"
+      tag:      "v3.7.1",
+      revision: "1d11fcb5d3f3bf00dbe6fe31b8412839a96b3dc4"
   license "Apache-2.0"
-  head "https://github.com/helm/helm.git"
+  head "https://github.com/helm/helm.git", branch: "main"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "28c8ecbcd4d30606e2655564ee15c0599bcd0026ba849323ceed1b1b1714f527" => :big_sur
-    sha256 "71a2d4c8befae485288013962330bf7c7f8360f15aa83859509929744f333821" => :catalina
-    sha256 "fb1eae1b5e6c7b5e2886bad3057fd3fe36d4238dd5f9a55ed54aff2904c1f150" => :mojave
-    sha256 "fb985d8d82e8af985fa46013c91dad2d98c2ddaca42fc8a636a744afe0f2044e" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "3ff5c5ebf92f73bf50637c24d5579b7608aa3dc8618244b7389f061bfe4875f1"
+    sha256 cellar: :any_skip_relocation, big_sur:       "f62c4a77bdf5f912129ed649222eb947fe4abe549163b44fe0d330ef736b6e33"
+    sha256 cellar: :any_skip_relocation, catalina:      "9335a6f8906210e2b832e07e6702df4726ae67c42fc017ebebdaab386ba8de2d"
+    sha256 cellar: :any_skip_relocation, mojave:        "85f1ddd0cfb9a20a927b1296a1df7a09081665d278893df62cb2ad7c4672a3f0"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ecd1d24432ca3d27cb96d465980e83b0e0b1c299713f6954e32dfc55bce84dd2" # linuxbrew-core
   end
 
   depends_on "go" => :build
 
   def install
+    # Don't dirty the git tree
+    rm_rf ".brew_home"
+
     system "make", "build"
     bin.install "bin/helm"
 
@@ -26,21 +29,26 @@ class Helm < Formula
       man1.install Dir["*"]
     end
 
-    output = Utils.safe_popen_read({ "SHELL" => "bash" }, bin/"helm", "completion", "bash")
+    output = Utils.safe_popen_read(bin/"helm", "completion", "bash")
     (bash_completion/"helm").write output
 
-    output = Utils.safe_popen_read({ "SHELL" => "zsh" }, bin/"helm", "completion", "zsh")
+    output = Utils.safe_popen_read(bin/"helm", "completion", "zsh")
     (zsh_completion/"_helm").write output
+
+    output = Utils.safe_popen_read(bin/"helm", "completion", "fish")
+    (fish_completion/"helm.fish").write output
   end
 
   test do
-    system "#{bin}/helm", "create", "foo"
-    assert File.directory? "#{testpath}/foo/charts"
+    system bin/"helm", "create", "foo"
+    assert File.directory? testpath/"foo/charts"
 
-    version_output = shell_output("#{bin}/helm version 2>&1")
-    assert_match "Version:\"v#{version}\"", version_output
+    version_output = shell_output(bin/"helm version 2>&1")
+    assert_match "GitTreeState:\"clean\"", version_output
     if build.stable?
-      assert_match stable.instance_variable_get(:@resource).instance_variable_get(:@specs)[:revision], version_output
+      revision = stable.instance_variable_get(:@resource).instance_variable_get(:@specs)[:revision]
+      assert_match "GitCommit:\"#{revision}\"", version_output
+      assert_match "Version:\"v#{version}\"", version_output
     end
   end
 end

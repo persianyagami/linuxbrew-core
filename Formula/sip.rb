@@ -1,92 +1,91 @@
 class Sip < Formula
+  include Language::Python::Virtualenv
+
   desc "Tool to create Python bindings for C and C++ libraries"
   homepage "https://www.riverbankcomputing.com/software/sip/intro"
-  url "https://www.riverbankcomputing.com/static/Downloads/sip/4.19.24/sip-4.19.24.tar.gz"
-  sha256 "edcd3790bb01938191eef0f6117de0bf56d1136626c0ddb678f3a558d62e41e5"
+  url "https://files.pythonhosted.org/packages/ed/74/57851ed1cd8d996bbb3103b17798d59ddda3f7f8245b826c01aadfc3d66c/sip-6.3.1.tar.gz"
+  sha256 "2f9cd6ce0e19226d53d62ad6ba81a62f624626f14924724eab2a23390d4dc684"
   license any_of: ["GPL-2.0-only", "GPL-3.0-only"]
-  revision 1
   head "https://www.riverbankcomputing.com/hg/sip", using: :hg
 
-  livecheck do
-    url "https://riverbankcomputing.com/software/sip/download"
-    regex(/href=.*?sip[._-]v?(\d+(\.\d+)+)\.t/i)
-  end
-
   bottle do
-    cellar :any_skip_relocation
-    sha256 "8325e469dc8c267c526034ce3ea3bc014c3f66dc05471e0af81bef9725cdb671" => :big_sur
-    sha256 "20c9e0745b80d218317e81bb81227b513c59d84524ad6cf44439d446cb289616" => :catalina
-    sha256 "5a64babc3b0e9058fce2b9963ef8193d6b8437de1d8119e43966b4ad42092590" => :mojave
-    sha256 "c555ded74a09732751261cfe7cd243ceb69bed86f489df8a80cc4e6a5819220c" => :high_sierra
-    sha256 "9cdd2638bac69db75cf492a48adf210bf20cc27ac2490cd868b547608d54a373" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "933b936d56d79aa7f1f044f0b7cfc53b61fbbba541243bf73d76c1308040fdfc"
+    sha256 cellar: :any_skip_relocation, big_sur:       "78d4beda8f0e902311c19eace9723a805d37aa978053b20198bfc29b2fb43e17"
+    sha256 cellar: :any_skip_relocation, catalina:      "7fdf440cd1060a7a58c686dd7568d9984c9950abd7eb52ac5585badcf878e97d"
+    sha256 cellar: :any_skip_relocation, mojave:        "d34a94def987327458aabd27b6c10dee5efb165f51355ba9987ecf94c80e559b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3f22f14a1f6c126eae8c074635c503363cd9f27f352d8972d0c1357e7fa04b32" # linuxbrew-core
   end
 
   depends_on "python@3.9"
 
-  def install
-    ENV.prepend_path "PATH", Formula["python@3.9"].opt_bin
-    ENV.delete("SDKROOT") # Avoid picking up /Application/Xcode.app paths
-
-    if build.head?
-      # Link the Mercurial repository into the download directory so
-      # build.py can use it to figure out a version number.
-      ln_s cached_download/".hg", ".hg"
-      # build.py doesn't run with python3
-      system "python", "build.py", "prepare"
-    end
-
-    version = Language::Python.major_minor_version "python3"
-    system "python3", "configure.py",
-                     *("--deployment-target=#{MacOS.version}" if OS.mac?),
-                      "--destdir=#{lib}/python#{version}/site-packages",
-                      "--bindir=#{bin}",
-                      "--incdir=#{include}",
-                      "--sipdir=#{HOMEBREW_PREFIX}/share/sip",
-                      "--sip-module", "PyQt5.sip"
-    system "make"
-    system "make", "install"
+  resource "packaging" do
+    url "https://files.pythonhosted.org/packages/df/86/aef78bab3afd461faecf9955a6501c4999933a48394e90f03cd512aad844/packaging-21.0.tar.gz"
+    sha256 "7dc96269f53a4ccec5c0670940a4281106dd0bb343f47b7471f779df49c2fbe7"
   end
 
-  def post_install
-    (HOMEBREW_PREFIX/"share/sip").mkpath
+  resource "pyparsing" do
+    url "https://files.pythonhosted.org/packages/c1/47/dfc9c342c9842bbe0036c7f763d2d6686bcf5eb1808ba3e170afdb282210/pyparsing-2.4.7.tar.gz"
+    sha256 "c203ec8783bf771a155b207279b9bccb8dea02d8f0c9e5f8ead507bc3246ecc1"
+  end
+
+  resource "toml" do
+    url "https://files.pythonhosted.org/packages/be/ba/1f744cdc819428fc6b5084ec34d9b30660f6f9daaf70eead706e3203ec3c/toml-0.10.2.tar.gz"
+    sha256 "b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"
+  end
+
+  def install
+    python = Formula["python@3.9"]
+    venv = virtualenv_create(libexec, python.bin/"python3")
+    resources.each do |r|
+      venv.pip_install r
+    end
+
+    system python.bin/"python3", *Language::Python.setup_install_args(prefix)
+
+    site_packages = Language::Python.site_packages(python)
+    pth_contents = "import site; site.addsitedir('#{libexec/site_packages}')\n"
+    (prefix/site_packages/"homebrew-sip.pth").write pth_contents
   end
 
   test do
-    (testpath/"test.h").write <<~EOS
-      #pragma once
-      class Test {
-      public:
-        Test();
-        void test();
-      };
+    (testpath/"pyproject.toml").write <<~EOS
+      # Specify sip v6 as the build system for the package.
+      [build-system]
+      requires = ["sip >=6, <7"]
+      build-backend = "sipbuild.api"
+
+      # Specify the PEP 566 metadata for the project.
+      [tool.sip.metadata]
+      name = "fib"
     EOS
-    (testpath/"test.cpp").write <<~EOS
-      #include "test.h"
-      #include <iostream>
-      Test::Test() {}
-      void Test::test()
-      {
-        std::cout << "Hello World!" << std::endl;
-      }
-    EOS
-    (testpath/"test.sip").write <<~EOS
-      %Module test
-      class Test {
-      %TypeHeaderCode
-      #include "test.h"
+
+    (testpath/"fib.sip").write <<~EOS
+      // Define the SIP wrapper to the (theoretical) fib library.
+
+      %Module(name=fib, language="C")
+
+      int fib_n(int n);
+      %MethodCode
+          if (a0 <= 0)
+          {
+              sipRes = 0;
+          }
+          else
+          {
+              int a = 0, b = 1, c, i;
+
+              for (i = 2; i <= a0; i++)
+              {
+                  c = a + b;
+                  a = b;
+                  b = c;
+              }
+
+              sipRes = b;
+          }
       %End
-      public:
-        Test();
-        void test();
-      };
     EOS
-    if OS.mac?
-      system ENV.cxx, "-shared", "-Wl,-install_name,#{testpath}/libtest.dylib",
-                    "-o", "libtest.dylib", "test.cpp"
-    else
-      system ENV.cxx, "-fPIC", "-shared", "-Wl,-soname,#{testpath}/libtest.so",
-                    "-o", "libtest.so", "test.cpp"
-    end
-    system bin/"sip", "-b", "test.build", "-c", ".", "test.sip"
+
+    system "sip-install", "--target-dir", "."
   end
 end

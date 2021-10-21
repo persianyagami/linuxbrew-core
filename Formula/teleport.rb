@@ -1,49 +1,46 @@
 class Teleport < Formula
   desc "Modern SSH server for teams managing distributed infrastructure"
   homepage "https://gravitational.com/teleport"
-  url "https://github.com/gravitational/teleport/archive/v5.0.1.tar.gz"
-  sha256 "3145e0b93c7b38fdf94e8cd995699fca8f78c26228bd19b1aad66b4749fd7719"
+  url "https://github.com/gravitational/teleport/archive/v7.3.0.tar.gz"
+  sha256 "0ebda4ebc5482a3e23302df696edf8ad60fb68466e41a4deecc05acf1e76c771"
   license "Apache-2.0"
-  head "https://github.com/gravitational/teleport.git"
+  head "https://github.com/gravitational/teleport.git", branch: "master"
 
+  # We check the Git tags instead of using the `GithubLatest` strategy, as the
+  # "latest" version can be incorrect. As of writing, two major versions of
+  # `teleport` are being maintained side by side and the "latest" tag can point
+  # to a release from the older major version.
   livecheck do
     url :stable
-    strategy :github_latest
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "0974ae48535b723a3cc38cb238602a4e4bf542192c85e5a3c7487248863a69d4" => :big_sur
-    sha256 "fcab18d54a2f2cd6cf4fd2ae24123f58517620bc94fd807249ee3575e81e00b4" => :catalina
-    sha256 "6d71dbf63fdd7c5019a15c701d211951aa330a610d17b256fadc1e5c3852e5d5" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "7a4074e2fee67a8cf05357f42ba0dfb878790d5fc547a0fb59ecab94cd82b8d3"
+    sha256 cellar: :any_skip_relocation, big_sur:       "82322ab5f3f6d791a96cbb530c8b13417b2bdc3bd233375a946e8ee84c4c28cc"
+    sha256 cellar: :any_skip_relocation, catalina:      "1b35b92036bbed489ae1f7ed91bf7d269870cfaf836e2f7e12128ff6ae3d7dce"
+    sha256 cellar: :any_skip_relocation, mojave:        "57df152b7d09bad81e755e999f4b830d9f4381572d30cce06ea9aff2256b99a2"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b5a941bec283eb4e4fbfbb2e011347dd9668fc0756b18e6c20b70ecec2638684" # linuxbrew-core
   end
 
   depends_on "go" => :build
 
   uses_from_macos "curl" => :test
+  uses_from_macos "netcat" => :test
   uses_from_macos "zip"
-
-  on_linux do
-    depends_on "netcat" => :test
-  end
 
   conflicts_with "etsh", because: "both install `tsh` binaries"
 
+  # Keep this in sync with https://github.com/gravitational/teleport/tree/v#{version}
   resource "webassets" do
-    url "https://github.com/gravitational/webassets/archive/72412062d6d55ec7faa9707abf500d703e7d09da.tar.gz"
-    sha256 "c84767bea0a723f406e3b6566a0a48892758b2e5f3a9e9b453d22171315fd29d"
+    url "https://github.com/gravitational/webassets/archive/07493a5e78677de448b0e35bd72bf1dc6498b5ea.tar.gz"
+    sha256 "2074ee7e50720f20ff1b4da923434c05f6e1664e13694adde9522bf9ab09e0fd"
   end
 
   def install
-    ENV["GOPATH"] = buildpath
-    ENV["GOROOT"] = Formula["go"].opt_libexec
-
     (buildpath/"webassets").install resource("webassets")
-    (buildpath/"src/github.com/gravitational/teleport").install buildpath.children
-    cd "src/github.com/gravitational/teleport" do
-      ENV.deparallelize { system "make", "full" }
-      bin.install Dir["build/*"]
-    end
+    ENV.deparallelize { system "make", "full" }
+    bin.install Dir["build/*"]
   end
 
   test do
@@ -53,27 +50,15 @@ class Teleport < Formula
       .gsub("/var/lib/teleport", testpath)
       .gsub("/var/run", testpath)
       .gsub(/https_(.*)/, "")
-    unless OS.mac?
-      inreplace testpath/"config.yml", "/usr/bin/hostname", "/bin/hostname"
-      inreplace testpath/"config.yml", "/usr/bin/uname", "/bin/uname"
+
+    fork do
+      exec "#{bin}/teleport start -c #{testpath}/config.yml --debug"
     end
-    begin
-      debug = OS.mac? ? "" : "DEBUG=1 "
-      pid = spawn("#{debug}#{bin}/teleport start -c #{testpath}/config.yml")
-      if OS.mac?
-        sleep 5
-        path = OS.mac? ? "/usr/bin/" : ""
-        system "#{path}curl", "--insecure", "https://localhost:3080"
-        # Fails on Linux:
-        # Failed to update cache: \nERROR REPORT:\nOriginal Error:
-        # *trace.NotFoundError open /tmp/teleport-test-20190120-15973-1hx2ui3/cache/auth/localCluster:
-        # no such file or directory
-        system "#{path}nc", "-z", "localhost", "3022"
-        system "#{path}nc", "-z", "localhost", "3023"
-        system "#{path}nc", "-z", "localhost", "3025"
-      end
-    ensure
-      Process.kill(9, pid)
-    end
+
+    sleep 10
+    system "curl", "--insecure", "https://localhost:3080"
+    system "nc", "-z", "localhost", "3022"
+    system "nc", "-z", "localhost", "3023"
+    system "nc", "-z", "localhost", "3025"
   end
 end

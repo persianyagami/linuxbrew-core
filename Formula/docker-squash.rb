@@ -6,22 +6,17 @@ class DockerSquash < Formula
   url "https://files.pythonhosted.org/packages/8c/b4/429be44bdb8ad42bbca4ab4a813f771ef517b00a8d733feb6d62716c4209/docker-squash-1.0.8.tar.gz"
   sha256 "f677bc9129d1156516454b0b334cdc2642f7b9a3328dca3a7477c43ac5ee23a9"
   license "MIT"
-  revision OS.mac? ? 3 : 4
-
-  livecheck do
-    url :stable
-  end
+  revision OS.mac? ? 4 : 5
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "5037e7ed624b62a548cb2d06398c78f4737c55c2203e59654886fef6c7d2ed3f" => :big_sur
-    sha256 "8eba8e475bd16f666d5dcae8c86c6903a6284714fd39827ef022846436482ddc" => :catalina
-    sha256 "e8f93445d63859ffbe3a7b3607f736c8171cbb34f5277dc99f9e5b431726d1bf" => :mojave
-    sha256 "b808d930d8ac2950359fd87047dec4c8a04b771f54c41c632916761cff647d8f" => :high_sierra
-    sha256 "5b43f1594aa452e9f163adb40b11529315e67b62310c01077bbbe9829ff72e42" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "92068871f7c0e53d5249efd82755cec793d32dbee030546869a50bfeba35b4db"
+    sha256 cellar: :any_skip_relocation, big_sur:       "b6ba076a62ad14d79fde9d02af07a14f6785887fd122dbb35d93878ebf159d05"
+    sha256 cellar: :any_skip_relocation, catalina:      "b6ba076a62ad14d79fde9d02af07a14f6785887fd122dbb35d93878ebf159d05"
+    sha256 cellar: :any_skip_relocation, mojave:        "b6ba076a62ad14d79fde9d02af07a14f6785887fd122dbb35d93878ebf159d05"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9a0e605e04d8bb0999b32690905a2a1c0c41d1f47862badb74fa34ef65011aa8" # linuxbrew-core
   end
 
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   resource "certifi" do
     url "https://files.pythonhosted.org/packages/41/bf/9d214a5af07debc6acf7f3f257265618f1db242a3f8e49a9b516f24523a6/certifi-2019.11.28.tar.gz"

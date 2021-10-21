@@ -1,13 +1,15 @@
 class PhpCsFixer < Formula
   desc "Tool to automatically fix PHP coding standards issues"
   homepage "https://cs.symfony.com/"
-  url "https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v2.17.1/php-cs-fixer.phar"
-  sha256 "47d9a0c26389ae71ccc261adcaaea52cf48ba8fdc8eb97f708cbc51fb7ceeb13"
+  url "https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v3.2.1/php-cs-fixer.phar"
+  sha256 "5d77329b72ae79322fd24e1737f1606e50f77cd42140661e5d8ed6917ddc4617"
   license "MIT"
 
-  bottle :unneeded
+  bottle do
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "bdccc22b31bde4d2c8e83b203c7799393f2c5c689d2b7482898b16da07ba07e6" # linuxbrew-core
+  end
 
-  depends_on "php" if MacOS.version <= :el_capitan
+  uses_from_macos "php", since: :catalina
 
   def install
     bin.install "php-cs-fixer.phar" => "php-cs-fixer"
@@ -18,7 +20,9 @@ class PhpCsFixer < Formula
       <?php $this->foo(   'homebrew rox'   );
     EOS
     (testpath/"correct_test.php").write <<~EOS
-      <?php $this->foo('homebrew rox');
+      <?php
+
+      $this->foo('homebrew rox');
     EOS
 
     system "#{bin}/php-cs-fixer", "fix", "test.php"

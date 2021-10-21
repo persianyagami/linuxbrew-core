@@ -1,45 +1,60 @@
 class Blast < Formula
   desc "Basic Local Alignment Search Tool"
   homepage "https://blast.ncbi.nlm.nih.gov/"
-  url "https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.11.0/ncbi-blast-2.11.0+-src.tar.gz"
-  version "2.11.0"
-  sha256 "d88e1858ae7ce553545a795a2120e657a799a6d334f2a07ef0330cc3e74e1954"
+  url "https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.12.0/ncbi-blast-2.12.0+-src.tar.gz"
+  version "2.12.0"
+  sha256 "fda3c9c9d488cad6c1880a98a236d842bcf3610e3e702af61f7a48cf0a714b88"
   license :public_domain
 
   livecheck do
-    url "https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/"
-    regex(%r{href=.*?v?(\d+(?:\.\d+)+)/?["' >]}i)
+    url "https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/VERSION"
+    regex(/v?(\d+(?:\.\d+)+)/i)
   end
 
   bottle do
-    sha256 "8d32e53882b58c2ffec36a76764929759536cf72c5104337c599be08f8772aa0" => :big_sur
-    sha256 "b682885e3ef53795f010e04a55ebc607e82105b24d441f0354dda4fa2ce56b41" => :catalina
-    sha256 "0d98042978cd28ea16e9e89f4b4f2ff318c67e662a11a9b9bf130d810ee1eb3f" => :mojave
-    sha256 "5899dbfbdd65d6274b03eb0ed576d87a7bfc18a3d9a5b588fe30edddb554ce24" => :high_sierra
-    sha256 "b519814c3586975beafa76e2579a893184d5caf2fe6252231789a7c640f4af6d" => :x86_64_linux
+    rebuild 1
+    sha256 arm64_big_sur: "2976fc131888183295514f2e2d2ff32c91cc2f15b76361c37d2a9414283c16ff"
+    sha256 big_sur:       "2fd23535ef7180812f7d16abf25590cc99a1689fc3edcfe1fbb84cd79c65e1a3"
+    sha256 catalina:      "a044ffeb208ed5b4de37cba25e584b74b571368ad4ed5260155f671981ccd4ae"
+    sha256 mojave:        "3ccce772ca8ef7f25343f13bd43cc8f12e0d4288306bf6bcde5d2303e112e378"
+    sha256 x86_64_linux:  "3e4f921e8a74c0269ae8200068b56207f1ce48fb6c56fb0a25a1fb801d97b117" # linuxbrew-core
   end
 
   depends_on "lmdb"
 
-  uses_from_macos "cpio" => :build
   uses_from_macos "bzip2"
   uses_from_macos "zlib"
+
+  on_macos do
+    depends_on "libomp"
+  end
+
+  on_linux do
+    depends_on "libarchive" => :build
+  end
 
   conflicts_with "proj", because: "both install a `libproj.a` library"
 
   def install
     cd "c++" do
-      # Use ./configure --without-boost to fix
-      # error: allocating an object of abstract class type 'ncbi::CNcbiBoostLogger'
-      # Boost is used only for unit tests.
-      # See https://github.com/Homebrew/homebrew-science/pull/3537#issuecomment-220136266
-      system "./configure", "--prefix=#{prefix}",
-                            "--without-debug",
-                            "--without-boost"
+      # Boost is only used for unit tests.
+      args = %W[--prefix=#{prefix}
+                --with-bin-release
+                --with-mt
+                --with-strip
+                --with-experimental=Int8GI
+                --without-debug
+                --without-boost]
+
+      if OS.mac?
+        args += ["OPENMP_FLAGS=-Xpreprocessor -fopenmp",
+                 "LDFLAGS=-lomp"]
+      end
+
+      system "./configure", *args
 
       # Fix the error: install: ReleaseMT/lib/*.*: No such file or directory
       system "make"
-
       system "make", "install"
     end
   end

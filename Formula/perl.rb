@@ -1,8 +1,8 @@
 class Perl < Formula
   desc "Highly capable, feature-rich programming language"
   homepage "https://www.perl.org/"
-  url "https://www.cpan.org/src/5.0/perl-5.32.0.tar.xz"
-  sha256 "6f436b447cf56d22464f980fac1916e707a040e96d52172984c5d184c09b859b"
+  url "https://www.cpan.org/src/5.0/perl-5.34.0.tar.xz"
+  sha256 "82c2e5e5c71b0e10487a80d79140469ab1f8056349ca8545140a224dbbed7ded"
   license any_of: ["Artistic-1.0-Perl", "GPL-1.0-or-later"]
   head "https://github.com/perl/perl5.git", branch: "blead"
 
@@ -12,30 +12,20 @@ class Perl < Formula
   end
 
   bottle do
-    sha256 "7db44dc9609acbada14bd4cf847b26b49f1b3f18693e0870e806741a274c957a" => :big_sur
-    sha256 "bb412cbff8e5c80bcecc7141d10c5b34b8bbcf46d05d926805bff68d120d0cf1" => :arm64_big_sur
-    sha256 "bc6c97521b6edf723c8ee0742aebb1954b5c8fec81bf2d96861c3f8bcc4e404d" => :catalina
-    sha256 "f09b3fefe2175b36e590ee13e7aa84d28ebcbce3ef8e252e24a0aebb752405ab" => :mojave
-    sha256 "718a54da6e3b02c33d5230776aaa54eaaac710c09cf412078014c9c50dd0ac51" => :high_sierra
-    sha256 "82ccac650bfefacad6b1ce088d3b612c16ae3677cb0d3c3ea52a2d4f786a1cd8" => :x86_64_linux
+    sha256 arm64_big_sur: "8b55cc95c9de8bdcf628ae6d6f631057952fa8b0218da8ac61eafe4da65a8761"
+    sha256 big_sur:       "5f86afbccd065524f92080bd7f35ffe6398b7dd40a8fef6f0a2a7982fd276dae"
+    sha256 catalina:      "de0127c56612bbadc3621217b586571cab897c001344b7a1d63302a4f8f74a8e"
+    sha256 mojave:        "2222c3f09bdcd10640720d2f52ba71e09408ead129bc77853b2fdf88fc381061"
+    sha256 x86_64_linux:  "ade369d066b93925bced51ad47be64743969283e9e0c88fb3de2c58bfddbacee" # linuxbrew-core
   end
+
+  depends_on "berkeley-db"
+  depends_on "gdbm"
 
   uses_from_macos "expat"
 
-  unless OS.mac?
-    depends_on "gdbm"
-    depends_on "berkeley-db"
-  end
-
   # Prevent site_perl directories from being removed
   skip_clean "lib/perl5/site_perl"
-
-  patch do
-    # Enable build support on macOS 11.x
-    # Remove when https://github.com/Perl/perl5/pull/17946 is merged
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/526faca9830646b974f563532fa27a1515e51ca1/perl/version_check.patch"
-    sha256 "cff250437f141eb677ec2215a9f2dfcbacba77304dac06499db6c722c9d30b58"
-  end
 
   def install
     args = %W[
@@ -55,25 +45,18 @@ class Perl < Formula
     args << "-Dsed=/usr/bin/sed" if OS.mac?
 
     args << "-Dusedevel" if build.head?
-    # Fix for https://github.com/Linuxbrew/homebrew-core/issues/405
-    args << "-Dlocincpth=#{HOMEBREW_PREFIX}/include" if OS.linux?
 
     system "./Configure", *args
 
     system "make"
-    system "make", "install"
 
-    # expose libperl.so to ensure we aren't using a brewed executable
-    # but a system library
-    if OS.linux?
-      perl_core = Pathname.new(`#{bin/"perl"} -MConfig -e 'print $Config{archlib}'`)+"CORE"
-      lib.install_symlink perl_core/"libperl.so"
-    end
+    system "make", "install"
   end
 
   def post_install
-    unless OS.mac?
-      perl_core = Pathname.new(`#{bin/"perl"} -MConfig -e 'print $Config{archlib}'`)+"CORE"
+    if OS.linux?
+      perl_archlib = Utils.safe_popen_read("perl", "-MConfig", "-e", "print $Config{archlib}")
+      perl_core = Pathname.new(perl_archlib)/"CORE"
       if File.readlines("#{perl_core}/perl.h").grep(/include <xlocale.h>/).any? &&
          (OS::Linux::Glibc.system_version >= "2.26" ||
          (Formula["glibc"].any_version_installed? && Formula["glibc"].version >= "2.26"))
@@ -82,15 +65,6 @@ class Perl < Formula
         # locale.h includes xlocale.h if the latter one exists
         inreplace "#{perl_core}/perl.h", "include <xlocale.h>", "include <locale.h>"
       end
-
-      # CPAN modules installed via the system package manager will not be visible to
-      # brewed Perl. As a temporary measure, install critical CPAN modules to ensure
-      # they are available. See https://github.com/Linuxbrew/homebrew-core/pull/1064
-      ENV.activate_extensions!
-      ENV.setup_build_environment(formula: self)
-      ENV["PERL_MM_USE_DEFAULT"] = "1"
-      system bin/"cpan", "-i", "XML::Parser"
-      system bin/"cpan", "-i", "XML::SAX"
     end
   end
 

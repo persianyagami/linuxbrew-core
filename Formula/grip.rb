@@ -6,22 +6,17 @@ class Grip < Formula
   url "https://files.pythonhosted.org/packages/3c/ea/2a475ed37e1b6476182e71223c98667f51704bdbc919608372b203c7ea04/grip-4.5.2.tar.gz"
   sha256 "048b7e5c738ed80bee345bd10840f27eb31687eb67132b40f2473dc1cf67aa0f"
   license "MIT"
-  revision OS.mac? ? 3 : 4
-
-  livecheck do
-    url :stable
-  end
+  revision OS.mac? ? 4 : 5
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "030e8c707b32fddf61e3d5d566fc0c5e6e89d34e92aaecbb33fa3f60abf63b64" => :big_sur
-    sha256 "373f8ccd90c2cb8d753f1ceab1b50ff568be4a782761402e0db137dfd5a946f3" => :catalina
-    sha256 "d8aa30db0652b18890baa83a7ae4c529a346f068e799ddadada6dae8771c46fc" => :mojave
-    sha256 "3c5e3c5e4e928803ec821c7624014bf3740566dd2741a02cfdac541d4162860a" => :high_sierra
-    sha256 "f6a38db6f7c72276c49f6e47b801bb838467aac9d408cb9a27857b9300fa5a88" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "cfc5788cdd426b916854e205ef98a6216afd86c8acbcedd1590b57ac8276cca2"
+    sha256 cellar: :any_skip_relocation, big_sur:       "60f6b63e4dc026f60c4c8e0321c1c40f962662fba4d355edde94d0bc59435691"
+    sha256 cellar: :any_skip_relocation, catalina:      "20845cfa7d409cd8a401f4fd9cc78dc2cf5c2b14ded670d4c1a2b0a90fa8030f"
+    sha256 cellar: :any_skip_relocation, mojave:        "1a1fc037a3861aee7a694a6bfe43e8accd32165d01ca2815c2a4c7b45e573b67"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5d1607be0ff569824db2d7ba5438554904e2f9388591cce4b3042b87322f26ab" # linuxbrew-core
   end
 
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   resource "certifi" do
     url "https://files.pythonhosted.org/packages/b8/e2/a3a86a67c3fc8249ed305fc7b7d290ebe5e4d46ad45573884761ef4dea7b/certifi-2020.4.5.1.tar.gz"

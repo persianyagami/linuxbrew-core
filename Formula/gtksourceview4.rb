@@ -1,8 +1,8 @@
 class Gtksourceview4 < Formula
   desc "Text view with syntax, undo/redo, and text marks"
   homepage "https://projects.gnome.org/gtksourceview/"
-  url "https://download.gnome.org/sources/gtksourceview/4.8/gtksourceview-4.8.0.tar.xz"
-  sha256 "00a19121500cedf1bae97f35af865d839841fd785d9facf188498e13975b4e1a"
+  url "https://download.gnome.org/sources/gtksourceview/4.8/gtksourceview-4.8.2.tar.xz"
+  sha256 "842de7e5cb52000fd810e4be39cd9fe29ffa87477f15da85c18f7b82d45637cc"
   license "LGPL-2.1-or-later"
 
   livecheck do
@@ -11,10 +11,11 @@ class Gtksourceview4 < Formula
   end
 
   bottle do
-    sha256 "55f60179bcb0bd14fa91391c8f338d5bac701c3bc6a31bb0c81ecd3a3532f23b" => :big_sur
-    sha256 "d49d932f5d0986c72d13d0750e1038ab18036da9539902a55d6cd856126bc452" => :catalina
-    sha256 "bc2eae19e209fe125041648d1f45ab36a8609ac2a49c8bc9fe1aa604b8cc8d99" => :mojave
-    sha256 "38fbfbe4cc2887532bf078e2a2b62a1d1102cb09bf4f8724d31e96d9a58a0148" => :high_sierra
+    sha256 arm64_big_sur: "dbac09cb14c7566766fdeaf867d322e932142816efa5fc1f01a2a7d5792928ee"
+    sha256 big_sur:       "b714a2eaa1ad26b3aaf2b5169b85cd80ad890256886db2a3955d1d815dc9e7c3"
+    sha256 catalina:      "c48c3be2dc1bd3da0caf35b01a8238f53cc3c0d003f6ec4f845591f206041310"
+    sha256 mojave:        "73140e09740766172fba3e3184abe9a8be1358061b4ac2714995f183788e2e9b"
+    sha256 x86_64_linux:  "c28a65e0177c6ff90db9358eeb67a5f0daa24d109c905929926f56f726cf9891" # linuxbrew-core
   end
 
   depends_on "gobject-introspection" => :build

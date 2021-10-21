@@ -1,8 +1,8 @@
 class Protobuf < Formula
   desc "Protocol buffers (Google's data interchange format)"
   homepage "https://github.com/protocolbuffers/protobuf/"
-  url "https://github.com/protocolbuffers/protobuf/releases/download/v3.14.0/protobuf-all-3.14.0.tar.gz"
-  sha256 "6dd0f6b20094910fbb7f1f7908688df01af2d4f6c5c21331b9f636048674aebf"
+  url "https://github.com/protocolbuffers/protobuf/releases/download/v3.17.3/protobuf-all-3.17.3.tar.gz"
+  sha256 "77ad26d3f65222fd96ccc18b055632b0bfedf295cb748b712a98ba1ac0b704b2"
   license "BSD-3-Clause"
 
   livecheck do
@@ -11,12 +11,11 @@ class Protobuf < Formula
   end
 
   bottle do
-    rebuild 1
-    sha256 "b06e8c4247465d7773a359eeeaa39385e564fefab77dbbb245ac928eea334ce9" => :big_sur
-    sha256 "d552ba31a02e48f9eaba685dc56955a7ff5620283f3763bab684b9fe07b81042" => :arm64_big_sur
-    sha256 "8d53111626404e2b4f27718127a313dceea600a74a4d38ffe0870812d8f57eb4" => :catalina
-    sha256 "0070627fe9b8c1818e54480c272cc00fa71bd5bd944b04d37ebe2e31604cb9c9" => :mojave
-    sha256 "3a8740e87247f14779fa953354a17f7f02d49e7ece43081f79537a26a3892fc2" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "ef7a56961e918e7626e099d18ad87d2ad5414ccc2086211d5dd4f6509d7f4de5"
+    sha256 cellar: :any,                 big_sur:       "d1060a6f73000c9c46a1954397a6375fb41c409d7b3cb7206fc69488313b4855"
+    sha256 cellar: :any,                 catalina:      "2f25a4051028d54de1b5527826f39815858b89040f39f14866472c8aa6bfb4e1"
+    sha256 cellar: :any,                 mojave:        "7e6d2eb1baee925d8a0776e9dc9fbcb267e1de5c45d2b648b6a60457f0519667"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2aec8a5b472dac20baa064848901305e471422ed4b229964ca6989e0cee093c6" # linuxbrew-core
   end
 
   head do
@@ -28,27 +27,9 @@ class Protobuf < Formula
   end
 
   depends_on "python@3.9" => [:build, :test]
+  depends_on "six"
 
-  conflicts_with "percona-server", "percona-xtrabackup",
-    because: "both install libprotobuf(-lite) libraries"
-
-  resource "six" do
-    url "https://files.pythonhosted.org/packages/6b/34/415834bfdafca3c5f451532e8a8d9ba89a21c9743a0c59fbd0205c7f9426/six-1.15.0.tar.gz"
-    sha256 "30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259"
-  end
-
-  # Fix build on Big Sur, remove in next version
-  # https://github.com/protocolbuffers/protobuf/pull/8126
-  patch do
-    url "https://github.com/atomiix/protobuf/commit/d065bd6910a0784232dbbbfd3e5806922d69c622.patch?full_index=1"
-    sha256 "5433b6247127f9ca622b15c9f669efbaac830fa717ed6220081bc1fc3c735f91"
-  end
-
-  unless OS.mac?
-    fails_with gcc: "4"
-    fails_with gcc: "5"
-    depends_on "gcc@6" => :build
-  end
+  uses_from_macos "zlib"
 
   def install
     # Don't build in debug mode. See:
@@ -61,7 +42,7 @@ class Protobuf < Formula
     system "./configure", "--disable-debug", "--disable-dependency-tracking",
                           "--prefix=#{prefix}", "--with-zlib"
     system "make"
-    system "make", "check" if OS.mac?
+    system "make", "check"
     system "make", "install"
 
     # Install editor support and examples
@@ -71,18 +52,10 @@ class Protobuf < Formula
     ENV.append_to_cflags "-I#{include}"
     ENV.append_to_cflags "-L#{lib}"
 
-    resource("six").stage do
-      system Formula["python@3.9"].opt_bin/"python3", *Language::Python.setup_install_args(libexec)
-    end
     chdir "python" do
-      system Formula["python@3.9"].opt_bin/"python3", *Language::Python.setup_install_args(libexec),
+      system Formula["python@3.9"].opt_bin/"python3", *Language::Python.setup_install_args(prefix),
                         "--cpp_implementation"
     end
-
-    version = Language::Python.major_minor_version Formula["python@3.9"].opt_bin/"python3"
-    site_packages = "lib/python#{version}/site-packages"
-    pth_contents = "import site; site.addsitedir('#{libexec/site_packages}')\n"
-    (prefix/site_packages/"homebrew-protobuf.pth").write pth_contents
   end
 
   test do

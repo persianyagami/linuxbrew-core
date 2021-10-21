@@ -3,27 +3,17 @@ class Libgusb < Formula
 
   desc "GObject wrappers for libusb1"
   homepage "https://github.com/hughsie/libgusb"
+  url "https://people.freedesktop.org/~hughsient/releases/libgusb-0.3.8.tar.xz"
+  sha256 "6d7092ec4e8e4405e75d4c8799512f2c31cdb0d7a8381ee37d1015a4c4fc8407"
   license "LGPL-2.1-only"
-  revision 2
   head "https://github.com/hughsie/libgusb.git"
 
-  stable do
-    url "https://people.freedesktop.org/~hughsient/releases/libgusb-0.3.5.tar.xz"
-    sha256 "5b2a00c6997cc4b0133c5a5748a2e616e9e7504626922105b62aadced78e65df"
-
-    # Patch accepted upstream to allow for building without meson-internal
-    # Remove on next release
-    patch do
-      url "https://github.com/hughsie/libgusb/commit/b2ca7ebb887ff10314a5a000e7d21e33fd4ffc2f.patch?full_index=1"
-      sha256 "a068b0f66079897866d2b9280b3679f58c040989f74ee8d8bd70b0f8e977ec37"
-    end
-  end
-
   bottle do
-    sha256 "7fe394a32e306eb3a5acc9f51b6f07cc46243bb863b15f17eea800d2a1a09231" => :big_sur
-    sha256 "4a5345775e87130c47c9c78a9fbe16d28c6dcfc7f74dc76850cae8e1a24ad948" => :catalina
-    sha256 "571f51cd56f7ed502e349d63909977cdf44629976ce7b81a765d6dce39be8fa4" => :mojave
-    sha256 "570e84e48faa46bb217f581272679c26cb47c13e0bfe25a33916782e7cdebfdf" => :high_sierra
+    sha256 arm64_big_sur: "162c2f8e2aa821917680b9b0dd147ec962c5f5576f41aebeca22a8e62cb89f71"
+    sha256 big_sur:       "cf83dacead41ee2afadd41cbbb536199b32031766aba49fdc8bf39da285749f3"
+    sha256 catalina:      "a61c7235f3c956d25feb3c26c54bbafd09014dc46612055cdc7739c42a7a4ada"
+    sha256 mojave:        "556215c83c9a7b50315e94b654614ad94a874698e9dfd3649f8316797bccbf5e"
+    sha256 x86_64_linux:  "a3df985eab4a9f01478ff634069c4b743a1c3d38a517db9994aee8df11ccb29a" # linuxbrew-core
   end
 
   depends_on "gobject-introspection" => :build
@@ -74,10 +64,12 @@ class Libgusb < Formula
       -lgio-2.0
       -lglib-2.0
       -lgobject-2.0
-      -lintl
       -lusb-1.0
       -lgusb
     ]
+    on_macos do
+      flags << "-lintl"
+    end
     system ENV.cc, "test.c", "-o", "test", *flags
     system "./test"
   end

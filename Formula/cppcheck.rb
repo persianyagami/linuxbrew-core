@@ -1,28 +1,37 @@
 class Cppcheck < Formula
   desc "Static analysis of C and C++ code"
   homepage "https://sourceforge.net/projects/cppcheck/"
-  url "https://github.com/danmar/cppcheck/archive/2.3.tar.gz"
-  sha256 "3c622628ebf46f68909c7a96743b07b6207894a0772fbe802603732152ab1035"
+  url "https://github.com/danmar/cppcheck/archive/2.6.tar.gz"
+  sha256 "99f0c5cf58a0072876c4deb114f3f5f798c933b8e459cddb00a061c8bb4dd765"
   license "GPL-3.0-or-later"
-  head "https://github.com/danmar/cppcheck.git"
+  head "https://github.com/danmar/cppcheck.git", branch: "main"
 
   bottle do
-    sha256 "d43b72a935d69d6a170289be18dc91677021ce79e3a9b3098d185e74f86a76ef" => :big_sur
-    sha256 "e5e9dcaa609ee6d13d4a49597bde145f7264cf9ea18b9bd4f8b3bd6733c6f56f" => :catalina
-    sha256 "fc7ad924b5ab15d44cd6496d8fad5a5e1df639541bc04a67c9f68cd0ab909409" => :mojave
-    sha256 "ca883804b4f380e32ad7f721f4454542e24c7d8612445c6817d360bc46f1d90b" => :x86_64_linux
+    sha256 arm64_big_sur: "312ac3dda79bfd7a8fe06823d0a205050bbb344300135d3bb731c91fc837e034"
+    sha256 big_sur:       "10c914a136b9596a45d911b125bc43d7e6f4f5e61fbba8d73dcba8c1fa680f77"
+    sha256 catalina:      "91f4bd0a4695f2bdf976371118afcdb4d2b28372e8ab8951f53a27db419a86b9"
+    sha256 mojave:        "b79dde99ef183e06d82a0b79ee615ae74b349269332bfc7bd6c268e75a600121"
+    sha256 x86_64_linux:  "5f6fd1733be02da0cab96168cf7c9d101d52eb85fc2e9a127c87b241c1b3f89e" # linuxbrew-core
   end
 
-  depends_on "python@3.9" => :test
+  depends_on "cmake" => :build
+  depends_on "python@3.9" => [:build, :test]
   depends_on "pcre"
+  depends_on "tinyxml2"
+
+  uses_from_macos "libxml2"
 
   def install
-    ENV.cxx11
-
-    system "make", "HAVE_RULES=yes", "FILESDIR=#{prefix}/cfg"
-
-    # FILESDIR is relative to the prefix for install, don't add #{prefix}.
-    system "make", "DESTDIR=#{prefix}", "BIN=#{bin}", "FILESDIR=/cfg", "install"
+    args = std_cmake_args + %W[
+      -DHAVE_RULES=ON
+      -DUSE_MATCHCOMPILER=ON
+      -DUSE_BUNDLED_TINYXML2=OFF
+      -DENABLE_OSS_FUZZ=OFF
+      -DPYTHON_EXECUTABLE=#{Formula["python@3.9"].opt_bin}/python3
+    ]
+    system "cmake", "-S", ".", "-B", "build", *args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
 
     # Move the python addons to the cppcheck pkgshare folder
     (pkgshare/"addons").install Dir.glob("addons/*.py")

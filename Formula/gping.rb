@@ -1,8 +1,8 @@
 class Gping < Formula
   desc "Ping, but with a graph"
   homepage "https://github.com/orf/gping"
-  url "https://github.com/orf/gping/archive/v1.2.0.tar.gz"
-  sha256 "2379d2d5c3e301140d9c65c4dcc2b99602acf511b2798f45009af4c1101a0716"
+  url "https://github.com/orf/gping/archive/gping-v1.2.6.tar.gz"
+  sha256 "e36d5bc02157708c803d1855be4b2a9daa27d077fffe86c58b12c746fdc04c8f"
   license "MIT"
   head "https://github.com/orf/gping.git"
 
@@ -12,20 +12,22 @@ class Gping < Formula
   # https://github.com/Homebrew/homebrew-core/pull/66366#discussion_r537339032
   livecheck do
     url :stable
-    regex(/^v?(\d+(?:\.\d+)+)$/i)
+    regex(/^gping[._-]v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "ad76726fb0897f1960e045b31d6a080a1c699a5ebe187f1b5f3fabb1575afe90" => :big_sur
-    sha256 "c8162661b26ec98036c7abd06916867fb715f1c6b0881fe41ce7bbd292773f07" => :catalina
-    sha256 "9c0a56c20f3c378227ae9288ff6b88d0eb2f3f1cbd33dcb493226dab1b894ad8" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "b7e1e08ebe385455747070b11e9f73c2cf3cbe3ce96860443ba7a709d125ed31"
+    sha256 cellar: :any_skip_relocation, big_sur:       "232fc5425ac0ea4de4860786ffb795a9cc6e1f1e4fe4ce00edbc65c45657164b"
+    sha256 cellar: :any_skip_relocation, catalina:      "0d555937efeae1474a1a187ddeb0db14ba078dd012b4918d262d2e3f569369f9"
+    sha256 cellar: :any_skip_relocation, mojave:        "ce0e519142ae3da1d3d4c9eecce6971bd6fd582c77c0eb8858dc49413d352395"
   end
 
   depends_on "rust" => :build
 
   def install
-    system "cargo", "install", *std_cargo_args
+    cd "gping" do
+      system "cargo", "install", *std_cargo_args
+    end
   end
 
   test do
@@ -43,7 +45,7 @@ class Gping < Formula
       invalid: :replace,
       undef:   :replace,
       replace: "")
-    screenlog.gsub! /\e\[([;\d]+)?m/, ""
+    screenlog.gsub!(/\e\[([;\d]+)?m/, "")
 
     assert_match "google.com (", screenlog
   ensure

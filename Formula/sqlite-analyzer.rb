@@ -1,25 +1,24 @@
 class SqliteAnalyzer < Formula
   desc "Analyze how space is allocated inside an SQLite file"
   homepage "https://www.sqlite.org/"
-  url "https://www.sqlite.org/2020/sqlite-src-3340000.zip"
-  version "3.34.0"
-  sha256 "a5c2000ece56d2de13c474658b9cdba6b7f2608a4d711e245518ea02a2a2333e"
+  url "https://www.sqlite.org/2021/sqlite-src-3360000.zip"
+  version "3.36.0"
+  sha256 "25a3b9d08066b3a9003f06a96b2a8d1348994c29cc912535401154501d875324"
   license "blessing"
 
   livecheck do
-    url "https://sqlite.org/news.html"
-    regex(%r{v?(\d+(?:\.\d+)+)</h3>}i)
+    formula "sqlite"
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "94fcffd969fb353677861b33e1d1cbf4d06c267711d7ec7f15d96b6e8d7707cf" => :big_sur
-    sha256 "07b188e4a46c429622a1b89d4fba852bd337fc9c522278c6ef8d8137cf99f199" => :catalina
-    sha256 "ae6550708b62b3c03d3ef760294fc9271e0b469286324bcdb01d99458d282fd5" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "279951170e98f9f3b4b23fbd34cd210c6a3ad3c8b564f7a6dd41366f98610cf9"
+    sha256 cellar: :any_skip_relocation, big_sur:       "8e912eaec069e12f498c2ba3bc09217cd2cf924ff8e26bfa966680b98d53f95c"
+    sha256 cellar: :any_skip_relocation, catalina:      "927cb8b16c0c5c4fefc9169c1d51346c6db3daaba27219a194b353d0e1a4b08f"
+    sha256 cellar: :any_skip_relocation, mojave:        "039205cb4d999259011589f99db4dea8612a0a743cca17265c06734342820489"
   end
 
   def install
-    sdkprefix = MacOS.sdk_path_if_needed ? MacOS.sdk_path : ""
+    sdkprefix = MacOS.sdk_path_if_needed
     system "./configure", "--disable-debug",
                           "--with-tcl=#{sdkprefix}/System/Library/Frameworks/Tcl.framework/",
                           "--prefix=#{prefix}"

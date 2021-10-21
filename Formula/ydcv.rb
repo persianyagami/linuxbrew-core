@@ -3,20 +3,21 @@ class Ydcv < Formula
 
   desc "YouDao Console Version"
   homepage "https://github.com/felixonmars/ydcv"
-  url "https://github.com/felixonmars/ydcv/archive/0.7.tar.gz"
-  sha256 "03dd5de36ea8fce3170e678e63fc3694e2718b22bc5e1526e3e07f5c36ec9aa0"
+  url "https://files.pythonhosted.org/packages/1f/29/17124ebfdea8d810774977474a8652018c04c4a6db1ca413189f7e5b9d52/ydcv-0.7.tar.gz"
+  sha256 "53cd59501557496512470e7db5fb14e42ddcb411fe4fa45c00864d919393c1da"
   license "GPL-3.0"
-  revision 3
+  revision 4
+  head "https://github.com/felixonmars/ydcv.git", branch: "master"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "c4ff545cddb41fe2ccaf575cb4f3e76c5c01f232c625eb1c530e47d2ef8075c9" => :big_sur
-    sha256 "a16a37a02c2a91cb46238a89d8771af6c65b623f361648e7f13247f0af9ef436" => :catalina
-    sha256 "2ad28560612e25690f859e8ba31e4d7a7b35820dc414c0778aa8c99f90737ceb" => :mojave
-    sha256 "148d1c3f69a30f2f7e42e037bd2dd0a704a400b41990317513d36a993f914a66" => :high_sierra
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "15a2f9b94d39645328338ffb95aa4ba058bc16b1dbe097af765c1ee7aa0b0a37"
+    sha256 cellar: :any_skip_relocation, big_sur:       "3961fb6ede937e194466d10568899cef0e9f7370348dcd758f4da4494c867d90"
+    sha256 cellar: :any_skip_relocation, catalina:      "3961fb6ede937e194466d10568899cef0e9f7370348dcd758f4da4494c867d90"
+    sha256 cellar: :any_skip_relocation, mojave:        "3961fb6ede937e194466d10568899cef0e9f7370348dcd758f4da4494c867d90"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "35d3c655f6e3b7623dd7657adc51da6bd53629676710c450d7941378a9f62b4b" # linuxbrew-core
   end
 
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   def install
     ENV["SETUPTOOLS_SCM_PRETEND_VERSION"] = version

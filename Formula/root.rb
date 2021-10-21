@@ -1,11 +1,10 @@
 class Root < Formula
   desc "Object oriented framework for large scale data analysis"
   homepage "https://root.cern.ch/"
-  url "https://root.cern.ch/download/root_v6.22.06.source.tar.gz"
-  sha256 "c4688784a7e946cd10b311040b6cf0b2f75125a7520e04d1af0b746505911b57"
+  url "https://root.cern.ch/download/root_v6.24.04.source.tar.gz"
+  sha256 "4a416f3d7aa25dba46d05b641505eb074c5f07b3ec1d21911451046adaea3ee7"
   license "LGPL-2.1-or-later"
-  revision 1
-  head "https://github.com/root-project/root.git"
+  head "https://github.com/root-project/root.git", branch: "master"
 
   livecheck do
     url "https://root.cern.ch/download/"
@@ -13,23 +12,11 @@ class Root < Formula
   end
 
   bottle do
-    sha256 "2f03ec4062bf795c86104aa30e0bbf4f8f40f849286269ed2273daa804b181c6" => :big_sur
-    sha256 "6b34e1170e459c2f5c1b381640475171e14a06e197bc08bda2fb52f05bb64be9" => :catalina
-    sha256 "4bf42c4f9ee6b7ea486207ef1033ebafe1df2b2582ba71ad83109ae6bc80e0b2" => :mojave
-  end
-
-  if OS.mac?
-    # https://github.com/Homebrew/homebrew-core/issues/30726
-    # strings libCling.so | grep Xcode:
-    #  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1
-    #  /Applications/Xcode.app/Contents/Developer
-    pour_bottle? do
-      reason "The bottle hardcodes locations inside Xcode.app"
-      satisfy do
-        MacOS::Xcode.installed? &&
-          MacOS::Xcode.prefix.to_s.include?("/Applications/Xcode.app/")
-      end
-    end
+    sha256 arm64_big_sur: "b047f553b56962b417f1a8deeb43c9a814de15e776aa52287e074e83fd9ea09d"
+    sha256 big_sur:       "1fa26f261a9a86327106fbb5f2dd48687efa39979c207696f85eb6d6a7814fef"
+    sha256 catalina:      "2c925c6cfea7e222a1aaec1c0bec0e74d6a6f56ca24afd0f36cf0b3ef97b01f6"
+    sha256 mojave:        "75c2a278276d76be14f0ed92a78e104a39cdcf0d7e506dda0d172b83747d7ed7"
+    sha256 x86_64_linux:  "deab04d8ec9f21c1caa365fd750993cb8d9379830529074381060f9a67c2153c" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
@@ -41,22 +28,20 @@ class Root < Formula
   depends_on "gl2ps"
   depends_on "graphviz"
   depends_on "gsl"
-  # Temporarily depend on Homebrew libxml2 to work around a brew issue:
-  # https://github.com/Homebrew/brew/issues/5068
-  depends_on "libxml2" if MacOS.version >= :mojave
   depends_on "lz4"
   depends_on "numpy" # for tmva
   depends_on "openssl@1.1"
   depends_on "pcre"
   depends_on "python@3.9"
   depends_on "tbb"
+  depends_on :xcode if MacOS.version <= :catalina
   depends_on "xrootd"
   depends_on "xz" # for LZMA
   depends_on "zstd"
 
-  unless OS.mac?
-    depends_on "libx11"
-    depends_on "libxext"
+  uses_from_macos "libxml2"
+
+  on_linux do
     depends_on "libxft"
     depends_on "libxpm"
   end
@@ -66,8 +51,7 @@ class Root < Formula
   skip_clean "bin"
 
   def install
-    # Work around "error: no member named 'signbit' in the global namespace"
-    ENV.delete("SDKROOT") if DevelopmentTools.clang_build_version >= 900
+    ENV.append "LDFLAGS", "-Wl,-rpath,#{lib}/root" if OS.linux?
 
     # Freetype/afterimage/gl2ps/lz4 are vendored in the tarball, so are fine.
     # However, this is still permitting the build process to make remote
@@ -78,6 +62,7 @@ class Root < Formula
               "https://lcgpackages"
 
     args = std_cmake_args + %W[
+      -DCLING_CXX_PATH=clang++
       -DCMAKE_INSTALL_ELISPDIR=#{elisp}
       -DPYTHON_EXECUTABLE=#{Formula["python@3.9"].opt_bin}/python3
       -Dbuiltin_cfitsio=OFF
@@ -102,8 +87,6 @@ class Root < Formula
       -GNinja
     ]
 
-    args << "-DCLING_CXX_PATH=clang++" if OS.mac?
-
     cxx_version = (MacOS.version < :mojave) ? 14 : 17
     args << "-DCMAKE_CXX_STANDARD=#{cxx_version}"
 
@@ -116,7 +99,6 @@ class Root < Formula
 
     mkdir "builddir" do
       system "cmake", "..", *args
-
       system "ninja", "install"
 
       chmod 0755, Dir[bin/"*.*sh"]
@@ -152,7 +134,6 @@ class Root < Formula
     EOS
 
     # Test ROOT command line mode
-    ENV.prepend_path "LD_LIBRARY_PATH", lib/"root" unless OS.mac?
     system "#{bin}/root", "-b", "-l", "-q", "-e", "gSystem->LoadAllLibraries(); 0"
 
     # Test ROOT executable
@@ -168,12 +149,10 @@ class Root < Formula
         return 0;
       }
     EOS
-    (testpath/"test_compile.bash").write <<~EOS
-      $(root-config --cxx) $(root-config --cflags) $(root-config --libs) $(root-config --ldflags) test.cpp
-      ./a.out
-    EOS
-    assert_equal "Hello, world!\n",
-                 shell_output("/bin/bash test_compile.bash")
+    flags = %w[cflags libs ldflags].map { |f| "$(root-config --#{f})" }
+    flags << "-Wl,-rpath,#{lib}/root" if OS.linux?
+    shell_output("$(root-config --cxx) test.cpp #{flags.join(" ")}")
+    assert_equal "Hello, world!\n", shell_output("./a.out")
 
     # Test Python module
     system Formula["python@3.9"].opt_bin/"python3", "-c", "import ROOT; ROOT.gSystem.LoadAllLibraries()"

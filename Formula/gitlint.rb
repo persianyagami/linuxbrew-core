@@ -3,48 +3,44 @@ class Gitlint < Formula
 
   desc "Linting for your git commit messages"
   homepage "https://jorisroovers.github.io/gitlint"
-  url "https://files.pythonhosted.org/packages/df/b5/04355d3abe6b372e6bae36864ec7b659012343da437b595895637713f90f/gitlint-0.15.0.tar.gz"
-  sha256 "aae7e966d765a818d941398f2d3aff6ec7f30a7251dd5c915846b7e82f4f7776"
+  url "https://files.pythonhosted.org/packages/9a/0c/bacbf0ea52b924ff7d6984b2756e544d0e276c56663bb37e0c08781d4ad3/gitlint-0.16.0.tar.gz"
+  sha256 "30ee2bdae611bbf66df6326b5da1afc14bf0be337e1d3021fafeb7f13b37f55b"
   license "MIT"
   head "https://github.com/jorisroovers/gitlint.git", branch: "main"
 
-  livecheck do
-    url :stable
-  end
-
   bottle do
-    cellar :any_skip_relocation
-    sha256 "52ac0738eaf1ee717e838a7a2d2c2e8c4745f281bafc846a054be2526567c411" => :big_sur
-    sha256 "79dacaaf2f45dedcca1fb05efbf8c84d37f85996db920a4a675ceff724a8110f" => :catalina
-    sha256 "dbb9d4e5bbabaa3a75ea7d38df6cb46ad51f95e5378591068f397884cee9ceb6" => :mojave
-    sha256 "e521e5f7438a16fb03d874bf1d5b68ee3f481298127a02150560fee01fccb404" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "5bcbf70697da339aa2a7c794377187c57c7618d32ef7c538b36d37480b5f6c42"
+    sha256 cellar: :any_skip_relocation, big_sur:       "95e74a0cfd189c140ea05874f9a82e605992666cbff78b48f661189e83aec2f2"
+    sha256 cellar: :any_skip_relocation, catalina:      "a2305c81e08d6910cc1332f5ffdb40866ae9b166c0687025a9400739461567ed"
+    sha256 cellar: :any_skip_relocation, mojave:        "8a27c21879cfcd036c2acd9a1160b9467fdeff0121f3521150d962a29e1cc2a8"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0f62bf006114169777df159c9441039d6b7ed2b2e4b7ad394df2e65b718aabea" # linuxbrew-core
   end
 
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   resource "arrow" do
-    url "https://files.pythonhosted.org/packages/ec/74/1cf2d9912921cebdba3fa954949206c8aa159c9cc803b88140fb227f8a0e/arrow-0.17.0.tar.gz"
-    sha256 "ff08d10cda1d36c68657d6ad20d74fbea493d980f8b2d45344e00d6ed2bf6ed4"
+    url "https://files.pythonhosted.org/packages/dc/bd/2565b8533bb8cf66e10a9e68a1d489ad839799b2050f0635039e614e3b1a/arrow-1.2.0.tar.gz"
+    sha256 "16fc29bbd9e425e3eb0fef3018297910a0f4568f21116fc31771e2760a50e074"
   end
 
   resource "click" do
-    url "https://files.pythonhosted.org/packages/27/6f/be940c8b1f1d69daceeb0032fee6c34d7bd70e3e649ccac0951500b4720e/click-7.1.2.tar.gz"
-    sha256 "d2b5255c7c6349bc1bd1e59e08cd12acbbd63ce649f2588755783aa94dfb6b1a"
+    url "https://files.pythonhosted.org/packages/21/83/308a74ca1104fe1e3197d31693a7a2db67c2d4e668f20f43a2fca491f9f7/click-8.0.1.tar.gz"
+    sha256 "8c04c11192119b1ef78ea049e0a6f0463e4c48ef00a30160c704337586f3ad7a"
   end
 
   resource "python-dateutil" do
-    url "https://files.pythonhosted.org/packages/be/ed/5bbc91f03fa4c839c4c7360375da77f9659af5f7086b7a7bdda65771c8e0/python-dateutil-2.8.1.tar.gz"
-    sha256 "73ebfe9dbf22e832286dafa60473e4cd239f8592f699aa5adaf10050e6e1823c"
+    url "https://files.pythonhosted.org/packages/4c/c4/13b4776ea2d76c115c1d1b84579f3764ee6d57204f6be27119f13a61d0a9/python-dateutil-2.8.2.tar.gz"
+    sha256 "0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86"
   end
 
   resource "sh" do
-    url "https://files.pythonhosted.org/packages/f6/d4/e80280b1eba9597d16144f71d12cdf62d0e66170d289880f307cf905d327/sh-1.14.1.tar.gz"
-    sha256 "39aa9af22f6558a0c5d132881cf43e34828ca03e4ae11114852ca6a55c7c1d8e"
+    url "https://files.pythonhosted.org/packages/80/39/ed280d183c322453e276a518605b2435f682342f2c3bcf63228404d36375/sh-1.14.2.tar.gz"
+    sha256 "9d7bd0334d494b2a4609fe521b2107438cdb21c0e469ffeeb191489883d6fe0d"
   end
 
   resource "six" do
-    url "https://files.pythonhosted.org/packages/6b/34/415834bfdafca3c5f451532e8a8d9ba89a21c9743a0c59fbd0205c7f9426/six-1.15.0.tar.gz"
-    sha256 "30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259"
+    url "https://files.pythonhosted.org/packages/71/39/171f1c67cd00715f190ba0b100d606d440a28c93c7714febeca8b79af85e/six-1.16.0.tar.gz"
+    sha256 "1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"
   end
 
   def install

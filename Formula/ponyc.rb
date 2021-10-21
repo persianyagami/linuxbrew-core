@@ -2,15 +2,15 @@ class Ponyc < Formula
   desc "Object-oriented, actor-model, capabilities-secure programming language"
   homepage "https://www.ponylang.org/"
   url "https://github.com/ponylang/ponyc.git",
-      tag:      "0.38.1",
-      revision: "bba16525b41bbe9f05490e80396b935f06b894dc"
+      tag:      "0.44.0",
+      revision: "48084fe40e9f95fa9d87d3782b0cf4acbdd9bca1"
   license "BSD-2-Clause"
 
   bottle do
-    sha256 "fc1a3e92cdf2332a147126ea2ce4031fb6856e3f192152ae11190b29c63e723e" => :catalina
-    sha256 "37cd9f8fe62fddafd4798b991598cffb36a446b4c5d153e6a4dbdf6b79e95713" => :mojave
-    sha256 "299a27feca612c8d5dd6beb65e37ae16d8b259c1f9caedcb5d6b061a30f49dc0" => :high_sierra
-    sha256 "41791f6e763c6bd4ee6dbf4d1f767341e067a854878ef2232921250d2d07499f" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, big_sur:      "cce001435d5e456402444206e379d3542b3d898372514c8b450f1ea235a5be20"
+    sha256 cellar: :any_skip_relocation, catalina:     "0c93b907b614ed0f3fc68d11b91f74e4594e5ffd86896d72f35109988ffff380"
+    sha256 cellar: :any_skip_relocation, mojave:       "e46e8e63c97ba8481300376e641633eef8054f64923b9e40fbaa840de9ada354"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "860054a6c2f82c8f4b583755ba4d9ff4ad33bfaea62d3d3bb20a3116bdba2b2c" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
@@ -20,9 +20,7 @@ class Ponyc < Formula
   def install
     ENV.cxx11
 
-    unless OS.mac?
-      inreplace "CMakeLists.txt", "PONY_COMPILER=\"${CMAKE_C_COMPILER}\"", "PONY_COMPILER=\"/usr/bin/gcc\""
-    end
+    inreplace "CMakeLists.txt", "PONY_COMPILER=\"${CMAKE_C_COMPILER}\"", "PONY_COMPILER=\"#{ENV.cc}\"" if OS.linux?
 
     ENV["MAKEFLAGS"] = "build_flags=-j#{ENV.make_jobs}"
     system "make", "libs"

@@ -2,10 +2,10 @@ class Flux < Formula
   desc "Lightweight scripting language for querying databases"
   homepage "https://www.influxdata.com/products/flux/"
   url "https://github.com/influxdata/flux.git",
-      tag:      "v0.98.0",
-      revision: "c40321a5a49949ec65906064251e419fdee4a2ef"
+      tag:      "v0.128.0",
+      revision: "1883bac5ff6ec06b4004a70f5823d42828b82bc3"
   license "MIT"
-  head "https://github.com/influxdata/flux.git"
+  head "https://github.com/influxdata/flux.git", branch: "master"
 
   livecheck do
     url :stable
@@ -13,38 +13,42 @@ class Flux < Formula
   end
 
   bottle do
-    cellar :any
-    sha256 "367caf1fccf26f51eacae8f3b196b4e1379291eb8319154e7c2975d0c4d7864a" => :big_sur
-    sha256 "9778ae0370bf3af6c75d122fc34cc256c443b375924036dd9010b4300cfdce84" => :catalina
-    sha256 "2020fabfca64466ddc2d60afd7b41c67a33e7c85dddc3a6ff768943ee6cc6568" => :mojave
-    sha256 "cac89e76cf5fbecb76d3d13065c8a6130af6aaf70a8bae656ecb3e72fbd9bc91" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "cab3ad722b4cee4db9869f4de26e312cb58942af958cf7f0173b86bb73284f82"
+    sha256 cellar: :any,                 big_sur:       "0ca5d9b5ec459d3048264e456943909c8df05fd1a156bf304e2d8ff275e8567f"
+    sha256 cellar: :any,                 catalina:      "d2f0b1cf0ae70949964d97d0615bd2ad9fc7085c4bca7a48dc60ad7f67e3ee77"
+    sha256 cellar: :any,                 mojave:        "28923462a1770082cf1db480cbb9ac81eaf26520d1c53064dc395052232b3cb1"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "288b8745164736de8e27adbe2b91cc49206e4d42ba0a7853dd281273247d633a" # linuxbrew-core
   end
 
   depends_on "go" => :build
   depends_on "rust" => :build
 
   on_linux do
-    depends_on "llvm" => :build
     depends_on "pkg-config" => :build
-    depends_on "ragel" => :build
+  end
+
+  # NOTE: The version here is specified in the go.mod of influxdb.
+  # If you're upgrading to a newer influxdb version, check to see if this needs upgraded too.
+  resource "pkg-config-wrapper" do
+    url "https://github.com/influxdata/pkg-config/archive/refs/tags/v0.2.8.tar.gz"
+    sha256 "9d3f3bbcac7c787f6e8846e70172d06bd4d7394b4bcd0b8572fe2f1d03edc11b"
   end
 
   def install
+    # Set up the influxdata pkg-config wrapper to enable just-in-time compilation & linking
+    # of the Rust components in the server.
+    resource("pkg-config-wrapper").stage do
+      system "go", "build", *std_go_args, "-o", buildpath/"bootstrap/pkg-config"
+    end
+    ENV.prepend_path "PATH", buildpath/"bootstrap"
+
     system "make", "build"
-    system "go", "build", "./cmd/flux"
-    bin.install %w[flux]
+    system "go", "build", *std_go_args(ldflags: "-s -w"), "./cmd/flux"
     include.install "libflux/include/influxdata"
-    on_macos do
-      lib.install "libflux/target/x86_64-apple-darwin/release/libflux.dylib"
-      lib.install "libflux/target/x86_64-apple-darwin/release/libflux.a"
-    end
-    on_linux do
-      lib.install "libflux/target/x86_64-unknown-linux-gnu/release/libflux.so"
-      lib.install "libflux/target/x86_64-unknown-linux-gnu/release/libflux.a"
-    end
+    lib.install Dir["libflux/target/*/release/libflux.{dylib,a,so}"]
   end
 
   test do
-    assert_equal "8\n", shell_output("flux execute \"5.0 + 3.0\"")
+    assert_equal "8\n", shell_output(bin/"flux execute \"5.0 + 3.0\"")
   end
 end

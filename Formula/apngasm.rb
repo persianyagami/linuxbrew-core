@@ -4,19 +4,15 @@ class Apngasm < Formula
   url "https://github.com/apngasm/apngasm/archive/3.1.6.tar.gz"
   sha256 "0068e31cd878e07f3dffa4c6afba6242a753dac83b3799470149d2e816c1a2a7"
   license "Zlib"
-  head "https://github.com/apngasm/apngasm.git"
+  revision 3
+  head "https://github.com/apngasm/apngasm.git", branch: "master"
 
   bottle do
-    cellar :any
-    rebuild 1
-    sha256 "9f0a2fd1ce759c8d60e9f31deb74a33ae9714f7391255577fd33eb0d534b3cae" => :big_sur
-    sha256 "48dfe150da3c6f5992d771f4581d39a6a4a9750ae4835d959f6bbc23c03923da" => :catalina
-    sha256 "9385f652fd7fae83e373a823d7cd7b090213f3e6e17d1eee415022a4eb454cf4" => :mojave
-    sha256 "df11f91ea8d27997410b38d42e435b58c34d54dd2bb58a714745ffcfaaacdda2" => :high_sierra
-    sha256 "87cb9f81d1ec12b561e8750d259e27d1d97daa654742fcce032863e0185baf0f" => :sierra
-    sha256 "073f74cacea8907e430113f4aae80d248887fc1d18de36f64889e683c08e3441" => :el_capitan
-    sha256 "5fb1bd67761e2717c78c3842c7effd8835acb5f6193a05516df7cde7ff7051e8" => :yosemite
-    sha256 "124cee4bf9746a9e60882cf6fd5b2430265fc661af5dbe9bab2f85e83e985cfa" => :mavericks
+    sha256 cellar: :any,                 arm64_big_sur: "e7ae49e492cf07670d473742b64ab25103e0e94780181b78173c10b5f5c4fba7"
+    sha256 cellar: :any,                 big_sur:       "d94b80958f9782e98a7bcd7461b22d5239c376d4b1fb26b49bfb9d5c5c25b6e6"
+    sha256 cellar: :any,                 catalina:      "db0dc40f3fd4e8a8b7435da56211356e669b42ba47b8107d0f840777197202cf"
+    sha256 cellar: :any,                 mojave:        "569b760c848add596a639397ebe63f631e2ad3faabd1fa77ea6609f24f240e2f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "fd723c581739c21323fcba6aaf920532144aac609a0f7b30d124fc69f0487d9c" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
@@ -27,8 +23,11 @@ class Apngasm < Formula
   def install
     inreplace "cli/CMakeLists.txt", "${CMAKE_INSTALL_PREFIX}/man/man1",
                                     "${CMAKE_INSTALL_PREFIX}/share/man/man1"
-    system "cmake", ".", *std_cmake_args
-    system "make", "install"
+    mkdir "build" do
+      ENV.cxx11
+      system "cmake", "..", *std_cmake_args
+      system "make", "install"
+    end
     (pkgshare/"test").install "test/samples"
   end
 

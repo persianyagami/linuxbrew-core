@@ -1,17 +1,17 @@
 class Ejdb < Formula
   desc "Embeddable JSON Database engine C11 library"
   homepage "https://ejdb.org"
-  url "https://github.com/Softmotions/ejdb/archive/v2.0.56.tar.gz"
-  sha256 "48ceaf95702eef26ba3d74b10deaa0cd4b97646b8848aada7e12cc09315c3f7a"
+  url "https://github.com/Softmotions/ejdb/archive/v2.61.tar.gz"
+  sha256 "8b0880f0c267a4a10b07eb3fde06871167864198589d615343dd3beaf9a2f972"
   license "MIT"
   head "https://github.com/Softmotions/ejdb.git"
 
   bottle do
-    cellar :any
-    sha256 "d70a54a6b50d6b2d1e658604d325706f0003827234f258ed51f641802d1b9e90" => :big_sur
-    sha256 "f4a56b836509c301fa3b2b258334f1e6f245fcff740bf60c38167bee0f59a7e5" => :catalina
-    sha256 "d3706d7d52d29d2768bfebf65222d816bcaea7eabe4d4048842134de552d0785" => :mojave
-    sha256 "00fc930b995fedadf41cae17024c5edecd52d17ee9e9eaf7fbc3b2f29d1bf873" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "dc8b457b1eb0935776d6b2ecc9d0f2ff54a37c4512865e2edd645bc47dd7fc82"
+    sha256 cellar: :any,                 big_sur:       "643fb65248e8195d24a75295ec2229c19d6a3aa0cadf9e1270bbbf033171d5c9"
+    sha256 cellar: :any,                 catalina:      "7effbf0d5d8de63bd886f964a62c742dc4edeaf6f4c79ccdfb436f13604bf9ce"
+    sha256 cellar: :any,                 mojave:        "57add67ccf732e856325adbc945c8626addaac15418a0ff25e2401f720ca2034"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2b2484442f718d508c787e0449437bc3210126c05b864612f369476ae63b3373" # linuxbrew-core
   end
 
   depends_on "cmake" => :build

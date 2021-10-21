@@ -1,22 +1,18 @@
 class Subversion < Formula
   desc "Version control system designed to be a better CVS"
   homepage "https://subversion.apache.org/"
-  url "https://www.apache.org/dyn/closer.lua?path=subversion/subversion-1.14.0.tar.bz2"
-  mirror "https://archive.apache.org/dist/subversion/subversion-1.14.0.tar.bz2"
-  sha256 "6ba8e218f9f97a83a799e58a3c6da1221d034b18d9d8cbbcb6ec52ab11722102"
+  url "https://www.apache.org/dyn/closer.lua?path=subversion/subversion-1.14.1.tar.bz2"
+  mirror "https://archive.apache.org/dist/subversion/subversion-1.14.1.tar.bz2"
+  sha256 "2c5da93c255d2e5569fa91d92457fdb65396b0666fad4fd59b22e154d986e1a9"
   license "Apache-2.0"
-  revision 6
-
-  livecheck do
-    url :stable
-  end
+  revision 4
 
   bottle do
-    sha256 "1b9eb020913cf0e9ba84fdd6961733b60bb39c55e8e6b96d0190a51152ecde99" => :big_sur
-    sha256 "a077210ae884ac59170e51a4ff0566f9576f0a42f772effd4860b92e7ff5150e" => :catalina
-    sha256 "fbb5d261fae9924f357aecde6f7624712709bda2fd7403dc80f9e88fc4b017c0" => :mojave
-    sha256 "352b4a47df3cafc0171ba56f1a157ff375cab54ce10278abbcf98c1ca2408999" => :high_sierra
-    sha256 "2164d65df0104ae9c09bdd0827ab9ed685e16ccb92f8c023bf0716234137c681" => :x86_64_linux
+    sha256 arm64_big_sur: "34f8d1862f1480c068ff3798c8e1cd90f833b43c33d1731aca15f1d875b16834"
+    sha256 big_sur:       "cfb18266b350bbe5cf81a02d1a27c33da8df832094e366925a50ef7664aba384"
+    sha256 catalina:      "92ef7547ff26e327ac5bd0a544d850e4ca7872493747eecf2220ecf5be0a13bd"
+    sha256 mojave:        "17b0bd35f345453c1401d1c390393525bacaf9f8a767cce31c1f1cb5241e1b17"
+    sha256 x86_64_linux:  "d1a186064376f7acc604b9d447bc91c31deb9a5c35ef51f4e7717644bed9fd47" # linuxbrew-core
   end
 
   head do
@@ -27,8 +23,7 @@ class Subversion < Formula
     depends_on "gettext" => :build
   end
 
-  # Do not build java bindings on ARM as openjdk is not available
-  depends_on "openjdk" => :build if Hardware::CPU.intel?
+  depends_on "openjdk" => :build
   depends_on "pkg-config" => :build
   depends_on "python@3.9" => :build
   depends_on "scons" => :build # For Serf
@@ -37,20 +32,27 @@ class Subversion < Formula
   depends_on "apr-util"
 
   # build against Homebrew versions of
-  # gettext, lz4, perl, sqlite and utf8proc for consistency
+  # gettext, lz4 and utf8proc for consistency
   depends_on "gettext"
   depends_on "lz4"
   depends_on "openssl@1.1" # For Serf
-  depends_on "perl"
-  depends_on "sqlite"
   depends_on "utf8proc"
-
-  depends_on "libtool" unless OS.mac?
 
   uses_from_macos "expat"
   uses_from_macos "krb5"
+  uses_from_macos "perl"
   uses_from_macos "ruby"
+  uses_from_macos "sqlite"
   uses_from_macos "zlib"
+
+  on_macos do
+    # Prevent "-arch ppc" from being pulled in from Perl's $Config{ccflags}
+    patch :DATA
+  end
+
+  on_linux do
+    depends_on "libtool"
+  end
 
   resource "py3c" do
     url "https://github.com/encukou/py3c/archive/v1.1.tar.gz"
@@ -63,53 +65,75 @@ class Subversion < Formula
     sha256 "549c2d21c577a8a9c0450facb5cca809f26591f048e466552240947bdf7a87cc"
   end
 
-  # Prevent "-arch ppc" from being pulled in from Perl's $Config{ccflags}
-  # Prevent linking into a Python Framework
-  patch :DATA if OS.mac?
-
   def install
     py3c_prefix = buildpath/"py3c"
     serf_prefix = libexec/"serf"
 
     resource("py3c").unpack py3c_prefix
     resource("serf").stage do
-      unless OS.mac?
+      if OS.linux?
         inreplace "SConstruct" do |s|
           s.gsub! "env.Append(LIBPATH=['$OPENSSL\/lib'])",
           "\\1\nenv.Append(CPPPATH=['$ZLIB\/include'])\nenv.Append(LIBPATH=['$ZLIB/lib'])"
         end
-        inreplace "SConstruct" do |s|
-          s.gsub! "print 'Warning: Used unknown variables:', ', '.join(unknown.keys())",
-          "print('Warning: Used unknown variables:', ', '.join(unknown.keys()))"
-          s.gsub! "match = re.search('SERF_MAJOR_VERSION ([0-9]+).*'",
-          "match = re.search(b'SERF_MAJOR_VERSION ([0-9]+).*'"
-          s.gsub! "'SERF_MINOR_VERSION ([0-9]+).*'",
-          "b'SERF_MINOR_VERSION ([0-9]+).*'"
-          s.gsub! "'SERF_PATCH_VERSION ([0-9]+)'",
-          "b'SERF_PATCH_VERSION ([0-9]+)'"
-        end
       end
+
+      inreplace "SConstruct" do |s|
+        s.gsub! "print 'Warning: Used unknown variables:', ', '.join(unknown.keys())",
+        "print('Warning: Used unknown variables:', ', '.join(unknown.keys()))"
+        s.gsub! "match = re.search('SERF_MAJOR_VERSION ([0-9]+).*'",
+        "match = re.search(b'SERF_MAJOR_VERSION ([0-9]+).*'"
+        s.gsub! "'SERF_MINOR_VERSION ([0-9]+).*'",
+        "b'SERF_MINOR_VERSION ([0-9]+).*'"
+        s.gsub! "'SERF_PATCH_VERSION ([0-9]+)'",
+        "b'SERF_PATCH_VERSION ([0-9]+)'"
+      end
+
       # scons ignores our compiler and flags unless explicitly passed
+      krb5 = if OS.mac?
+        "/usr"
+      else
+        Formula["krb5"].opt_prefix
+      end
+
       args = %W[
-        PREFIX=#{serf_prefix} GSSAPI=#{Formula["krb5"].opt_prefix} CC=#{ENV.cc}
+        PREFIX=#{serf_prefix} GSSAPI=#{krb5} CC=#{ENV.cc}
         CFLAGS=#{ENV.cflags} LINKFLAGS=#{ENV.ldflags}
         OPENSSL=#{Formula["openssl@1.1"].opt_prefix}
         APR=#{Formula["apr"].opt_prefix}
         APU=#{Formula["apr-util"].opt_prefix}
-        ZLIB=#{Formula["zlib"].opt_prefix}
       ]
+
+      args << "ZLIB=#{Formula["zlib"].opt_prefix}" if OS.linux?
+
       system "scons", *args
       system "scons", "install"
     end
 
-    # svn can't find libserf-1.so.1 at runtime without this
-    ENV.append "LDFLAGS", "-Wl,-rpath=#{serf_prefix}/lib" unless OS.mac?
+    # Use existing system zlib and sqlite
+    if OS.linux?
+      # svn can't find libserf-1.so.1 at runtime without this
+      ENV.append "LDFLAGS", "-Wl,-rpath=#{serf_prefix}/lib"
+    end
 
-    # Use existing system zlib
     # Use dep-provided other libraries
     # Don't mess with Apache modules (since we're not sudo)
-    zlib = OS.mac? ? "#{MacOS.sdk_path_if_needed}/usr" : Formula["zlib"].opt_prefix
-    ruby = OS.mac? ? "/usr/bin/ruby" : "#{Formula["ruby"].opt_bin}/ruby"
+    zlib = if OS.mac?
+      "#{MacOS.sdk_path_if_needed}/usr"
+    else
+      Formula["zlib"].opt_prefix
+    end
+
+    perl = DevelopmentTools.locate("perl")
+
+    ruby = DevelopmentTools.locate("ruby")
+
+    sqlite = if OS.mac?
+      "#{MacOS.sdk_path_if_needed}/usr"
+    else
+      Formula["sqlite"].opt_prefix
+    end
+
     args = %W[
       --prefix=#{prefix}
       --disable-debug
@@ -119,22 +143,22 @@ class Subversion < Formula
       --with-apr-util=#{Formula["apr-util"].opt_prefix}
       --with-apr=#{Formula["apr"].opt_prefix}
       --with-apxs=no
+      --with-jdk=#{Formula["openjdk"].opt_prefix}
       --with-ruby-sitedir=#{lib}/ruby
       --with-py3c=#{py3c_prefix}
       --with-serf=#{serf_prefix}
-      --with-sqlite=#{Formula["sqlite"].opt_prefix}
+      --with-sqlite=#{sqlite}
       --with-swig=#{Formula["swig"].opt_prefix}
       --with-zlib=#{zlib}
       --without-apache-libexecdir
       --without-berkeley-db
       --without-gpg-agent
+      --enable-javahl
       --without-jikes
-      PYTHON=#{Formula["python@3.8"].opt_bin}/python3
+      PERL=#{perl}
+      PYTHON=#{Formula["python@3.9"].opt_bin}/python3
       RUBY=#{ruby}
     ]
-
-    # Do not build java bindings on ARM as openjdk is not available
-    args << "--with-jdk=#{Formula["openjdk"].opt_prefix}" << "--enable-javahl" if Hardware::CPU.intel?
 
     inreplace "Makefile.in",
               "toolsdir = @bindir@/svn-tools",
@@ -154,22 +178,29 @@ class Subversion < Formula
     system "make", "install-swig-py"
     (lib/"python3.9/site-packages").install_symlink Dir["#{lib}/svn-python/*"]
 
-    if Hardware::CPU.intel?
-      # Java and Perl support don't build correctly in parallel:
-      # https://github.com/Homebrew/homebrew/issues/20415
-      ENV.deparallelize
-      system "make", "javahl"
-      system "make", "install-javahl"
+    # Java and Perl support don't build correctly in parallel:
+    # https://github.com/Homebrew/homebrew/issues/20415
+    ENV.deparallelize
+    system "make", "javahl"
+    system "make", "install-javahl"
+
+    perl_archlib = Utils.safe_popen_read(perl.to_s, "-MConfig", "-e", "print $Config{archlib}")
+    perl_core = Pathname.new(perl_archlib)/"CORE"
+    perl_extern_h = perl_core/"EXTERN.h"
+
+    unless perl_extern_h.exist?
+      # No EXTERN.h, maybe it's system perl
+      perl_version = Utils.safe_popen_read(perl.to_s, "--version")[/v(\d+\.\d+)(?:\.\d+)?/, 1]
+      perl_core = MacOS.sdk_path/"System/Library/Perl"/perl_version/"darwin-thread-multi-2level/CORE"
+      perl_extern_h = perl_core/"EXTERN.h"
     end
 
-    archlib = Utils.safe_popen_read("perl", "-MConfig", "-e", "print $Config{archlib}")
-    perl_core = Pathname.new(archlib)/"CORE"
-    onoe "'#{perl_core}' does not exist" unless perl_core.exist?
+    onoe "'#{perl_extern_h}' does not exist" unless perl_extern_h.exist?
 
     if OS.mac?
       inreplace "Makefile" do |s|
         s.change_make_var! "SWIG_PL_INCLUDES",
-          "$(SWIG_INCLUDES) -arch x86_64 -g -pipe -fno-common " \
+          "$(SWIG_INCLUDES) -arch #{Hardware::CPU.arch} -g -pipe -fno-common " \
           "-DPERL_DARWIN -fno-strict-aliasing -I#{HOMEBREW_PREFIX}/include -I#{perl_core}"
       end
     end
@@ -200,7 +231,18 @@ class Subversion < Formula
   test do
     system "#{bin}/svnadmin", "create", "test"
     system "#{bin}/svnadmin", "verify", "test"
-    system "perl", "-e", "use SVN::Client; new SVN::Client()"
+
+    platform = if OS.mac?
+      "darwin-thread-multi-2level"
+    else
+      "#{Hardware::CPU.arch}-#{OS.kernel_name.downcase}-thread-multi"
+    end
+
+    perl = DevelopmentTools.locate("perl")
+
+    perl_version = Utils.safe_popen_read(perl.to_s, "--version")[/v(\d+\.\d+(?:\.\d+)?)/, 1]
+    ENV["PERL5LIB"] = "#{lib}/perl5/site_perl/#{perl_version}/#{platform}"
+    system perl, "-e", "use SVN::Client; new SVN::Client()"
   end
 end
 

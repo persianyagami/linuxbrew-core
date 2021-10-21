@@ -4,30 +4,30 @@ class Dmd < Formula
   license "BSL-1.0"
 
   stable do
-    url "https://github.com/dlang/dmd/archive/v2.094.2.tar.gz"
-    sha256 "0f7406cf45b5fb36f2ec8cc4454398302f0131853b6ff1c9d4c8133d0dc5904a"
+    url "https://github.com/dlang/dmd/archive/v2.098.0.tar.gz"
+    sha256 "437e7abae7f747ce8a027e512d2f98f0c27badd623347141c3f6fb0834d85ad0"
 
     resource "druntime" do
-      url "https://github.com/dlang/druntime/archive/v2.094.2.tar.gz"
-      sha256 "e0872190136cafe0c4c78ebc8750759eabf43f5af714c5619f4499ae3385a6e7"
+      url "https://github.com/dlang/druntime/archive/v2.098.0.tar.gz"
+      sha256 "f150400756c7940bc9d67a3ed7f89777e49b42a1ef2dff6f40727f83b3cea6f4"
     end
 
     resource "phobos" do
-      url "https://github.com/dlang/phobos/archive/v2.094.2.tar.gz"
-      sha256 "efc9fe827a480521df2a9391170d733320b0d78ae679592821d551fd76968801"
+      url "https://github.com/dlang/phobos/archive/v2.098.0.tar.gz"
+      sha256 "f91c6c7f2d5683af2804a183c287bf6991b99c49692759d7844e1919ca59e974"
     end
 
     resource "tools" do
-      url "https://github.com/dlang/tools/archive/v2.094.2.tar.gz"
-      sha256 "eed24c4b10035d52e4de6edf48199b8310c01e2d51e369562e7e3445eeea8574"
+      url "https://github.com/dlang/tools/archive/v2.098.0.tar.gz"
+      sha256 "9466e62ed2cf80802158524fc4e7ff80cbefc0fadff23a8933f6f2892b42cb56"
     end
   end
 
   bottle do
-    sha256 "2e9456d05fbcda78e4b2a7dbd56ba423a36ff06b754c80a15c4a1b483ed484bd" => :big_sur
-    sha256 "4524e9544890a56bcac7adf0928f91fc918c438d6a174fe4c97d7808c4b80412" => :catalina
-    sha256 "7a8683ad4e9c67dbcd9f0851ae677649150620d1a167a9901ec1bab69f941581" => :mojave
-    sha256 "a45402fe0eb8220543b0a5790b78628a9393ae6b640f4db22fb796f61a476f29" => :x86_64_linux
+    sha256 big_sur:      "b2c95835a1295b25169b3e96eacfddc479cd24efc6d58285e42a1436c2b097ce"
+    sha256 catalina:     "ec5dec4305424b179a815a4d15a8f85591bfb73d5cc92ca34b4ada0f05c34743"
+    sha256 mojave:       "82a178b02a4001d6a7f0e466d33bc6479be456b27bd29b124973164a164fde5f"
+    sha256 x86_64_linux: "dbbf394c29aabaa3f257846061ea34e465ed628cf8d8a2ea730ebf6575ac987e" # linuxbrew-core
   end
 
   head do
@@ -45,6 +45,8 @@ class Dmd < Formula
       url "https://github.com/dlang/tools.git"
     end
   end
+
+  depends_on arch: :x86_64
 
   uses_from_macos "unzip" => :build
   uses_from_macos "xz" => :build
@@ -82,10 +84,9 @@ class Dmd < Formula
       system "make", "install", *make_args
     end
 
-    on_macos do
+    if OS.mac?
       bin.install "generated/osx/release/64/dmd"
-    end
-    on_linux do
+    else
       bin.install "generated/linux/release/64/dmd"
     end
     pkgshare.install "samples"

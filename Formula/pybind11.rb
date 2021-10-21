@@ -1,28 +1,49 @@
 class Pybind11 < Formula
   desc "Seamless operability between C++11 and Python"
   homepage "https://github.com/pybind/pybind11"
-  url "https://github.com/pybind/pybind11/archive/v2.6.1.tar.gz"
-  sha256 "cdbe326d357f18b83d10322ba202d69f11b2f49e2d87ade0dc2be0c5c34f8e2a"
+  url "https://github.com/pybind/pybind11/archive/v2.8.0.tar.gz"
+  sha256 "9ca7770fc5453b10b00a4a2f99754d7a29af8952330be5f5602e7c2635fa3e79"
   license "BSD-3-Clause"
+  revision 1
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "2f8d6a8a4ec4e2d35ed5926f56d49e0a3c1a3a853f16f1fe266e4cb25673a2c9" => :big_sur
-    sha256 "a65ec879104470206955784e0715d9188fd2f3848dcd88714e094313ab8305de" => :catalina
-    sha256 "122967134526009627cf8648d4181f4a7e06688d5b74ffa0a2767abeeb54e091" => :mojave
-    sha256 "2128187d3a45fbb3dfe2426b8e974ad15a07942a17ae07c09a52f07482b11bdf" => :high_sierra
-    sha256 "8f6291fa8fa9b0a3285c4dd70f96c2d9f1214496ea228f410acd9036259468a1" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "2b7261c0bd9680888ad093a8299d6ab8d18358717fa3d62a45ac4e9554b1982a" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
-  depends_on "python@3.9" => :test
+  depends_on "python@3.10" => [:build, :test]
+  depends_on "python@3.8" => [:build, :test]
+  depends_on "python@3.9" => [:build, :test]
+
+  def pythons
+    deps.map(&:to_formula)
+        .select { |f| f.name.match?(/^python@3\.\d+$/) }
+  end
 
   def install
+    # Install /include and /share/cmake to the global location
     system "cmake", "-S", ".", "-B", "build",
            "-DPYBIND11_TEST=OFF",
            "-DPYBIND11_NOPYTHON=ON",
            *std_cmake_args
     system "cmake", "--install", "build"
+
+    pythons.each do |python|
+      # Install Python package too
+      system python.opt_bin/"python3", *Language::Python.setup_install_args(libexec)
+
+      pyversion = Language::Python.major_minor_version python.opt_bin/"python3"
+      site_packages = Language::Python.site_packages python.opt_bin/"python3"
+      pth_contents = "import site; site.addsitedir('#{libexec/site_packages}')\n"
+      (prefix/site_packages/"homebrew-pybind11.pth").write pth_contents
+
+      bin.install libexec/"bin/pybind11-config" => "pybind11-config-#{pyversion}"
+
+      next unless python == pythons.max_by(&:version)
+
+      # The newest one is used as the default
+      bin.install_symlink "pybind11-config-#{pyversion}" => "pybind11-config"
+    end
   end
 
   test do
@@ -44,9 +65,25 @@ class Pybind11 < Formula
       example.add(1,2)
     EOS
 
-    python_flags = `#{Formula["python@3.9"].opt_bin}/python3-config --cflags --ldflags --embed`.split(" ")
-    system ENV.cxx, "-O3", "-shared", "-std=c++11",
-           *python_flags, *("-fPIC" unless OS.mac?), "example.cpp", "-o", "example.so"
-    system Formula["python@3.9"].opt_bin/"python3", "example.py"
+    pythons.each do |python|
+      pyversion = Language::Python.major_minor_version python.opt_bin/"python3"
+      site_packages = Language::Python.site_packages python.opt_bin/"python3"
+
+      python_flags = Utils.safe_popen_read(python.opt_bin/"python3-config", "--cflags", "--ldflags", "--embed").split
+      system ENV.cxx, "-shared", "-fPIC", "-O3", "-std=c++11", "example.cpp", "-o", "example.so", *python_flags
+      system python.opt_bin/"python3", "example.py"
+
+      test_module = shell_output("#{python.opt_bin}/python3 -m pybind11 --includes")
+      assert_match (libexec/site_packages).to_s, test_module
+
+      test_script = shell_output("#{opt_bin}/pybind11-config-#{pyversion} --includes")
+      assert_match test_module, test_script
+
+      next unless python == pythons.max_by(&:version)
+
+      test_module = shell_output("#{python.opt_bin}/python3 -m pybind11 --includes")
+      test_script = shell_output("#{opt_bin}/pybind11-config --includes")
+      assert_match test_module, test_script
+    end
   end
 end

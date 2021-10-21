@@ -1,8 +1,8 @@
 class Prometheus < Formula
   desc "Service monitoring system and time series database"
   homepage "https://prometheus.io/"
-  url "https://github.com/prometheus/prometheus/archive/v2.23.0.tar.gz"
-  sha256 "7ef1d61052fe3dace20b89ab287a6a0e835f8f111ab41584aa39b80f6093842b"
+  url "https://github.com/prometheus/prometheus/archive/v2.30.3.tar.gz"
+  sha256 "66a835096e717c11db2ecb5f948c6346868fa1f877196ee2237fb4630df97c06"
   license "Apache-2.0"
 
   livecheck do
@@ -11,11 +11,11 @@ class Prometheus < Formula
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "f75a66655f20ee1ac62e72fab79d1576e4a3b0f56e51cb177d00217301c05676" => :big_sur
-    sha256 "2ff193125d103e3f439e923ba04a083e39aed9a53eec2243bc015faa42c2678c" => :catalina
-    sha256 "b2b1b555942c57c7fe16f093094a27981eb1e727086fcd4d8839fb059f8c989c" => :mojave
-    sha256 "09374d765bbcaf1825c73ccc5502367ebf4dca1b0d4a0deefc30eed1337a0719" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "97621b99e959e16419b9539bf7162a1fda9367580da427a8533a3e9e74cf3de9"
+    sha256 cellar: :any_skip_relocation, big_sur:       "df45f718948efe0c8aac092333b79151aa9652b5927c2127c542cd40067f068d"
+    sha256 cellar: :any_skip_relocation, catalina:      "16b43830daf9666454eef51b71b190295ef777abc4c0f736147d1ffa44f9301c"
+    sha256 cellar: :any_skip_relocation, mojave:        "d4a48002a602a51a97a5a30206986979a6ff6bf751963d939ce706f3e4ff05d5"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4aced2a641605885f7373fc44bd702fd42f080aac6e1615bb575e734a83bbf8a" # linuxbrew-core
   end
 
   depends_on "go" => :build
@@ -23,6 +23,8 @@ class Prometheus < Formula
   depends_on "yarn" => :build
 
   def install
+    ENV.deparallelize
+    ENV.prepend_path "PATH", Formula["node"].opt_libexec/"bin"
     mkdir_p buildpath/"src/github.com/prometheus"
     ln_sf buildpath, buildpath/"src/github.com/prometheus/prometheus"
 
@@ -62,31 +64,11 @@ class Prometheus < Formula
     EOS
   end
 
-  plist_options manual: "prometheus --config.file=#{HOMEBREW_PREFIX}/etc/prometheus.yml"
-
-  def plist
-    <<~EOS
-      <?xml version="1.0" encoding="UTF-8"?>
-        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-        <plist version="1.0">
-        <dict>
-          <key>Label</key>
-          <string>#{plist_name}</string>
-          <key>ProgramArguments</key>
-          <array>
-            <string>#{opt_bin}/prometheus_brew_services</string>
-          </array>
-          <key>RunAtLoad</key>
-          <true/>
-          <key>KeepAlive</key>
-          <false/>
-          <key>StandardErrorPath</key>
-          <string>#{var}/log/prometheus.err.log</string>
-          <key>StandardOutPath</key>
-          <string>#{var}/log/prometheus.log</string>
-        </dict>
-      </plist>
-    EOS
+  service do
+    run [opt_bin/"prometheus_brew_services"]
+    keep_alive false
+    log_path var/"log/prometheus.log"
+    error_log_path var/"log/prometheus.err.log"
   end
 
   test do

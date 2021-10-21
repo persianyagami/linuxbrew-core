@@ -1,37 +1,46 @@
 class Bpytop < Formula
   include Language::Python::Virtualenv
+  include Language::Python::Shebang
 
   desc "Linux/OSX/FreeBSD resource monitor"
   homepage "https://github.com/aristocratos/bpytop"
-  url "https://files.pythonhosted.org/packages/ba/df/8d73c1134944116f96cd13cb82bf0295e0d1832450b783b023764b00d5a1/bpytop-1.0.50.tar.gz"
-  sha256 "0a06b621d77b7b7223cef6421f6ceb04da4bfce20836d1c473ebfaa89dc1c838"
+  url "https://github.com/aristocratos/bpytop/archive/v1.0.67.tar.gz"
+  sha256 "e3f0267bd40a58016b5ac81ed6424f1c8d953b33a537546b22dd1a2b01b07a97"
   license "Apache-2.0"
+  revision 2
 
   bottle do
-    cellar :any_skip_relocation
-    rebuild 1
-    sha256 "2b1f3d2ed30ceb229ad0dd2cdb438b2f050291aa386e057d6edcda8550e060d1" => :big_sur
-    sha256 "63678217e7a4aa2f9952c2dff52a02e3a07728e1010540a5b7a1fda71537c2ac" => :catalina
-    sha256 "d2d8be76d473030d004f1ade5b386e6e02bb565493259dece438003d817f6553" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "9d29bed4df3651ba795552146d0082d3e7ed6f0e08ff913bd25a40d0666367fa"
+    sha256 cellar: :any_skip_relocation, big_sur:       "a9124b39222c6cad1fc9f9d55c193f1ba34e26611cb1d9cb82b01834e6008643"
+    sha256 cellar: :any_skip_relocation, catalina:      "6c53a6e4e1beffda773d8f98c8ffe1f971d5a2edf90bf91b6f93db4491e61f26"
+    sha256 cellar: :any_skip_relocation, mojave:        "ba84fab69b931ddb11536521357b40c669ddc1d562d414cb524bcd11251c6fc3"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "87ef5047c7a8082a5fe12a5aaf24d410fd9eb8e7bd1c01aa807cbf488d86a4cf" # linuxbrew-core
   end
 
-  depends_on "python@3.9"
+  depends_on "python@3.10"
   on_macos do
     depends_on "osx-cpu-temp"
   end
 
   resource "psutil" do
-    url "https://files.pythonhosted.org/packages/33/e0/82d459af36bda999f82c7ea86c67610591cf5556168f48fd6509e5fa154d/psutil-5.7.3.tar.gz"
-    sha256 "af73f7bcebdc538eda9cc81d19db1db7bf26f103f91081d780bbacfcb620dee2"
+    url "https://files.pythonhosted.org/packages/e1/b0/7276de53321c12981717490516b7e612364f2cb372ee8901bd4a66a000d7/psutil-5.8.0.tar.gz"
+    sha256 "0c9ccb99ab76025f2f0bbecf341d4656e9c1351db8cc8a03ccd62e318ab4b5c6"
   end
 
   def install
-    virtualenv_install_with_resources
-    pkgshare.install "bpytop-themes" => "themes"
+    venv = virtualenv_create(libexec, "python3")
+    venv.pip_install resources
+    system "make", "install", "PREFIX=#{prefix}"
+    pkgshare.install "themes"
+
+    # Replace shebang with virtualenv python
+    rw_info = python_shebang_rewrite_info("#{libexec}/bin/python")
+    rewrite_shebang rw_info, bin/"bpytop"
   end
 
   test do
     config = (testpath/".config/bpytop")
+    mkdir config/"themes"
     (config/"bpytop.conf").write <<~EOS
       #? Config file for bpytop v. #{version}
 
@@ -49,7 +58,7 @@ class Bpytop < Formula
 
     log = (config/"error.log").read
     assert_match "bpytop version #{version} started with pid #{pid}", log
-    assert_not_match /ERROR:/, log
+    refute_match(/ERROR:/, log)
   ensure
     Process.kill("TERM", pid)
   end

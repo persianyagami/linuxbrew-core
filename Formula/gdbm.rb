@@ -1,27 +1,25 @@
 class Gdbm < Formula
   desc "GNU database manager"
   homepage "https://www.gnu.org/software/gdbm/"
-  url "https://ftp.gnu.org/gnu/gdbm/gdbm-1.18.1.tar.gz"
-  mirror "https://ftpmirror.gnu.org/gdbm/gdbm-1.18.1.tar.gz"
-  sha256 "86e613527e5dba544e73208f42b78b7c022d4fa5a6d5498bf18c8d6f745b91dc"
-  license "GPL-3.0"
+  url "https://ftp.gnu.org/gnu/gdbm/gdbm-1.21.tar.gz"
+  mirror "https://ftpmirror.gnu.org/gdbm/gdbm-1.21.tar.gz"
+  sha256 "b0b7dbdefd798de7ddccdd8edf6693a30494f7789777838042991ef107339cc2"
+  license "GPL-3.0-or-later"
   revision 1
 
-  livecheck do
-    url :stable
-  end
-
   bottle do
-    sha256 "36b492f1b0910367dd394cbdcffe1606f64ab41ec6701210becfb591a8557dee" => :big_sur
-    sha256 "d5ae1727d7a669559f4f9333d165006ee5d2d7282a3e3a7aa1a28fddcdac6da2" => :arm64_big_sur
-    sha256 "f7b5ab7363961fa6defcb66b4ffdf5365264fcb97d35bc413e754f173a3b1912" => :catalina
-    sha256 "0f65874bcd50d31aaf8b2e6c8ef414cb65a8d8b9eb6d1fa4ef179c6e0a94983c" => :mojave
-    sha256 "4a644af2fcc2781c3a161209deff7b62d760058bc1bac7c4f91a5ce5738f0798" => :high_sierra
-    sha256 "dd00a26fa20413f81477af032587de19bb620eef352a6d8dd3d9c3a176f6bd5a" => :x86_64_linux
+    sha256 cellar: :any, arm64_big_sur: "fd3c1830264b732ad953e0ec41dd8325ac3c07fc8bf3b8a55a968f4f8947ecc5"
+    sha256 cellar: :any, big_sur:       "a0390a4a2b661b19ca7ef9736aea3df13afda10d13600d7a7e25e0686f97a4d6"
+    sha256 cellar: :any, catalina:      "5037ab5bfdebab730434d93c09ac44a19194edb49fabc25563736695aa2bc309"
+    sha256 cellar: :any, mojave:        "fbe153ad0a746da6ee2dcadb81f6db06bd226945cfa71c61f9215944fa60971b"
+    sha256               x86_64_linux:  "9be34c0de7f42af7b6837a3d0e13bb6e0857bdee1e1e6020b805365c8b41070f" # linuxbrew-core
   end
 
-  fails_with gcc: "10" do
-    cause "multiple definition of parseopt_program_doc"
+  # Fix build failure on macOS. Merged upstream as
+  # https://git.gnu.org.ua/gdbm.git/commit/?id=32517af75ac8c32b3ff4870e14ff28418696c554
+  patch :p0 do
+    url "https://raw.githubusercontent.com/Homebrew/formula-patches/ad16d309923dd7839d239e05c7fdd86d9b6e5207/gdbm/fix-st_mtim.diff"
+    sha256 "09813e4a01a74fb1c510abbd98abd53c18f5dfb4e66475969f4b173b4ff96935"
   end
 
   # --enable-libgdbm-compat for dbm.h / gdbm-ndbm.h compatibility:
@@ -48,6 +46,6 @@ class Gdbm < Formula
   test do
     pipe_output("#{bin}/gdbmtool --norc --newdb test", "store 1 2\nquit\n")
     assert_predicate testpath/"test", :exist?
-    assert_match /2/, pipe_output("#{bin}/gdbmtool --norc test", "fetch 1\nquit\n")
+    assert_match "2", pipe_output("#{bin}/gdbmtool --norc test", "fetch 1\nquit\n")
   end
 end

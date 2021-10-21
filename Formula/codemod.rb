@@ -6,24 +6,21 @@ class Codemod < Formula
   url "https://files.pythonhosted.org/packages/9b/e3/cb31bfcf14f976060ea7b7f34135ebc796cde65eba923f6a0c4b71f15cc2/codemod-1.0.0.tar.gz"
   sha256 "06e8c75f2b45210dd8270e30a6a88ae464b39abd6d0cab58a3d7bfd1c094e588"
   license "Apache-2.0"
-  revision OS.mac? ? 4 : 5
+  revision OS.mac? ? 5 : 6
   version_scheme 1
-  head "https://github.com/facebook/codemod.git"
-
-  livecheck do
-    url :stable
-  end
+  head "https://github.com/facebook/codemod.git", branch: "master"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "66c432f6fc86bd65b2596215ac6e8a30bb813c70cf9585783a564c06e075a72f" => :big_sur
-    sha256 "e0a2e42e92636a4b0ccb54fdfa45ca5e73870315357d57c5c673d7710e3ffb7a" => :catalina
-    sha256 "07b7c3807d776ca2991a321f32846a9613d0af356f69482f2653a5c30b7304df" => :mojave
-    sha256 "b7b6b35729c1e0e990f4dc2d09c197d6c07cd8fbdacaa3d81decfe16e8856cb3" => :high_sierra
-    sha256 "76f441b50d78411faa44ddfaa082e3d04b96bbcc20dc9f44ca6510227b5c1fde" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "fcf3de80ebdad83809c2f691f5fdcf8f07a395c55cee6fa9cc332a0847eead33"
+    sha256 cellar: :any_skip_relocation, big_sur:       "b23035b282c74a9394e85d9a0223b1ddb677151c134da0468ad0713ab3658e7e"
+    sha256 cellar: :any_skip_relocation, catalina:      "b23035b282c74a9394e85d9a0223b1ddb677151c134da0468ad0713ab3658e7e"
+    sha256 cellar: :any_skip_relocation, mojave:        "b23035b282c74a9394e85d9a0223b1ddb677151c134da0468ad0713ab3658e7e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0114d4c09511fe3f16378656b723f73ee8936d0660c85ef72311e11d1bd09c66" # linuxbrew-core
   end
 
-  depends_on "python@3.9"
+  deprecate! date: "2021-07-13", because: :repo_archived
+
+  depends_on "python@3.10"
 
   def install
     virtualenv_install_with_resources

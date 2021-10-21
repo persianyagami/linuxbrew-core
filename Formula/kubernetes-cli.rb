@@ -2,26 +2,27 @@ class KubernetesCli < Formula
   desc "Kubernetes command-line interface"
   homepage "https://kubernetes.io/"
   url "https://github.com/kubernetes/kubernetes.git",
-      tag:      "v1.19.4",
-      revision: "d360454c9bcd1634cf4cc52d1867af5491dc9c5f"
+      tag:      "v1.22.2",
+      revision: "8b5a19147530eaac9476b0ab82980b4088bbc1b2"
   license "Apache-2.0"
   head "https://github.com/kubernetes/kubernetes.git"
 
   livecheck do
-    url :head
-    regex(/^v([\d.]+)$/i)
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "fc37b7498498b8c56ad659f51ca8360be611bd82438d35e835c13804520d641d" => :big_sur
-    sha256 "6cd5a2595db0b35e4ad8a317ab2dd2b6876d7f5568803baf971c1a0adb938305" => :catalina
-    sha256 "1bb95e044688ecf81fb4d8e0cc7b8e4fd14f81ce7fb8f8d6ccb9f7cdc64129ee" => :mojave
-    sha256 "4e988d95a7d72acab1b06a5517de5cb45d666e3168ba1b6670319ed989c6a046" => :high_sierra
-    sha256 "e76c38ed6c92e1eadcaeb2d5262d879acb8c756d42dbc68f1c101182a56b5d8c" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "172cf98338a33a49f1526596df4c7edbad42ef4a48ae2b3da93902bc6ab06dec"
+    sha256 cellar: :any_skip_relocation, big_sur:       "2c7bf6d0518f32822dabfe86c0c7a6fd54130024c2e632a0182e70ca4b3d1ab9"
+    sha256 cellar: :any_skip_relocation, catalina:      "531bce5f3d91144060aad50b10db2742e40dc93db084d6dbfd4b4bb0a27788ab"
+    sha256 cellar: :any_skip_relocation, mojave:        "5a36702c6abeb05683b5c0dc57255c7dfcc49191c0bae0b35b29f62ccb8c71dd"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "fb9271b9ab6a200815a323133fa360239e22f8c9cb00e663e8c21f272ad0629e" # linuxbrew-core
   end
 
-  depends_on "go" => :build
+  depends_on "bash" => :build
+  depends_on "coreutils" => :build
+  depends_on "go@1.16" => :build
 
   uses_from_macos "rsync" => :build
 
@@ -30,6 +31,7 @@ class KubernetesCli < Formula
     rm_rf ".brew_home"
 
     # Make binary
+    ENV.prepend_path "PATH", Formula["coreutils"].libexec/"gnubin" # needs GNU date
     system "make", "WHAT=cmd/kubectl"
     bin.install "_output/bin/kubectl"
 
@@ -52,7 +54,9 @@ class KubernetesCli < Formula
     assert_match "kubectl controls the Kubernetes cluster manager.", run_output
 
     version_output = shell_output("#{bin}/kubectl version --client 2>&1")
+
     assert_match "GitTreeState:\"clean\"", version_output
+
     if build.stable?
       assert_match stable.instance_variable_get(:@resource)
                          .instance_variable_get(:@specs)[:revision],

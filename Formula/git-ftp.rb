@@ -7,12 +7,12 @@ class GitFtp < Formula
   head "https://github.com/git-ftp/git-ftp.git", branch: "develop"
 
   bottle do
-    cellar :any
-    sha256 "2e3d8573c71ae26fdac0d0d8952e625b5a14d90118a6a413604eac8c3a6f6eb6" => :big_sur
-    sha256 "0a61ca11e69370dfecfd3c82d6d03aeec377bf9db660658403556ea71b84bae0" => :catalina
-    sha256 "f878c4015697794bb8b2c3f034a167b750d3871c0d320d903536128f01880ca2" => :mojave
-    sha256 "63c8b94fd89eb635d8c2056efdf933de45dca7fdb04793b620750f8b338fbb88" => :high_sierra
-    sha256 "80d507de96861546cf465d4bc2042c936bbbd3b7873fb34e43954751ce54f10c" => :x86_64_linux
+    sha256 cellar: :any, arm64_big_sur: "22f0e6b0a0c16aa110711333e1a44b77d65fe851049db51fb200f33a2e2be534"
+    sha256 cellar: :any, big_sur:       "2e3d8573c71ae26fdac0d0d8952e625b5a14d90118a6a413604eac8c3a6f6eb6"
+    sha256 cellar: :any, catalina:      "0a61ca11e69370dfecfd3c82d6d03aeec377bf9db660658403556ea71b84bae0"
+    sha256 cellar: :any, mojave:        "f878c4015697794bb8b2c3f034a167b750d3871c0d320d903536128f01880ca2"
+    sha256 cellar: :any, high_sierra:   "63c8b94fd89eb635d8c2056efdf933de45dca7fdb04793b620750f8b338fbb88"
+    sha256 cellar: :any, x86_64_linux:  "80d507de96861546cf465d4bc2042c936bbbd3b7873fb34e43954751ce54f10c" # linuxbrew-core
   end
 
   depends_on "pandoc" => :build
@@ -21,8 +21,8 @@ class GitFtp < Formula
   uses_from_macos "zlib"
 
   resource "curl" do
-    url "https://curl.haxx.se/download/curl-7.69.0.tar.bz2"
-    mirror "https://curl.askapache.com/download/curl-7.69.0.tar.bz2"
+    url "https://curl.se/download/curl-7.69.0.tar.bz2"
+    mirror "https://curl.askapache.com/curl-7.69.0.tar.bz2"
     sha256 "668d451108a7316cff040b23c79bc766e7ed84122074e44f662b8982f2e76739"
   end
 

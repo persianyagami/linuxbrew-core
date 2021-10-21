@@ -1,30 +1,22 @@
 class Frugal < Formula
   desc "Cross language code generator for creating scalable microservices"
   homepage "https://github.com/Workiva/frugal"
-  url "https://github.com/Workiva/frugal/archive/v3.12.1.tar.gz"
-  sha256 "e01c8d643096e8ec0ceb22852e4065312b32aa3c0fe84808474c3583594646fa"
+  url "https://github.com/Workiva/frugal/archive/v3.14.9.tar.gz"
+  sha256 "223afe9aab415308a0cb83bb71f51d5868c0ec180401146d1dfb107ea6d0650b"
   license "Apache-2.0"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "9dbbc0e9f24568826e15c259b73e66b9ad90ccbd08d6e45f5a877c4dbc484ba7" => :big_sur
-    sha256 "c845b9c6362982511fb2ef5fc845e604aed74a743a45a56ae8b13507da003b69" => :catalina
-    sha256 "e40ff743a3a9683c8091a58f7d0d2000cc07f0fbfe8e3435c73d28aadee9b193" => :mojave
-    sha256 "3db23dd902f7abfc932ca302d3ecdfc456f39cca2080830b84781451d28cd078" => :high_sierra
-    sha256 "51ea30980fd6f28deae65c3e6ae35a10f8936b69c3f01f051a91a5a55c87cdfd" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "ddf0882cccedf077a47c9d6f19c1149d2deb2f41b9291877b3c74a9021afde64"
+    sha256 cellar: :any_skip_relocation, big_sur:       "2010feb5c9e7ee315cdb22c94e1ac95336a56a868f553c346f400d297b580db5"
+    sha256 cellar: :any_skip_relocation, catalina:      "2010feb5c9e7ee315cdb22c94e1ac95336a56a868f553c346f400d297b580db5"
+    sha256 cellar: :any_skip_relocation, mojave:        "2010feb5c9e7ee315cdb22c94e1ac95336a56a868f553c346f400d297b580db5"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "19674e735af1211a6f7096df85eb6394c950888496df9d3d035304e87fcf52eb" # linuxbrew-core
   end
 
-  depends_on "glide" => :build
   depends_on "go" => :build
 
   def install
-    ENV["GOPATH"] = buildpath
-    (buildpath/"src/github.com/Workiva/frugal").install buildpath.children
-    cd "src/github.com/Workiva/frugal" do
-      system "glide", "install"
-      system "go", "build", "-o", bin/"frugal"
-      prefix.install_metafiles
-    end
+    system "go", "build", *std_go_args(ldflags: "-s -w")
   end
 
   test do

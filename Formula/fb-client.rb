@@ -1,9 +1,12 @@
 class FbClient < Formula
+  include Language::Python::Shebang
+
   desc "Shell-script client for https://paste.xinu.at"
   homepage "https://paste.xinu.at"
   url "https://paste.xinu.at/data/client/fb-2.1.1.tar.gz"
   sha256 "8fbcffc853b298a8497ab0f66b254c0c9ae4cbd31ab9889912a44a8c5c7cef0e"
-  revision 2
+  license "GPL-3.0-only"
+  revision 3
   head "https://git.server-speed.net/users/flo/fb", using: :git
 
   livecheck do
@@ -12,18 +15,18 @@ class FbClient < Formula
   end
 
   bottle do
-    cellar :any
-    sha256 "76cab48a5e41ea108da84e1228ddea7c23ee92727206d0e0ef00aa11e65167ae" => :big_sur
-    sha256 "0f2e6cd24defedab9ce9b5a843b75a7082592808035f00082008c47f5ba26024" => :catalina
-    sha256 "9a7adf6509265cf7c9ae67d68b108685d49e35f44ab00bdfe1c77be073942596" => :mojave
-    sha256 "b7046652787b4b87d433f4ac2328a8a3b86df5aabbe1a8a5c87ff7ccf03a702e" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "a870e1dd933cdd27887bba730779541f1b9a118de7b77faafcd946a11987216a"
+    sha256 cellar: :any,                 big_sur:       "15022e572c324e76d5b28922b1239f8ff8aba221bf2ed7cae49903ea85f9a4ae"
+    sha256 cellar: :any,                 catalina:      "ca22959ea5179efb908e13f0463e2a7d4bc0127322166594524a8db3be1a6925"
+    sha256 cellar: :any,                 mojave:        "d0681ab4b033fde92bcc83801c86342b1f97e27e849ea1404a7e8b3cf803a65c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "164c8baf50c95cacdcc0eb2398320fe98eb4da5a1caaba1a6010f067de31f494" # linuxbrew-core
   end
 
   depends_on "pkg-config" => :build
   depends_on "curl"
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
-  conflicts_with "findbugs", because: "findbugs and fb-client both install a `fb` binary"
+  conflicts_with "spotbugs", because: "both install a `fb` binary"
 
   resource "pycurl" do
     url "https://files.pythonhosted.org/packages/50/1a/35b1d8b8e4e23a234f1b17a8a40299fd550940b16866c9a1f2d47a04b969/pycurl-7.43.0.6.tar.gz"
@@ -39,22 +42,19 @@ class FbClient < Formula
     # avoid pycurl error about compile-time and link-time curl version mismatch
     ENV.delete "SDKROOT"
 
-    xy = Language::Python.major_minor_version Formula["python@3.9"].opt_bin/"python3"
-    ENV.prepend_create_path "PYTHONPATH", libexec/"vendor/lib/python#{xy}/site-packages"
+    ENV.prepend_create_path "PYTHONPATH", libexec/"vendor"/Language::Python.site_packages("python3")
 
     # avoid error about libcurl link-time and compile-time ssl backend mismatch
     resource("pycurl").stage do
-      system Formula["python@3.9"].opt_bin/"python3",
-             *Language::Python.setup_install_args(libexec/"vendor"),
-             "--curl-config=#{Formula["curl"].opt_bin}/curl-config"
+      system "python3", *Language::Python.setup_install_args(libexec/"vendor"),
+                        "--curl-config=#{Formula["curl"].opt_bin}/curl-config"
     end
 
     resource("pyxdg").stage do
-      system Formula["python@3.9"].opt_bin/"python3",
-             *Language::Python.setup_install_args(libexec/"vendor")
+      system "python3", *Language::Python.setup_install_args(libexec/"vendor")
     end
 
-    inreplace "fb", "#!/usr/bin/env python", "#!#{Formula["python@3.9"].opt_bin}/python3"
+    rewrite_shebang detected_python_shebang, "fb"
 
     system "make", "PREFIX=#{prefix}", "install"
     bin.env_script_all_files(libexec/"bin", PYTHONPATH: ENV["PYTHONPATH"])

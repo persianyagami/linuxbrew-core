@@ -1,31 +1,28 @@
 class RancherCli < Formula
   desc "Unified tool to manage your Rancher server"
   homepage "https://github.com/rancher/cli"
-  url "https://github.com/rancher/cli/archive/v2.4.9.tar.gz"
-  sha256 "db4d52b8dfa14961e5c42d040ef7dec8f45458f528eefdc1aa09ea303c8297d7"
+  url "https://github.com/rancher/cli/archive/v2.4.13.tar.gz"
+  sha256 "4a1aab7193f2e478b12b1000f17f2a8e3545dd5521a140aa90389afdb2ff8357"
   license "Apache-2.0"
-  head "https://github.com/rancher/cli.git"
+  head "https://github.com/rancher/cli.git", branch: "master"
 
   livecheck do
     url :stable
-    strategy :github_latest
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "609abe1ef0f570ca51daf2b22ec5fe0cfdd5ebe0e4eb61aae9a42a5ce53c5621" => :big_sur
-    sha256 "56038ce98b25222f81b716240a56a3c9eb717d60b552e48c8443c7725327b5ee" => :catalina
-    sha256 "f251b7191746fcc8312d7d87bb8bdb810da8b16e1c843bb7b49807d945c3014e" => :mojave
-    sha256 "1508e3253e0d5f7f0e67bc16ee72cccf80d1072de115cc0e4a3d908d7aed0838" => :high_sierra
-    sha256 "b2cc78382422796b76fbca4275b03ba48285a406830a42c1492cdeb8329b4b0d" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "1fe3c03e1c7389f3aa03de802b23d60986c61e91ad275353984effdd41055b6c"
+    sha256 cellar: :any_skip_relocation, big_sur:       "eceff7f2924ce3aa42e3e5cb180b38eb41a2747321d29d6d2588d0b17d5b20cc"
+    sha256 cellar: :any_skip_relocation, catalina:      "d99b09b8067c46c3bad171bfa9998680a2a13ae658641be7c6fd0830f37a8642"
+    sha256 cellar: :any_skip_relocation, mojave:        "f231900ea626c094b98f7620e12921691fe1f86781a66033ae9b07cdd2721bea"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f22314698f65e0c5af34ae3fd342ad57ed052cdc28a684245620a9e1ee364ccc" # linuxbrew-core
   end
 
   depends_on "go" => :build
 
   def install
-    system "go", "build", "-mod=vendor", "-ldflags",
-           "-w -X main.VERSION=#{version}",
-           "-trimpath", "-o", bin/"rancher"
+    system "go", "build", *std_go_args(ldflags: "-s -w -X main.VERSION=#{version}"), "-o", bin/"rancher"
   end
 
   test do

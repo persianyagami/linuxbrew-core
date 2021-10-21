@@ -1,28 +1,31 @@
 class Radare2 < Formula
   desc "Reverse engineering framework"
   homepage "https://radare.org"
-  url "https://github.com/radareorg/radare2/archive/4.5.1.tar.gz"
-  sha256 "4e85b35987bd2ca5881ad9585970b970fe7374814bd383bd1cd62e961a0c228b"
+  url "https://github.com/radareorg/radare2/archive/5.4.2.tar.gz"
+  sha256 "d3c337e893d7d1e7d5af8b527af3d4469c92898f0249f1b6263ea3325c9455b9"
   license "LGPL-3.0-only"
-  head "https://github.com/radareorg/radare2.git"
+  head "https://github.com/radareorg/radare2.git", branch: "master"
+
+  livecheck do
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
+  end
 
   bottle do
-    rebuild 1
-    sha256 "c7afb84ee74ee69d89595c0d89ee97c3778442c96286ffcc337eb6cd01970298" => :big_sur
-    sha256 "7471bcb207882abe2a594dc14db2bb54858b7cbf8d565bb37c4ce6c8cec50913" => :catalina
-    sha256 "5c47780424cf1b4121bf36f54fa65adc4be29b672fa8ad8d634adff6e1b4bc1d" => :mojave
-    sha256 "729b00544244154a7365d7cd9f29d99d47398642926ac15f0532fbc4a25d48ea" => :x86_64_linux
+    sha256 arm64_big_sur: "941c71f1c57c135e73f02d8150d72ea57f0735338dc6182e37f3bbc0c679e4ae"
+    sha256 big_sur:       "ab92b305f1612a6cf496e2834d49373961cf6c13afc8ca9fec38a35b3d8d2d27"
+    sha256 catalina:      "134ffba76d80a57059ca795247baf5eabdf5199b48755d3416826f08832dca3d"
+    sha256 mojave:        "687edf30826363d8870960bec6916375afe57fcfaf9a1fb4e10cdacb0bca1e90"
+    sha256 x86_64_linux:  "bc60f4f6b78bd57a9299cb0e8afedcf18d841cf142f96a13cac40067cc3ab340" # linuxbrew-core
   end
 
   def install
-    # Workaround for Xcode 12 from https://github.com/radareorg/radare2/pull/17879/files
-    inreplace "mk/darwin.mk", "$(XCODE_VERSION_MAJOR),11", "$(shell test $(XCODE_VERSION_MAJOR) -gt 10;echo $$?),0"
     system "./configure", "--prefix=#{prefix}"
     system "make"
     system "make", "install"
   end
 
   test do
-    assert_match "radare2 #{version}", shell_output("#{bin}/r2 -version")
+    assert_match "radare2 #{version}", shell_output("#{bin}/r2 -v")
   end
 end

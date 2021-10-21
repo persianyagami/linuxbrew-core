@@ -1,70 +1,51 @@
 class Snort < Formula
   desc "Flexible Network Intrusion Detection System"
   homepage "https://www.snort.org"
-  url "https://www.snort.org/downloads/snort/snort-2.9.17.tar.gz"
-  mirror "https://fossies.org/linux/misc/snort-2.9.17.tar.gz"
-  sha256 "c3b234c3922a09b0368b847ddb8d1fa371b741f032f42aa9ab53d67b428dc648"
+  url "https://github.com/snort3/snort3/archive/3.1.13.0.tar.gz"
+  mirror "https://fossies.org/linux/misc/snort3-3.1.13.0.tar.gz"
+  sha256 "297c9fb6598f473c8aad1c544a6a9b241a74c084074801c035fc0c5cc24680ec"
   license "GPL-2.0-only"
-
-  livecheck do
-    url "https://www.snort.org/downloads"
-    regex(/href=.*?snort[._-]v?(\d+(?:\.\d+)+)\.t/i)
-  end
+  head "https://github.com/snort3/snort3.git", branch: "master"
 
   bottle do
-    cellar :any
-    sha256 "2f7c1e51120e447ac63e19b0f6629e1603c64e223caba26002d7b954cacf6906" => :big_sur
-    sha256 "928d091a72cfe6f943b8f9f13e905f988d7ca89189206066c8d0165b2d71ca15" => :catalina
-    sha256 "2a337db5b70c66b8538b54fab50562467ad6b247e2f1bd818871f2cc647b29e1" => :mojave
-    sha256 "edb689076c5e819461df51036b5d41563b6a0f24857f12ce07ca2ce7b1c59e59" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "2ebe29f52d68b28fb55f7d65aea348bc5339d88d738221349cb0d00922193656"
+    sha256 cellar: :any,                 big_sur:       "8bd2dc2a016e6eb10e564723b4e52914dc2662313908b0e14ffd1681960f58a7"
+    sha256 cellar: :any,                 catalina:      "9e531dc0b5493e33390f6b043b08fc06907d40ee56a9ec65c53a2e96387cd2b6"
+    sha256 cellar: :any,                 mojave:        "1c688c1127c1a3da81e8aecfce557c4b3b3814c054637e90df41785f0d900efb"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "cbdad733d3bbcdd8a897e2e920ffde92a2ac6fe106661e906e72e9b83aa22ba9" # linuxbrew-core
   end
 
+  depends_on "cmake" => :build
+  depends_on "flatbuffers" => :build
+  depends_on "flex" => :build # need flex>=2.6.0
   depends_on "pkg-config" => :build
   depends_on "daq"
+  depends_on "gperftools" # for tcmalloc
+  depends_on "hwloc"
+  # Hyperscan improves IPS performance, but is only available for x86_64 arch.
+  depends_on "hyperscan" if Hardware::CPU.intel?
   depends_on "libdnet"
-  depends_on "libpcap"
-  depends_on "luajit"
-  depends_on "nghttp2"
+  depends_on "libpcap" # macOS version segfaults
+  depends_on "luajit-openresty"
   depends_on "openssl@1.1"
   depends_on "pcre"
+  depends_on "xz" # for lzma.h
 
-  uses_from_macos "bison" => :build
-  uses_from_macos "flex" => :build
-  uses_from_macos "xz"
+  uses_from_macos "zlib"
+
+  on_linux do
+    depends_on "libunwind"
+  end
 
   def install
-    openssl = Formula["openssl@1.1"]
-    libpcap = Formula["libpcap"]
+    # These flags are not needed for LuaJIT 2.1 (Ref: https://luajit.org/install.html).
+    # On Apple ARM, building with flags results in broken binaries and they need to be removed.
+    inreplace "cmake/FindLuaJIT.cmake", " -pagezero_size 10000 -image_base 100000000\"", "\""
 
-    args = %W[
-      --prefix=#{prefix}
-      --sysconfdir=#{etc}/snort
-      --disable-debug
-      --disable-dependency-tracking
-      --disable-silent-rules
-      --enable-active-response
-      --enable-flexresp3
-      --enable-gre
-      --enable-mpls
-      --enable-normalizer
-      --enable-react
-      --enable-reload
-      --enable-sourcefire
-      --enable-targetbased
-      --with-openssl-includes=#{openssl.opt_include}
-      --with-openssl-libraries=#{openssl.opt_lib}
-      --with-libpcap-includes=#{libpcap.opt_include}
-      --with-libpcap-libraries=#{libpcap.opt_lib}
-    ]
-
-    system "./configure", *args
-    system "make", "install"
-
-    # Currently configuration files in etc have strange permissions which causes postinstall to fail
-    # Reported to upstream: https://lists.snort.org/pipermail/snort-devel/2020-April/011466.html
-    (buildpath/"etc").children.each { |f| chmod 0644, f }
-    rm Dir[buildpath/"etc/Makefile*"]
-    (etc/"snort").install (buildpath/"etc").children
+    mkdir "build" do
+      system "cmake", "..", *std_cmake_args, "-DENABLE_TCMALLOC=ON"
+      system "make", "install"
+    end
   end
 
   def caveats
@@ -77,6 +58,6 @@ class Snort < Formula
   end
 
   test do
-    system bin/"snort", "-V"
+    assert_match "Version #{version}", shell_output("#{bin}/snort -V")
   end
 end

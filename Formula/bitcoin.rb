@@ -1,18 +1,22 @@
 class Bitcoin < Formula
   desc "Decentralized, peer to peer payment network"
-  homepage "https://bitcoin.org/"
-  url "https://bitcoin.org/bin/bitcoin-core-0.20.1/bitcoin-0.20.1.tar.gz"
-  sha256 "4bbd62fd6acfa5e9864ebf37a24a04bc2dcfe3e3222f056056288d854c53b978"
+  homepage "https://bitcoincore.org/"
+  url "https://bitcoincore.org/bin/bitcoin-core-22.0/bitcoin-22.0.tar.gz"
+  sha256 "d0e9d089b57048b1555efa7cd5a63a7ed042482045f6f33402b1df425bf9613b"
   license "MIT"
-  revision 1
-  head "https://github.com/bitcoin/bitcoin.git"
+  head "https://github.com/bitcoin/bitcoin.git", branch: "master"
+
+  livecheck do
+    url "https://bitcoincore.org/en/download/"
+    regex(/latest version.*?v?(\d+(?:\.\d+)+)/i)
+  end
 
   bottle do
-    cellar :any
-    sha256 "adfe0983a4c57e70c5d084206f779d42d31b6cd4fe3e81205d81330da01c1cfe" => :catalina
-    sha256 "f887ce011df22dbe1c001ee42fb6f0adddf22736fc12ea83b5d373bbd5a90e43" => :mojave
-    sha256 "b6b4763357bcbadbd9439c0d39132d43306a7b9b08c61c90afbe11c6cb2b3ff1" => :high_sierra
-    sha256 "ac1274e1030d0935250f80a87a20354edb64e2d250645ac1e5381e37cc8e27cd" => :x86_64_linux
+    rebuild 1
+    sha256 cellar: :any,                 big_sur:      "a326a566321b9f5b8d86499fcabb246fb7bdbded956791d9293a97705c0bdb12"
+    sha256 cellar: :any,                 catalina:     "59227888c3021090ea60dda9c54b80447d956e42325abb552e0f343cdaf334cc"
+    sha256 cellar: :any,                 mojave:       "12b6d4af2123df56dd5d421153a9901d97ad79b8af81660905446cf1fb592573"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "bc56082efef1d5c21ae17ae78f8510beb7bfbec3ed65df626fd4b67308afcc57" # linuxbrew-core
   end
 
   depends_on "autoconf" => :build
@@ -27,7 +31,10 @@ class Bitcoin < Formula
 
   on_linux do
     depends_on "util-linux" => :build # for `hexdump`
+    depends_on "gcc"
   end
+
+  fails_with gcc: "5"
 
   def install
     ENV.delete("SDKROOT") if MacOS.version == :el_capitan && MacOS::Xcode.version >= "8.0"
@@ -41,25 +48,8 @@ class Bitcoin < Formula
     pkgshare.install "share/rpcauth"
   end
 
-  plist_options manual: "bitcoind"
-
-  def plist
-    <<~EOS
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-      <dict>
-        <key>Label</key>
-        <string>#{plist_name}</string>
-        <key>ProgramArguments</key>
-        <array>
-          <string>#{opt_bin}/bitcoind</string>
-        </array>
-        <key>RunAtLoad</key>
-        <true/>
-      </dict>
-      </plist>
-    EOS
+  service do
+    run opt_bin/"bitcoind"
   end
 
   test do

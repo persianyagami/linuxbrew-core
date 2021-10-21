@@ -3,27 +3,28 @@ class Supervisor < Formula
 
   desc "Process Control System"
   homepage "http://supervisord.org/"
-  url "https://github.com/Supervisor/supervisor/archive/4.2.0.tar.gz"
-  sha256 "05031f36ad15cad47fb56f01d8e075f952ae39ba8ce492ea790ebb310e3f0368"
+  url "https://files.pythonhosted.org/packages/d3/7f/c780b7471ba0ff4548967a9f7a8b0bfce222c3a496c3dfad0164172222b0/supervisor-4.2.2.tar.gz"
+  sha256 "5b2b8882ec8a3c3733cce6965cc098b6d80b417f21229ab90b18fe551d619f90"
+  license "BSD-3-Clause-Modification"
   revision 1
+  head "https://github.com/Supervisor/supervisor.git", branch: "master"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "8f9afc2ab25e747431c943912f26199416222ade9f884947cb42c04fa22d59d4" => :big_sur
-    sha256 "bd9a26f19bc257abded6138d2c0ae208252d6c780ae2daa85b7d093c47234eb1" => :catalina
-    sha256 "484eeb4bd246381f6c629023f126515d960a564fd3de4788e3eace9085cf698d" => :mojave
-    sha256 "cca1a2525646a0aaeb2bae9c5885bca7757737415bbfe54f12cb1b2367548bb3" => :high_sierra
-    sha256 "99e96033387ad667b29f4a0b6d41bb9cb98a5f435355f2f126233665861b2e9b" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "19ca7572ee9fed86ba1cc5ad5c4ffe0df7f094307e78b623d75dea464b274592"
+    sha256 cellar: :any_skip_relocation, big_sur:       "03bb01ee8b90ea72e8d5fd27994f7b5e002576b467bdda3b6011e8af63d9777e"
+    sha256 cellar: :any_skip_relocation, catalina:      "03bb01ee8b90ea72e8d5fd27994f7b5e002576b467bdda3b6011e8af63d9777e"
+    sha256 cellar: :any_skip_relocation, mojave:        "03bb01ee8b90ea72e8d5fd27994f7b5e002576b467bdda3b6011e8af63d9777e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "af1065b2eca37b2678c416ec8274516fe1989b1d60debfc5057464f2f07fa84e" # linuxbrew-core
   end
 
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   def install
     inreplace buildpath/"supervisor/skel/sample.conf" do |s|
       s.gsub! %r{/tmp/supervisor\.sock}, var/"run/supervisor.sock"
       s.gsub! %r{/tmp/supervisord\.log}, var/"log/supervisord.log"
       s.gsub! %r{/tmp/supervisord\.pid}, var/"run/supervisord.pid"
-      s.gsub! /^;\[include\]$/, "[include]"
+      s.gsub!(/^;\[include\]$/, "[include]")
       s.gsub! %r{^;files = relative/directory/\*\.ini$}, "files = #{etc}/supervisor.d/*.ini"
     end
 
@@ -44,31 +45,9 @@ class Supervisor < Formula
     opoo conf_warn if old_conf.exist?
   end
 
-  plist_options manual: "supervisord"
-
-  def plist
-    <<~EOS
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-        <dict>
-          <key>KeepAlive</key>
-          <dict>
-            <key>SuccessfulExit</key>
-            <false/>
-          </dict>
-          <key>Label</key>
-          <string>#{plist_name}</string>
-          <key>ProgramArguments</key>
-          <array>
-            <string>#{opt_bin}/supervisord</string>
-            <string>-c</string>
-            <string>#{etc}/supervisord.conf</string>
-            <string>--nodaemon</string>
-          </array>
-        </dict>
-      </plist>
-    EOS
+  service do
+    run [opt_bin/"supervisord", "-c", etc/"supervisord.conf", "--nodaemon"]
+    keep_alive true
   end
 
   test do

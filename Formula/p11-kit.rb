@@ -1,15 +1,17 @@
 class P11Kit < Formula
   desc "Library to load and enumerate PKCS#11 modules"
   homepage "https://p11-glue.freedesktop.org"
-  url "https://github.com/p11-glue/p11-kit/releases/download/0.23.22/p11-kit-0.23.22.tar.xz"
-  sha256 "8a8f40153dd5a3f8e7c03e641f8db400133fb2a6a9ab2aee1b6d0cb0495ec6b6"
+  url "https://github.com/p11-glue/p11-kit/releases/download/0.24.0/p11-kit-0.24.0.tar.xz"
+  sha256 "81e6140584f635e4e956a1b93a32239acf3811ff5b2d3a5c6094e94e99d2c685"
   license "BSD-3-Clause"
+  revision 1
 
   bottle do
-    sha256 "9474fe6483bbc394d9069f79528ecfe9ba1af00db4aca23c26857b6b66736d73" => :big_sur
-    sha256 "d02045826811eeb8475b535be7331c0770fdc930d1ac1be86796af81141e8592" => :catalina
-    sha256 "4d35cd8fd37b06687b5025354f3a579ab2e36e8ab8bd9bab75102eee14bd86f4" => :mojave
-    sha256 "0bcd2685632013e3f7666e68c539651e27c11bd9493298f512c27a2225cc94c4" => :x86_64_linux
+    sha256 arm64_big_sur: "74df2e80935cbf3fd9f434d39787fab5f89ca1f4dc210c3dc002d2e8445c155d"
+    sha256 big_sur:       "afd53d336262a0bb9983276eb6ea6b9c602a534d021dc9abc1f3ddfa20ec9869"
+    sha256 catalina:      "37ee66ec71206a3077deef9d2f2452d0ea43a60d66a1d257a22947a189e115ea"
+    sha256 mojave:        "8d25a20a23fbd9e5787369b86b2af53d1cb558e69de5f7f8ab25069ae7beb390"
+    sha256 x86_64_linux:  "a8d4ad8b26dd3742a23afacba624ce409425e83b49b118a056f28d1e6fb96637" # linuxbrew-core
   end
 
   head do

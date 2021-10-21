@@ -1,17 +1,17 @@
 class Infracost < Formula
   desc "Cost estimates for Terraform"
   homepage "https://www.infracost.io/docs/"
-  url "https://github.com/infracost/infracost/archive/v0.7.7.tar.gz"
-  sha256 "452a6a3348ea4fc98df62a1ee3d5a97e24c6453d8a4a134ed4e0ece720a08d82"
+  url "https://github.com/infracost/infracost/archive/v0.9.10.tar.gz"
+  sha256 "c901cbab889bb96142b0f4b1541a4e15e44c099b059be3630febb8a3eeb731f4"
   license "Apache-2.0"
   head "https://github.com/infracost/infracost.git"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "4d50fb2de6328778be4d657415d06132b0c465b8b6249bc5f490fa1e6860d5bb" => :big_sur
-    sha256 "9d353a1d31c81486498c357c664441cbb3a2fa9c7d129819b926215ccf5448ce" => :catalina
-    sha256 "e20a2edaa279d798d97578eabd40572563c115ecfc02f415f5c6746717086722" => :mojave
-    sha256 "ade4d6be2837ce39516a2cb80ef1171a9475f76467a90a13af75ea43244bfe28" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "9e1eb8b2175a85a515d266ec0cec2af3a27dd839aa9a5b9dab6638b88b75557e"
+    sha256 cellar: :any_skip_relocation, big_sur:       "f40eede5b0a75c6c96e30d8c49edb760075c1bb418ceab20c684b801ee81511e"
+    sha256 cellar: :any_skip_relocation, catalina:      "f40eede5b0a75c6c96e30d8c49edb760075c1bb418ceab20c684b801ee81511e"
+    sha256 cellar: :any_skip_relocation, mojave:        "f40eede5b0a75c6c96e30d8c49edb760075c1bb418ceab20c684b801ee81511e"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4f16cc5c2cd96a73bfc9c37421c24caca691bae5bccb16bbb34c75ef5a6c4828" # linuxbrew-core
   end
 
   depends_on "go" => :build
@@ -24,9 +24,9 @@ class Infracost < Formula
   end
 
   test do
-    assert_match "v#{version}", shell_output("#{bin}/infracost --help 2>&1")
+    assert_match "v#{version}", shell_output("#{bin}/infracost --version 2>&1")
 
-    output = shell_output("#{bin}/infracost --no-color 2>&1", 1)
+    output = shell_output("#{bin}/infracost breakdown --no-color 2>&1", 1)
     assert_match "No INFRACOST_API_KEY environment variable is set.", output
   end
 end

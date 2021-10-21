@@ -1,21 +1,23 @@
 class Openldap < Formula
   desc "Open source suite of directory software"
   homepage "https://www.openldap.org/software/"
-  url "https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.4.56.tgz"
-  sha256 "25520e0363c93f3bcb89802a4aa3db33046206039436e0c7c9262db5a61115e0"
+  url "https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.5.8.tgz"
+  mirror "http://fresh-center.net/linux/misc/openldap-2.5.8.tgz"
+  mirror "http://fresh-center.net/linux/misc/legacy/openldap-2.5.8.tgz"
+  sha256 "366ea1c3b24202de4481978b632128c0cfe4148d4ae13cabf93a1f38c56472dc"
   license "OLDAP-2.8"
 
   livecheck do
     url "https://www.openldap.org/software/download/OpenLDAP/openldap-release/"
-    regex(/href=.*?openldap[._-]v?(\d+(?:\.\d+)*)\.t/i)
+    regex(/href=.*?openldap[._-]v?(\d+(?:\.\d+)+)\.t/i)
   end
 
   bottle do
-    sha256 "345810c84de13512ecf41b3ff0b606d8e59b093ab6bb3532e2cc3488a76c77fe" => :big_sur
-    sha256 "c51d24181e4291ece30b4ff8504f864bc4e0432a0dc85b64d6f4cac68b4f43dd" => :catalina
-    sha256 "8a9151d93ef5d9fe13aefe74b9cbba128524cfa5646d3bafa84b44180ffcba22" => :mojave
-    sha256 "517c23bda49065c883a38d4d2ea0b1816860913c0b30013be170a01d3518a824" => :high_sierra
-    sha256 "5a2950716f8cb4d50cf8d2833a0b30367e2f8c821ad78ec0c1a2da3304c06697" => :x86_64_linux
+    sha256 arm64_big_sur: "5618dfec3328a4b061a688289e475eed1355daec819e72bbaa3fb8dd93251005"
+    sha256 big_sur:       "c3cb199829c328e2afe869043b22181ff74993769785791be04cf099927168dd"
+    sha256 catalina:      "37b71c03a6915a25ef1fcb66c1a1089f5df3b34af9fb121f7b45703582e16c19"
+    sha256 mojave:        "071842e1a32af906ee4d9507271444902d3a288b7e9dd238da40f0bee99b84d9"
+    sha256 x86_64_linux:  "350e6f421803d8b6cb566d728f991450da7f52f64865f679394ec050b080a206" # linuxbrew-core
   end
 
   keg_only :provided_by_macos
@@ -23,8 +25,7 @@ class Openldap < Formula
   depends_on "openssl@1.1"
 
   on_linux do
-    depends_on "groff" => :build
-    depends_on "util-linux" # for libuuid.so.1
+    depends_on "util-linux"
   end
 
   def install
@@ -52,6 +53,16 @@ class Openldap < Formula
       --enable-unique
       --enable-valsort
     ]
+
+    if OS.linux?
+      args << "--without-systemd"
+
+      # Disable manpage generation, because it requires groff which has a huge
+      # dependency tree on Linux
+      inreplace "Makefile.in" do |s|
+        s.change_make_var! "SUBDIRS", "include libraries clients servers"
+      end
+    end
 
     system "./configure", *args
     system "make", "install"

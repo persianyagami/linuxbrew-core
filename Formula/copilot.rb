@@ -2,18 +2,24 @@ require "language/node"
 
 class Copilot < Formula
   desc "CLI tool for Amazon ECS and AWS Fargate"
-  homepage "https://github.com/aws/copilot-cli/wiki"
+  homepage "https://aws.github.io/copilot-cli/"
   url "https://github.com/aws/copilot-cli.git",
-      tag:      "v1.0.0",
-      revision: "238fd708679d4534b2f4c58cc3b7a85e6e1a768d"
+      tag:      "v1.10.1",
+      revision: "0b1d4015dd6f28b6649bbf6752be546527420a37"
   license "Apache-2.0"
-  head "https://github.com/aws/copilot-cli.git"
+  head "https://github.com/aws/copilot-cli.git", branch: "mainline"
+
+  livecheck do
+    url :stable
+    strategy :github_latest
+  end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "00d35d5ada87fda4b7c2cdef4da58e9a026e1a3e942dc30b575cbd8d3a8260e6" => :big_sur
-    sha256 "fc8ad0a5cbb32d5c68fa2e2e20e0fd57aa7d93b0a866329e36b7887947d845aa" => :catalina
-    sha256 "c90fa63256de5549f88b3f0fe88b3c3def47866bf5999a71b0fc5e9f7eeee690" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "8993199dfdef70c96b0bb754f96cbfdc5ac4f8512dc9afc606cfd0b9480c1fb9"
+    sha256 cellar: :any_skip_relocation, big_sur:       "672366ea1b8ab2397a2a6ad25da162492b69d5869dcad2556ba7e0bd4032fbed"
+    sha256 cellar: :any_skip_relocation, catalina:      "5219ef7c23e3ba9af9aa39e34797658f08ac777666f0f59d07189e3b781833ae"
+    sha256 cellar: :any_skip_relocation, mojave:        "e65079bcbcd01f771c77c18699e9f44a000c8d0bfc64c21b07d4288b80618a8c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "880bbb951c65a5d48350bd8b6df3848b4917fac034e5304fe27621f71c750857" # linuxbrew-core
   end
 
   depends_on "go" => :build
@@ -36,10 +42,14 @@ class Copilot < Formula
   end
 
   test do
-    assert_match "Welcome to the Copilot CLI! We're going to walk you through some questions",
-      shell_output("#{bin}/copilot init 2>&1", 1)
+    begin
+      _, stdout, wait_thr = Open3.popen2("#{bin}/copilot init 2>&1")
+      assert_match "Note: It's best to run this command in the root of your Git repository", stdout.gets("\n")
+    ensure
+      Process.kill 9, wait_thr.pid
+    end
 
-    assert_match "list environments for application : MissingRegion: could not find region",
+    assert_match "could not find an application attached to this workspace, please run `app init` first",
       shell_output("#{bin}/copilot pipeline init 2>&1", 1)
   end
 end

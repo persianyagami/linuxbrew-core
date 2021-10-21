@@ -1,10 +1,10 @@
 class Asio < Formula
   desc "Cross-platform C++ Library for asynchronous programming"
   homepage "https://think-async.com/Asio"
-  url "https://downloads.sourceforge.net/project/asio/asio/1.18.0%20%28Stable%29/asio-1.18.0.tar.bz2"
-  sha256 "9d539e7c09aa6394d512c433c5601c1f26dc4975f022ad7d5e8e57c3b635b370"
+  url "https://downloads.sourceforge.net/project/asio/asio/1.20.0%20%28Stable%29/asio-1.20.0.tar.bz2"
+  sha256 "204374d3cadff1b57a63f4c343cbadcee28374c072dc04b549d772dbba9f650c"
   license "BSL-1.0"
-  head "https://github.com/chriskohlhoff/asio.git"
+  head "https://github.com/chriskohlhoff/asio.git", branch: "master"
 
   livecheck do
     url :stable
@@ -12,11 +12,11 @@ class Asio < Formula
   end
 
   bottle do
-    cellar :any
-    sha256 "d07938fcf92d9003404f902c13aa96c3556c3d5117a2c5c753e53487ed87465f" => :big_sur
-    sha256 "89dff3c575014d571875ebaf43772705c605f95ed9424a235a7755b13d523c37" => :catalina
-    sha256 "46d36e13b0f13a1d0e02be143bb96f244fecbc3525d1ca8fcb560b1a8ecaf095" => :mojave
-    sha256 "f074033735a3dab5d4d6962aab8f9b948dcc6d2148b74fe3706f4d35def11cff" => :high_sierra
+    sha256 cellar: :any,                 arm64_big_sur: "6ae63027103addf746fc975cf3b9e521b7ab590e4e1a7891e8e10b433533607e"
+    sha256 cellar: :any,                 big_sur:       "685e304d5cbb0291585a2941c4bc521e3d60175e31ecfc91146d480a84f04325"
+    sha256 cellar: :any,                 catalina:      "d98a3f8267b7e3971fb5c712324858aa02252c718b55dc7e842c31922ad72d1c"
+    sha256 cellar: :any,                 mojave:        "ae04393a3164eff530766bf44aa2983534d3eb1115879b0a9f9c6e027b1b9fca"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b6632cad83bfd75f9bead6e455e0e63531af679ace3e60c30a51360aeb6ffd54" # linuxbrew-core
   end
 
   depends_on "autoconf" => :build
@@ -51,7 +51,7 @@ class Asio < Formula
     end
     sleep 1
     begin
-      assert_match /404 Not Found/, shell_output("curl http://127.0.0.1:#{port}")
+      assert_match "404 Not Found", shell_output("curl http://127.0.0.1:#{port}")
     ensure
       Process.kill 9, pid
       Process.wait pid

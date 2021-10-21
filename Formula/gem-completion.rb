@@ -7,7 +7,9 @@ class GemCompletion < Formula
   license "MIT"
   head "https://github.com/mernen/completion-ruby.git"
 
-  bottle :unneeded
+  livecheck do
+    formula "ruby-completion"
+  end
 
   def install
     bash_completion.install "completion-gem" => "gem"

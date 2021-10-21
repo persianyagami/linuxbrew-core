@@ -1,30 +1,24 @@
 class Prestodb < Formula
   desc "Distributed SQL query engine for big data"
   homepage "https://prestodb.io"
-  url "https://search.maven.org/remotecontent?filepath=com/facebook/presto/presto-server/0.244.1/presto-server-0.244.1.tar.gz"
-  sha256 "6eb166c6d1548eb608a9e1299897d3fd01e22fd12f6f81b3ced31bfb970d1f5e"
+  url "https://search.maven.org/remotecontent?filepath=com/facebook/presto/presto-server/0.263.1/presto-server-0.263.1.tar.gz"
+  sha256 "c01f3ce4990cde4c5840541119f2cd6fd558f0c3fd5d8c0881bd317f4596c295"
   license "Apache-2.0"
 
-  # The source of the Presto download page at https://prestodb.io/download.html
-  # contains old version information. The current version information is loaded
-  # from the JavaScript file below, so we check that instead. We don't check
-  # Maven because sometimes the directory listing page contains a newer version
-  # that hasn't been released yet and we probably don't want to upgrade until
-  # it's official on the first-party website, etc.
+  # Upstream has said that we should check Maven for Presto version information
+  # and the highest version found there is newest:
+  # https://github.com/prestodb/presto/issues/16200
   livecheck do
-    url "https://prestodb.io/static/js/version.js"
-    regex(/latest_presto_version.*?(\d+(?:\.\d+)+)/i)
+    url "https://search.maven.org/remotecontent?filepath=com/facebook/presto/presto-server/"
+    regex(%r{href=["']?v?(\d+(?:\.\d+)+)/?["' >]}i)
   end
 
-  bottle :unneeded
-
+  depends_on :macos # Seems to require Python2
   depends_on "openjdk"
 
-  conflicts_with "prestosql", because: "both install `presto` and `presto-server` binaries"
-
   resource "presto-cli" do
-    url "https://search.maven.org/remotecontent?filepath=com/facebook/presto/presto-cli/0.244.1/presto-cli-0.244.1-executable.jar"
-    sha256 "69a8ab1b3ca46d8436d35b3e07d049501e2a3e24c55f27356bef60ec6abc21d8"
+    url "https://search.maven.org/remotecontent?filepath=com/facebook/presto/presto-cli/0.263.1/presto-cli-0.263.1-executable.jar"
+    sha256 "5490c6b907fa59681832ade9b5fa9e0debbfda8356ae5c58db66d3e86f62ef65"
   end
 
   def install
@@ -68,6 +62,13 @@ class Prestodb < Formula
       libexec.install "presto-cli-#{version}-executable.jar"
       bin.write_jar_script libexec/"presto-cli-#{version}-executable.jar", "presto"
     end
+
+    # Remove incompatible pre-built binaries
+    libprocname_dirs = libexec.glob("bin/procname/*")
+    # Keep the Linux-x86_64 directory to make bottles identical
+    libprocname_dirs.reject! { |dir| dir.basename.to_s == "Linux-x86_64" }
+    libprocname_dirs.reject! { |dir| dir.basename.to_s == "#{OS.kernel_name}-#{Hardware::CPU.arch}" }
+    libprocname_dirs.map(&:rmtree)
   end
 
   def post_install
@@ -81,31 +82,9 @@ class Prestodb < Formula
     EOS
   end
 
-  plist_options manual: "presto-server run"
-
-  def plist
-    <<~EOS
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
-      "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-        <dict>
-          <key>Label</key>
-          <string>#{plist_name}</string>
-          <key>RunAtLoad</key>
-          <true/>
-          <key>AbandonProcessGroup</key>
-          <true/>
-          <key>WorkingDirectory</key>
-          <string>#{opt_libexec}</string>
-          <key>ProgramArguments</key>
-          <array>
-            <string>#{opt_bin}/presto-server</string>
-            <string>run</string>
-          </array>
-        </dict>
-      </plist>
-    EOS
+  service do
+    run [opt_bin/"presto-server", "run"]
+    working_dir opt_libexec
   end
 
   test do

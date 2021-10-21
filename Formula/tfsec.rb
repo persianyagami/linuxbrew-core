@@ -1,9 +1,10 @@
 class Tfsec < Formula
-  desc "Static analysis powered security scanner for your terraform code"
-  homepage "https://github.com/tfsec/tfsec"
-  url "https://github.com/tfsec/tfsec/archive/v0.36.10.tar.gz"
-  sha256 "9859f4764c2564639f1a11901af8add7d6215d1d3237811a28f85b85c2b6a091"
+  desc "Static analysis security scanner for your terraform code"
+  homepage "https://tfsec.dev/"
+  url "https://github.com/aquasecurity/tfsec/archive/v0.58.14.tar.gz"
+  sha256 "79b37aed43dc12e4d5383e138603fe59f9cfd503d9ec839a5ec08322cfd544ee"
   license "MIT"
+  head "https://github.com/aquasecurity/tfsec.git", branch: "master"
 
   livecheck do
     url :stable
@@ -11,18 +12,14 @@ class Tfsec < Formula
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "8dc0f3c4bed705438c27a83139ac837410c81300729ed2a6dc10fa0e2583d741" => :big_sur
-    sha256 "2817724ee161f0dbd90ed8bbb8758d0419425b196b5ec0cd7d90370fea761e42" => :catalina
-    sha256 "1635b24a6daf72e43a28c5efe885d7ea1ebae2ed07ba692cde66e10e1f757d25" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "4ce616515955602888c219c8393571e1a3f353ee728d84292edf050198bd9786"
+    sha256 cellar: :any_skip_relocation, big_sur:       "fd870c2295481d4185e20302da68bb9ba7a210fba9fb1583f94759ad42b864f7"
+    sha256 cellar: :any_skip_relocation, catalina:      "520309c5407048736ef13bf7abad8a6b46c6ee462e0b417ab48436290ab3afe4"
+    sha256 cellar: :any_skip_relocation, mojave:        "3bc49accf1843bf7ec4a2837c8a45bc2891d9a85b0b0b2a549dfbeffa178f656"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "747665e734c6f7c463c18911050b2c946131f4667826cf2b554bf53424e7c272" # linuxbrew-core
   end
 
   depends_on "go" => :build
-
-  resource "testfile" do
-    url "https://raw.githubusercontent.com/tfsec/tfsec/2d9b76a/example/brew-validate.tf"
-    sha256 "3ef5c46e81e9f0b42578fd8ddce959145cd043f87fd621a12140e99681f1128a"
-  end
 
   def install
     system "scripts/install.sh", "v#{version}"
@@ -30,8 +27,23 @@ class Tfsec < Formula
   end
 
   test do
-    resource("testfile").stage do
-      assert_match "No problems detected!", shell_output("#{bin}/tfsec .")
-    end
+    (testpath/"good/brew-validate.tf").write <<~EOS
+      resource "aws_alb_listener" "my-alb-listener" {
+        port     = "443"
+        protocol = "HTTPS"
+      }
+    EOS
+    (testpath/"bad/brew-validate.tf").write <<~EOS
+      resource "aws_security_group_rule" "world" {
+        description = "A security group triggering tfsec AWS006."
+        type        = "ingress"
+        cidr_blocks = ["0.0.0.0/0"]
+      }
+    EOS
+
+    good_output = shell_output("#{bin}/tfsec #{testpath}/good")
+    assert_match "No problems detected!", good_output
+    bad_output = shell_output("#{bin}/tfsec #{testpath}/bad 2>&1", 1)
+    assert_match "1 potential problems detected.", bad_output
   end
 end

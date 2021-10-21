@@ -5,24 +5,24 @@ class Po4a < Formula
 
   desc "Documentation translation maintenance tool"
   homepage "https://po4a.org"
-  url "https://github.com/mquinson/po4a/releases/download/v0.61/po4a-0.61.tar.gz"
-  sha256 "62954cb0537eff33124a45fa194ae3b92552ee6f6eef74f4953a577f640b86db"
-  license "GPL-2.0"
-  head "https://github.com/mquinson/po4a.git"
+  url "https://github.com/mquinson/po4a/releases/download/v0.64/po4a-0.64.tar.gz"
+  sha256 "34d14042e1925cf9a77649cb64f5b900125d2fc9ca5298c67889a76c2d3975e5"
+  license "GPL-2.0-or-later"
+  head "https://github.com/mquinson/po4a.git", branch: "master"
 
   bottle do
-    cellar :any
-    sha256 "8caa5beaaa149a61cc1e491e2d38311dfaf4d5079bb059e407a97338780d6674" => :catalina
-    sha256 "d6fab13fda127a91eeadbb7e4d031cc7e9d0f7292fef8579539db76228b908f9" => :mojave
-    sha256 "31ef1111f0d6d4a1ff0f50d37dbacaef5e0d017fa0f95c621d4d395bcda9b616" => :high_sierra
-    sha256 "4ee90867593711b561779612502057d655016398a22cb09a1d600968c10838b5" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "1a2d060d1faf7ecd75bd470748a5d303cd0c411811968078b05641878a474348"
+    sha256 cellar: :any,                 big_sur:       "80abc550f5bbd50a8aaa768842a4edafafeaca49cf1ff89082c8fab02b0abf63"
+    sha256 cellar: :any,                 catalina:      "3b54ccc0bad5fd40b0ce169475ae7f19043a107ba3434494ecee1e1cebb397c6"
+    sha256 cellar: :any,                 mojave:        "3c076870955edacccc0c14499074db4345426dd64e39723b517f854938d3510c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e45175ca8c12e7a0edc1baf605c869ea883afef8ac6613997b07f142b3fe7b3d" # linuxbrew-core
   end
 
   depends_on "docbook-xsl" => :build
   depends_on "gettext"
+  depends_on "perl"
 
   uses_from_macos "libxslt"
-  uses_from_macos "perl"
 
   resource "Locale::gettext" do
     url "https://cpan.metacpan.org/authors/id/P/PV/PVANDRY/gettext-1.07.tar.gz"
@@ -30,8 +30,6 @@ class Po4a < Formula
   end
 
   resource "Module::Build" do
-    # po4a requires Module::Build v0.4200 and above, while standard
-    # MacOS Perl installation has 0.4003
     url "https://cpan.metacpan.org/authors/id/L/LE/LEONT/Module-Build-0.4231.tar.gz"
     sha256 "7e0f4c692c1740c1ac84ea14d7ea3d8bc798b2fb26c09877229e04f430b2b717"
   end
@@ -46,7 +44,7 @@ class Po4a < Formula
     sha256 "550c9245291c8df2242f7e88f7921a0f636c7eec92c644418e7d89cfea70b2bd"
   end
 
-  resource "Term::ReadKey" do
+  resource "TermReadKey" do
     url "https://cpan.metacpan.org/authors/id/J/JS/JSTOWE/TermReadKey-2.38.tar.gz"
     sha256 "5a645878dc570ac33661581fbb090ff24ebce17d43ea53fd22e105a856a47290"
   end
@@ -78,8 +76,6 @@ class Po4a < Formula
     end
 
     ENV["XML_CATALOG_FILES"] = "#{etc}/xml/catalog"
-
-    inreplace "Po4aBuilder.pm", "PERL5LIB=lib", "PERL5LIB=lib:#{ENV["PERL5LIB"]}" unless OS.mac?
 
     system "perl", "Build.PL", "--install_base", libexec
     system "./Build"

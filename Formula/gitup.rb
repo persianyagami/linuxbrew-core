@@ -6,23 +6,18 @@ class Gitup < Formula
   url "https://files.pythonhosted.org/packages/7f/07/4835f8f4de5924b5f38b816c648bde284f0cec9a9ae65bd7e5b7f5867638/gitup-0.5.1.tar.gz"
   sha256 "4f787079cd65d8f60c5842181204635e1b72d3533ae91f0c619624c6b20846dd"
   license "MIT"
-  revision OS.mac? ? 4 : 5
+  revision OS.mac? ? 6 : 7
   head "https://github.com/earwig/git-repo-updater.git"
 
-  livecheck do
-    url :stable
-  end
-
   bottle do
-    cellar :any_skip_relocation
-    rebuild 1
-    sha256 "75267b1b78d901d02d25d3ffb0f867a5428319a5e7f71852549e610d92aef4e9" => :big_sur
-    sha256 "24a5b0141173ca61a85b8b7aeec68dce1d43d17d67e7edf92d4197241b977c91" => :catalina
-    sha256 "2ef7af3d0f8928ef352902bb7d583684adda069580d13af4c3d26818e5808d3a" => :mojave
-    sha256 "99d3fdc156f81f3cf4bafbed905b5053c397025f2c1788f155ff4065d5c41ff5" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "ff1d31029cc66522b235ec285341133a1074781dd57ff709e53caccb305ba3ee"
+    sha256 cellar: :any_skip_relocation, big_sur:       "75fd26446950358870cfd58d35f9f354ea7e64c8cda02672e35ee43288a40796"
+    sha256 cellar: :any_skip_relocation, catalina:      "75fd26446950358870cfd58d35f9f354ea7e64c8cda02672e35ee43288a40796"
+    sha256 cellar: :any_skip_relocation, mojave:        "75fd26446950358870cfd58d35f9f354ea7e64c8cda02672e35ee43288a40796"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ebcd8b41b9e617fd7ef1d7989dc2d3982a2ccfab628f1debfd518d772a445299" # linuxbrew-core
   end
 
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   resource "colorama" do
     url "https://files.pythonhosted.org/packages/1f/bb/5d3246097ab77fa083a61bd8d3d527b7ae063c7d8e8671b1cf8c4ec10cbe/colorama-0.4.4.tar.gz"
@@ -35,8 +30,8 @@ class Gitup < Formula
   end
 
   resource "GitPython" do
-    url "https://files.pythonhosted.org/packages/85/3d/ee9aa9c77a3c0e9074461d2d8da86c3564ed96abd28fa099dc3e05338a72/GitPython-3.1.11.tar.gz"
-    sha256 "befa4d101f91bad1b632df4308ec64555db684c360bd7d2130b4807d49ce86b8"
+    url "https://files.pythonhosted.org/packages/ec/4d/e6553122c85ec7c4c3e702142cc0f5ed02e5cf1b4d7ecea86a07e45725a0/GitPython-3.1.12.tar.gz"
+    sha256 "42dbefd8d9e2576c496ed0059f3103dcef7125b9ce16f9d5f9c834aed44a1dac"
   end
 
   resource "smmap" do
@@ -71,11 +66,11 @@ class Gitup < Formula
 
     system bin/"gitup", "first", "second"
 
-    first_head = `cd first ; git rev-parse HEAD`.split.first
-    assert_not_equal first_head, first_head_start
+    first_head = Utils.git_head(testpath/"first")
+    refute_equal first_head, first_head_start
 
-    second_head = `cd second ; git rev-parse HEAD`.split.first
-    assert_not_equal second_head, second_head_start
+    second_head = Utils.git_head(testpath/"second")
+    refute_equal second_head, second_head_start
 
     third_head_start = "f47ab45abdbc77e518776e5dc44f515721c523ae"
     mkdir "third" do
@@ -85,8 +80,8 @@ class Gitup < Formula
     system bin/"gitup", "--add", "third"
 
     system bin/"gitup"
-    third_head = `cd third ; git rev-parse HEAD`.split.first
-    assert_not_equal third_head, third_head_start
+    third_head = Utils.git_head(testpath/"third")
+    refute_equal third_head, third_head_start
 
     assert_match %r{#{Dir.pwd}/third}, `#{bin}/gitup --list`.strip
 

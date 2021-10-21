@@ -1,121 +1,74 @@
 class Sratoolkit < Formula
   desc "Data tools for INSDC Sequence Read Archive"
   homepage "https://github.com/ncbi/sra-tools"
-  url "https://github.com/ncbi/sra-tools/archive/2.10.8.tar.gz"
-  sha256 "4adb969a9a998f6a50020f99aa66f6ae27916f7dc83ddf6722fc0fea4a3a4d17"
-  head "https://github.com/ncbi/sra-tools.git"
+  license all_of: [:public_domain, "GPL-3.0-or-later", "MIT"]
+
+  stable do
+    url "https://github.com/ncbi/sra-tools/archive/2.11.2.tar.gz"
+    sha256 "17ff39d3a905142be63477a206bac3aa76a417e40979f06a8f1eed49fe8c43d4"
+
+    resource "ngs-sdk" do
+      url "https://github.com/ncbi/ngs/archive/2.11.2.tar.gz"
+      sha256 "7555ab7c2f04bd81160859f6c85c65376dc7f7b891804fad9e7636a7788e39c2"
+    end
+
+    resource "ncbi-vdb" do
+      url "https://github.com/ncbi/ncbi-vdb/archive/2.11.2.tar.gz"
+      sha256 "647efea2762d63dee6d3e462b1fed2ae6d0f2cf1adb0da583ac95f3ee073abdf"
+
+      # Fix Linux error in vdb3/interfaces/memory/MemoryManagerItf.hpp:155:13:
+      # error: 'ptrdiff_t' does not name a type
+      patch :DATA
+    end
+  end
 
   bottle do
-    sha256 "07759cc3d1ffe835f251f22bfc05b48073156f59a14a3811e70ddedc475b505c" => :big_sur
-    sha256 "2f5dba15de1efbf19142a6c89e8c3c1c8cb4e081ba3375d66536b1af3381645f" => :catalina
-    sha256 "49c589cf081c862f544b346b1e6878c5ab6d9a01b8a8582b054d61b153136199" => :mojave
-    sha256 "0e8fd8c3dca32ab66080dccc7050d1fefff0802809217b695cb888b79f5b2312" => :high_sierra
+    sha256 cellar: :any, big_sur:      "3ae6079cc1870308094b419e8141565c29030e139a2b3dd0065da4a64191a32b"
+    sha256 cellar: :any, catalina:     "67df1b84b24a39677517d5f0af6d4d06a99a3aa5c5ae39d3a2af821669868649"
+    sha256 cellar: :any, mojave:       "88cdb2651f23202d8f4c97df82e139edfcd2315d2be92021197e9183da007368"
+    sha256               x86_64_linux: "5a8c35e506bb565bea26b6269e0f5f180452be89aab830b053ea00cdf5f7a6a4" # linuxbrew-core
   end
 
-  depends_on "hdf5"
+  head do
+    url "https://github.com/ncbi/sra-tools.git", branch: "master"
+
+    resource "ngs-sdk" do
+      url "https://github.com/ncbi/ngs.git", branch: "master"
+    end
+
+    resource "ncbi-vdb" do
+      url "https://github.com/ncbi/ncbi-vdb.git", branch: "master"
+    end
+  end
+
+  depends_on "cmake" => :build
+  # Failed to build with `hdf5` at ncbi-vdb-source/libs/hdf5/hdf5dir.c:295:89:
+  # error: too few arguments to function call, expected 5, have 4
+  # herr_t h5e = H5Oget_info_by_name( self->hdf5_handle, buffer, &obj_info, H5P_DEFAULT );
+  # Try updating to `hdf5` on future release.
+  depends_on "hdf5@1.10"
   depends_on "libmagic"
 
+  uses_from_macos "perl" => :build
   uses_from_macos "libxml2"
-  uses_from_macos "perl"
-
-  on_linux do
-    depends_on "pkg-config" => :build
-
-    resource "which" do
-      url "https://cpan.metacpan.org/authors/id/P/PL/PLICEASE/File-Which-1.23.tar.gz"
-      sha256 "b79dc2244b2d97b6f27167fc3b7799ef61a179040f3abd76ce1e0a3b0bc4e078"
-    end
-
-    resource "build" do
-      url "https://cpan.metacpan.org/authors/id/P/PL/PLICEASE/Alien-Build-1.92.tar.gz"
-      sha256 "cd95173a72e988bdd7270a22699e6c9764b6aed6e6c4c022c623b1ce72040a79"
-    end
-
-    resource "tiny" do
-      url "https://cpan.metacpan.org/authors/id/D/DA/DAGOLDEN/Path-Tiny-0.108.tar.gz"
-      sha256 "3c49482be2b3eb7ddd7e73a5b90cff648393f5d5de334ff126ce7a3632723ff5"
-    end
-
-    resource "chdir" do
-      url "https://cpan.metacpan.org/authors/id/D/DA/DAGOLDEN/File-chdir-0.1010.tar.gz"
-      sha256 "efc121f40bd7a0f62f8ec9b8bc70f7f5409d81cd705e37008596c8efc4452b01"
-    end
-
-    resource "capture" do
-      url "https://cpan.metacpan.org/authors/id/D/DA/DAGOLDEN/Capture-Tiny-0.48.tar.gz"
-      sha256 "6c23113e87bad393308c90a207013e505f659274736638d8c79bac9c67cc3e19"
-    end
-
-    resource "libxml2" do
-      url "https://cpan.metacpan.org/authors/id/P/PL/PLICEASE/Alien-Libxml2-0.11.tar.gz"
-      sha256 "aa583d8e7677f944476bd595e3a25a99935ba15ca0b6a50927951e2ab8415ff3"
-    end
-
-    resource "libxml" do
-      url "https://cpan.metacpan.org/authors/id/S/SH/SHLOMIF/XML-LibXML-2.0201.tar.gz"
-      sha256 "e008700732502b3f1f0890696ec6e2dc70abf526cd710efd9ab7675cae199bc2"
-    end
-  end
-
-  resource "ngs-sdk" do
-    url "https://github.com/ncbi/ngs/archive/2.10.8.tar.gz"
-    sha256 "f20fae21439b69b6a3573c864a175e0f9aa47ca6dd12bea15e429b7c5a9b81b5"
-  end
-
-  resource "ncbi-vdb" do
-    url "https://github.com/ncbi/ncbi-vdb/archive/2.10.8.tar.gz"
-    sha256 "7a593aa22584db9443bb56ac01409707bca01b8f9601fe530dac81b73f1a44df"
-  end
-
-  unless OS.mac?
-    resource "which" do
-      url "https://cpan.metacpan.org/authors/id/P/PL/PLICEASE/File-Which-1.23.tar.gz"
-      sha256 "b79dc2244b2d97b6f27167fc3b7799ef61a179040f3abd76ce1e0a3b0bc4e078"
-    end
-
-    resource "build" do
-      url "https://cpan.metacpan.org/authors/id/P/PL/PLICEASE/Alien-Build-1.92.tar.gz"
-      sha256 "cd95173a72e988bdd7270a22699e6c9764b6aed6e6c4c022c623b1ce72040a79"
-    end
-
-    resource "tiny" do
-      url "https://cpan.metacpan.org/authors/id/D/DA/DAGOLDEN/Path-Tiny-0.108.tar.gz"
-      sha256 "3c49482be2b3eb7ddd7e73a5b90cff648393f5d5de334ff126ce7a3632723ff5"
-    end
-
-    resource "chdir" do
-      url "https://cpan.metacpan.org/authors/id/D/DA/DAGOLDEN/File-chdir-0.1010.tar.gz"
-      sha256 "efc121f40bd7a0f62f8ec9b8bc70f7f5409d81cd705e37008596c8efc4452b01"
-    end
-
-    resource "capture" do
-      url "https://cpan.metacpan.org/authors/id/D/DA/DAGOLDEN/Capture-Tiny-0.48.tar.gz"
-      sha256 "6c23113e87bad393308c90a207013e505f659274736638d8c79bac9c67cc3e19"
-    end
-
-    resource "libxml2" do
-      url "https://cpan.metacpan.org/authors/id/P/PL/PLICEASE/Alien-Libxml2-0.11.tar.gz"
-      sha256 "aa583d8e7677f944476bd595e3a25a99935ba15ca0b6a50927951e2ab8415ff3"
-    end
-
-    resource "libxml" do
-      url "https://cpan.metacpan.org/authors/id/S/SH/SHLOMIF/XML-LibXML-2.0201.tar.gz"
-      sha256 "e008700732502b3f1f0890696ec6e2dc70abf526cd710efd9ab7675cae199bc2"
-    end
-  end
 
   def install
-    # sratoolkit seems to have race conditions during the build and exhibit
-    # during pacbio util builds
-    # Issue: https://github.com/Linuxbrew/homebrew-core/issues/5323
-    ENV.deparallelize unless OS.mac?
+    libxml2_prefix = if OS.mac?
+      MacOS.sdk_path/"usr"
+    else
+      Formula["libxml2"].opt_prefix
+    end
+    with_formula_args = %W[
+      --with-hdf5-prefix=#{Formula["hdf5@1.10"].opt_prefix}
+      --with-magic-prefix=#{Formula["libmagic"].opt_prefix}
+      --with-xml2-prefix=#{libxml2_prefix}
+    ]
 
     ngs_sdk_prefix = buildpath/"ngs-sdk-prefix"
     resource("ngs-sdk").stage do
       cd "ngs-sdk" do
-        system "./configure",
-          "--prefix=#{ngs_sdk_prefix}",
-          "--build=#{buildpath}/ngs-sdk-build"
+        system "./configure", "--prefix=#{ngs_sdk_prefix}",
+                              "--build=#{buildpath}/ngs-sdk-build"
         system "make"
         system "make", "install"
       end
@@ -125,10 +78,18 @@ class Sratoolkit < Formula
     ncbi_vdb_build = buildpath/"ncbi-vdb-build"
     ncbi_vdb_source.install resource("ncbi-vdb")
     cd ncbi_vdb_source do
-      system "./configure",
-        "--prefix=#{buildpath/"ncbi-vdb-prefix"}",
-        "--with-ngs-sdk-prefix=#{ngs_sdk_prefix}",
-        "--build=#{ncbi_vdb_build}"
+      # Fix detection of hdf5 library on macOS as Apple Clang linker doesn't
+      # allow mixing static (-Wl,-Bstatic) and dynamic (-Wl,-Bdynamic) libraries
+      inreplace "setup/konfigure.perl", "-Wl,-Bstatic -lhdf5 -Wl,-Bdynamic", "-lhdf5" if OS.mac?
+
+      # Fix Linux error: `pshufb' is not supported on `generic64.aes'
+      # Upstream ref: https://github.com/ncbi/ncbi-vdb/issues/14
+      inreplace "libs/krypto/Makefile", "-Wa,-march=generic64+aes", "" if OS.linux?
+
+      system "./configure", "--prefix=#{buildpath}/ncbi-vdb-prefix",
+                            "--build=#{ncbi_vdb_build}",
+                            "--with-ngs-sdk-prefix=#{ngs_sdk_prefix}",
+                            *with_formula_args
       ENV.deparallelize { system "make" }
     end
 
@@ -136,52 +97,28 @@ class Sratoolkit < Formula
     # Upstream PR: https://github.com/ncbi/sra-tools/pull/105
     inreplace "tools/copycat/Makefile", "-smagic-static", "-smagic"
 
-    # Fix the error: undefined reference to `SZ_encoder_enabled'
-    # Issue: https://github.com/Linuxbrew/homebrew-core/issues/5323
-    inreplace "tools/pacbio-load/Makefile", "-shdf5 ", "-shdf5 -ssz " unless OS.mac?
+    # Fix detection of hdf5 library on macOS as Apple Clang linker doesn't
+    # allow mixing static (-Wl,-Bstatic) and dynamic (-Wl,-Bdynamic) libraries
+    inreplace "setup/konfigure.perl", "-Wl,-Bstatic -lhdf5 -Wl,-Bdynamic", "-lhdf5" if OS.mac?
 
-    system "./configure",
-      "--prefix=#{prefix}",
-      "--with-ngs-sdk-prefix=#{ngs_sdk_prefix}",
-      "--with-ncbi-vdb-sources=#{ncbi_vdb_source}",
-      "--with-ncbi-vdb-build=#{ncbi_vdb_build}",
-      "--build=#{buildpath}/sra-tools-build"
+    # Fix the error: utf8proc.o: linker input file unused because linking not done
+    # Upstream issue: https://github.com/ncbi/sra-tools/issues/283
+    if OS.linux?
+      inreplace "tools/driver-tool/utf8proc/Makefile",
+                "$(CC) $(LDFLAGS) -shared",
+                "#{ENV.cc} $(LDFLAGS) -shared"
+    end
 
+    system "./configure", "--prefix=#{prefix}",
+                          "--build=#{buildpath}/sra-tools-build",
+                          "--with-ngs-sdk-prefix=#{ngs_sdk_prefix}",
+                          "--with-ncbi-vdb-sources=#{ncbi_vdb_source}",
+                          "--with-ncbi-vdb-build=#{ncbi_vdb_build}",
+                          *with_formula_args
     system "make", "install"
 
     # Remove non-executable files.
-    rm_rf [bin/"magic", bin/"ncbi"]
-
-    unless OS.mac?
-      ENV.prepend_create_path "PERL5LIB", libexec/"lib/perl5"
-      ENV.prepend_path "PERL5LIB", libexec/"lib"
-
-      %w[
-        which
-        build
-        tiny
-        chdir
-        capture
-        libxml2
-        libxml
-      ].each do |r|
-        resource(r).stage do
-          if File.exist?("Makefile.PL")
-            system "perl", "Makefile.PL", "INSTALL_BASE=#{libexec}"
-            system "make"
-            system "make", "install"
-          elsif File.exist?("Build.PL")
-            system "perl", "Build.PL", "--install_base", libexec
-            system "./Build"
-            system "./Build", "install"
-          else
-            raise "UNKNOWN BUILD SYSTEM"
-          end
-        end
-      end
-
-      bin.env_script_all_files(libexec/"bin", PERL5LIB: ENV["PERL5LIB"])
-    end
+    rm_r [bin/"magic", bin/"ncbi"]
   end
 
   test do
@@ -195,3 +132,17 @@ class Sratoolkit < Formula
     assert_match "@SRR000001.1 EM7LVYS02FOYNU length=284", File.read("SRR000001.fastq")
   end
 end
+
+__END__
+diff --git a/vdb3/interfaces/memory/MemoryManagerItf.hpp b/vdb3/interfaces/memory/MemoryManagerItf.hpp
+index d802ba79..84a88aa5 100644
+--- a/vdb3/interfaces/memory/MemoryManagerItf.hpp
++++ b/vdb3/interfaces/memory/MemoryManagerItf.hpp
+@@ -26,6 +26,7 @@
+ #pragma once
+ 
+ #include <memory>
++#include <stddef.h>
+ 
+ namespace VDB3
+ {

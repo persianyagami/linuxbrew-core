@@ -1,26 +1,33 @@
 class Openjdk < Formula
   desc "Development kit for the Java programming language"
   homepage "https://openjdk.java.net/"
-  url "https://hg.openjdk.java.net/jdk-updates/jdk15u/archive/jdk-15.0.1-ga.tar.bz2"
-  sha256 "9c5be662f5b166b5c82c27de29b71f867cff3ff4570f4c8fa646490c4529135a"
-  license :cannot_represent
+  url "https://github.com/openjdk/jdk17u/archive/jdk-17-ga.tar.gz"
+  sha256 "8971e4c3555fffae60bd58a5fb403e51a1e0dda14645c6214b81ceff954dd411"
+  license "GPL-2.0-only" => { with: "Classpath-exception-2.0" }
 
-  bottle do
-    cellar :any
-    sha256 "6f31366f86a5eacf66673fca9ad647b98b207820f8cfea49a22af596395d3dba" => :big_sur
-    sha256 "9376a1c6fdf8b0268b6cb56c9878358df148b530fcb0e3697596155fad3ca8d7" => :catalina
-    sha256 "a4f00dc8b4c69bff53828f32c82b0a6be41b23a69a7775a95cdbc9e01d9bdb68" => :mojave
-    sha256 "bef2e4a43a6485253c655979cfc719332fb8631792720c0b9f6591559fb513f1" => :high_sierra
-    sha256 "318eb6cddc71cff93aaf9c419730a05d802cef0270051907aa2f938cbf1b4512" => :x86_64_linux
+  livecheck do
+    url :stable
+    regex(/^jdk[._-]v?(\d+(?:\.\d+)*)-ga$/i)
   end
 
-  keg_only "it shadows the macOS `java` wrapper"
+  bottle do
+    sha256 cellar: :any, arm64_big_sur: "5f1fcaf9ae3b8c8754d178c254ebbc968adcf598e6cbb7a07738c740b4124a3c"
+    sha256 cellar: :any, big_sur:       "a5a37760a9ca28869fa56dfa23f692e14f184c3d0b989be1675fda37b3475747"
+    sha256 cellar: :any, catalina:      "2438f3d3d2b0590be174654121126c9236328dc0b3a85c89ab7f28de96ae2863"
+    sha256 cellar: :any, mojave:        "dbb4c5a7d6f6c465b88674417e5fd10ab807daeed7ce8f4617d66010d7c4deb4"
+    sha256               x86_64_linux:  "4c25d31f63c74eaf5b2404054def5307af17e562e9c4241c0c24cd977288f862" # linuxbrew-core
+  end
+
+  keg_only :shadowed_by_macos
 
   depends_on "autoconf" => :build
 
-  unless OS.mac?
+  on_linux do
+    depends_on "pkg-config" => :build
+    depends_on "alsa-lib"
     depends_on "cups"
     depends_on "fontconfig"
+    depends_on "gcc"
     depends_on "libx11"
     depends_on "libxext"
     depends_on "libxrandr"
@@ -29,104 +36,95 @@ class Openjdk < Formula
     depends_on "libxtst"
     depends_on "unzip"
     depends_on "zip"
+
+    ignore_missing_libraries "libjvm.so"
   end
 
-  ignore_missing_libraries "libjvm.so" if OS.linux?
-
-  on_linux do
-    depends_on "pkg-config" => :build
-    depends_on "alsa-lib"
-  end
+  fails_with gcc: "5"
 
   # From https://jdk.java.net/archive/
   resource "boot-jdk" do
     on_macos do
-      url "https://download.java.net/java/GA/jdk14.0.2/205943a0976c4ed48cb16f1043c5c647/12/GPL/openjdk-14.0.2_osx-x64_bin.tar.gz"
-      sha256 "386a96eeef63bf94b450809d69ceaa1c9e32a97230e0a120c1b41786b743ae84"
+      if Hardware::CPU.arm?
+        url "https://download.java.net/java/GA/jdk17/0d483333a00540d886896bac774ff48b/35/GPL/openjdk-17_macos-aarch64_bin.tar.gz"
+        sha256 "b5bf6377aabdc935bd72b36c494e178b12186b0e1f4be50f35134daa33bda052"
+      else
+        url "https://download.java.net/java/GA/jdk16.0.2/d4a915d82b4c4fbb9bde534da945d746/7/GPL/openjdk-16.0.2_osx-x64_bin.tar.gz"
+        sha256 "e65f2437585f16a01fa8e10139d0d855e8a74396a1dfb0163294ed17edd704b8"
+      end
     end
     on_linux do
-      url "https://download.java.net/java/GA/jdk14.0.2/205943a0976c4ed48cb16f1043c5c647/12/GPL/openjdk-14.0.2_linux-x64_bin.tar.gz"
-      sha256 "91310200f072045dc6cef2c8c23e7e6387b37c46e9de49623ce0fa461a24623d"
+      url "https://download.java.net/java/GA/jdk16.0.2/d4a915d82b4c4fbb9bde534da945d746/7/GPL/openjdk-16.0.2_linux-x64_bin.tar.gz"
+      sha256 "6c714ded7d881ca54970ec949e283f43d673a142fda1de79b646ddd619da9c0c"
     end
-  end
-
-  # Fix build on Xcode 12
-  # https://bugs.openjdk.java.net/browse/JDK-8253375
-  patch do
-    url "https://github.com/openjdk/jdk/commit/f80a6066e45c3d53a61715abfe71abc3b2e162a1.patch?full_index=1"
-    sha256 "5320e5e8db5f94432925d7c240f41c12b10ff9a0afc2f7a8ab0728a114c43cdb"
-  end
-
-  # Fix build on Xcode 12
-  # https://bugs.openjdk.java.net/browse/JDK-8253791
-  patch do
-    url "https://github.com/openjdk/jdk/commit/4622a18a72c30c4fc72c166bee7de42903e1d036.patch?full_index=1"
-    sha256 "4e4448a5bf68843c21bf96f510ea270aa795c5fac41fd9088f716822788d0f57"
   end
 
   def install
-    boot_jdk_dir = Pathname.pwd/"boot-jdk"
-    resource("boot-jdk").stage boot_jdk_dir
-    boot_jdk = OS.mac? ? boot_jdk_dir/"Contents/Home" : boot_jdk_dir
+    boot_jdk = Pathname.pwd/"boot-jdk"
+    resource("boot-jdk").stage boot_jdk
+    boot_jdk /= "Contents/Home" if OS.mac?
     java_options = ENV.delete("_JAVA_OPTIONS")
 
-    # Inspecting .hg_archival.txt to find a build number
-    # The file looks like this:
-    #
-    # repo: fd16c54261b32be1aaedd863b7e856801b7f8543
-    # node: e3f940bd3c8fcdf4ca704c6eb1ac745d155859d5
-    # branch: default
-    # tag: jdk-15+36
-    # tag: jdk-15-ga
-    #
-    # Since openjdk has move their development from mercurial to git and GitHub
-    # this approach may need some changes in the future
-    #
-    build = File.read(".hg_archival.txt")
-                .scan(/^tag: jdk-#{version}\+(.+)$/)
-                .map(&:first)
-                .map(&:to_i)
-                .max
-    raise "cannot find build number in .hg_archival.txt" if build.nil?
+    args = %W[
+      --disable-warnings-as-errors
+      --with-boot-jdk-jvmargs=#{java_options}
+      --with-boot-jdk=#{boot_jdk}
+      --with-debug-level=release
+      --with-jvm-variants=server
+      --with-native-debug-symbols=none
+      --with-vendor-bug-url=#{tap.issues_url}
+      --with-vendor-name=#{tap.user}
+      --with-vendor-url=#{tap.issues_url}
+      --with-vendor-version-string=#{tap.user}
+      --with-vendor-vm-bug-url=#{tap.issues_url}
+      --with-version-build=#{revision}
+      --without-version-opt
+      --without-version-pre
+    ]
+
+    args += if OS.mac?
+      %W[
+        --enable-dtrace
+        --with-extra-ldflags=-headerpad_max_install_names
+        --with-sysroot=#{MacOS.sdk_path}
+      ]
+    else
+      %W[
+        --with-x=#{HOMEBREW_PREFIX}
+        --with-cups=#{HOMEBREW_PREFIX}
+        --with-fontconfig=#{HOMEBREW_PREFIX}
+      ]
+    end
 
     chmod 0755, "configure"
-    system "./configure", "--without-version-pre",
-                          "--without-version-opt",
-                          "--with-version-build=#{build}",
-                          "--with-toolchain-path=/usr/bin",
-                          ("--with-extra-ldflags=-headerpad_max_install_names" if OS.mac?),
-                          ("--with-sysroot=#{MacOS.sdk_path}" if OS.mac?),
-                          "--with-boot-jdk=#{boot_jdk}",
-                          "--with-boot-jdk-jvmargs=#{java_options}",
-                          "--with-debug-level=release",
-                          "--with-native-debug-symbols=none",
-                          ("--enable-dtrace" if OS.mac?),
-                          "--with-jvm-variants=server",
-                          ("--with-x=#{HOMEBREW_PREFIX}" unless OS.mac?),
-                          ("--with-cups=#{HOMEBREW_PREFIX}" unless OS.mac?),
-                          ("--with-fontconfig=#{HOMEBREW_PREFIX}" unless OS.mac?)
+    system "./configure", *args
 
-    ENV.deparallelize { system "make", "images" }
+    ENV["MAKEFLAGS"] = "JOBS=#{ENV.make_jobs}"
+    system "make", "images"
 
     if OS.mac?
       jdk = Dir["build/*/images/jdk-bundle/*"].first
       libexec.install jdk => "openjdk.jdk"
-      bin.install_symlink Dir["#{libexec}/openjdk.jdk/Contents/Home/bin/*"]
-      include.install_symlink Dir["#{libexec}/openjdk.jdk/Contents/Home/include/*.h"]
-      include.install_symlink Dir["#{libexec}/openjdk.jdk/Contents/Home/include/darwin/*.h"]
+      bin.install_symlink Dir[libexec/"openjdk.jdk/Contents/Home/bin/*"]
+      include.install_symlink Dir[libexec/"openjdk.jdk/Contents/Home/include/*.h"]
+      include.install_symlink Dir[libexec/"openjdk.jdk/Contents/Home/include/darwin/*.h"]
+      man1.install_symlink Dir[libexec/"openjdk.jdk/Contents/Home/man/man1/*"]
     else
       libexec.install Dir["build/linux-x86_64-server-release/images/jdk/*"]
-      bin.install_symlink Dir["#{libexec}/bin/*"]
-      include.install_symlink Dir["#{libexec}/include/*.h"]
-      include.install_symlink Dir["#{libexec}/include/linux/*.h"]
+      bin.install_symlink Dir[libexec/"bin/*"]
+      include.install_symlink Dir[libexec/"include/*.h"]
+      include.install_symlink Dir[libexec/"include/linux/*.h"]
+      man1.install_symlink Dir[libexec/"man/man1/*"]
     end
   end
 
   def caveats
-    <<~EOS
-      For the system Java wrappers to find this JDK, symlink it with
-        sudo ln -sfn #{opt_libexec}/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
-    EOS
+    on_macos do
+      <<~EOS
+        For the system Java wrappers to find this JDK, symlink it with
+          sudo ln -sfn #{opt_libexec}/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
+      EOS
+    end
   end
 
   test do

@@ -4,33 +4,34 @@
 class Mu < Formula
   desc "Tool for searching e-mail messages stored in the maildir-format"
   homepage "https://www.djcbsoftware.nl/code/mu/"
-  url "https://github.com/djcb/mu/archive/1.4.13.tar.gz"
-  sha256 "8856465501dccd9101eda1a29bedada010e6ff828c9d922f1abe86b152a2741b"
+  url "https://github.com/djcb/mu/releases/download/1.6.6/mu-1.6.6.tar.xz"
+  sha256 "42cd3d20f2a670fe57bedcde049b6b2b030fe51c507fdfdfeb6aa865f1f443b5"
   license "GPL-3.0-or-later"
 
   # We restrict matching to versions with an even-numbered minor version number,
   # as an odd-numbered minor version number indicates a development version:
   # https://github.com/djcb/mu/commit/23f4a64bdcdee3f9956a39b9a5a4fd0c5c2370ba
   livecheck do
-    url :head
+    url :stable
     regex(/^v?(\d+\.\d*[02468](?:\.\d+)*)$/i)
   end
 
   bottle do
-    sha256 "7feecba2de7299316bd86ced01e1546691c63d0b563a2c83b3957b8397169ad8" => :big_sur
-    sha256 "c2db643c69aaae50c5127dafd2018de2239c344c2b3a1cacb80cdb77d3710469" => :catalina
-    sha256 "c547ba5d0d7272e92a75c0c4476979b4e56066c6e1c5b98eff408bc5f87f7d8a" => :mojave
-    sha256 "a7f8c294053aa05cfe1942361471f4f27cf0c2631940952d44ebe1c6455adab0" => :high_sierra
+    sha256 cellar: :any,                 arm64_big_sur: "3e8e35eb6318b5ed58556f9ac0c4fa25c808c9a264c00b14d71390f34c983381"
+    sha256 cellar: :any,                 big_sur:       "29f19a1002c14ad90add4cac9a68b3144fab66db2ed5909ee6cd45984a9b4147"
+    sha256 cellar: :any,                 catalina:      "10c340b63a84e07431cdeea94682bfd41920a667abf2657cc21c495ca022fcda"
+    sha256 cellar: :any,                 mojave:        "f3fbce2bc43a6bc45bd2ca9d5ef2ad4a16bea47e80a0ffc42349ff3ec56f8ded"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "dec7d55287c289dc6e719d19f492abe0c64880190c65ef75ba537bc73e75c227" # linuxbrew-core
   end
 
   head do
     url "https://github.com/djcb/mu.git"
 
+    depends_on "autoconf" => :build
     depends_on "autoconf-archive" => :build
+    depends_on "automake" => :build
   end
 
-  depends_on "autoconf" => :build
-  depends_on "automake" => :build
   depends_on "emacs" => :build
   depends_on "libgpg-error" => :build
   depends_on "libtool" => :build
@@ -42,9 +43,16 @@ class Mu < Formula
 
   uses_from_macos "texinfo" => :build
 
+  on_linux do
+    depends_on "gcc"
+  end
+
+  fails_with gcc: "5"
+
   def install
-    system "autoreconf", "-ivf"
+    system "autoreconf", "-ivf" if build.head?
     system "./configure", "--disable-dependency-tracking",
+                          "--disable-guile",
                           "--prefix=#{prefix}",
                           "--with-lispdir=#{elisp}"
     system "make"

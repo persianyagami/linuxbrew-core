@@ -1,32 +1,36 @@
 class Ispc < Formula
   desc "Compiler for SIMD programming on the CPU"
   homepage "https://ispc.github.io"
-  url "https://github.com/ispc/ispc/archive/v1.14.1.tar.gz"
-  sha256 "3a7ee9ab90b9e9932b7b4effc9bb3ef45ca271d60d9ec6bc8c335242b5ec097b"
+  url "https://github.com/ispc/ispc/archive/v1.16.1.tar.gz"
+  sha256 "e5dcd0d85df6ed5feb454ad9ec295083a07d7459fcaba00d5dd6266ceb476399"
   license "BSD-3-Clause"
   revision 1
 
   bottle do
-    cellar :any
-    sha256 "633a23c16499ef408171d25d2350510ae91d7f73c4449a1fe29514a1aa8ddd08" => :big_sur
-    sha256 "7d830ca3028045971afbd4bd9adc6c73caf6bc79d0da341bb72acef0067e978b" => :catalina
-    sha256 "a93ed9cd6c35b8b8cda6e0128438fa12f5f2bf8b92ced82d507c8f792a229634" => :mojave
-    sha256 "1607e7d662670ed74fe122004c1ac7ace19ab1eb6c3939fe196155e90ebbd897" => :high_sierra
+    sha256 cellar: :any, arm64_big_sur: "816feef4722edd8866c394110c503338eaba0bb373c87ddb9a898dc56b1adac7"
+    sha256 cellar: :any, big_sur:       "a82168d4f3a51a8078eb3603a9e3810f5a81e32e131fce032f4b505d6d0147e7"
+    sha256 cellar: :any, catalina:      "168dcec41346433e47d5478793216c86b96c4e9c2a31673e21de60b5f6a95427"
+    sha256 cellar: :any, mojave:        "d19b58b941d33a38e574e351d85445c5f8aee6c9ca6a164db874a2753138ae1c"
   end
 
   depends_on "bison" => :build
   depends_on "cmake" => :build
   depends_on "flex" => :build
   depends_on "python@3.9" => :build
-  depends_on "llvm"
+  depends_on "llvm@12"
+
+  def llvm
+    deps.map(&:to_formula).find { |f| f.name.match? "^llvm" }
+  end
 
   def install
     args = std_cmake_args + %W[
       -DISPC_INCLUDE_EXAMPLES=OFF
       -DISPC_INCLUDE_TESTS=OFF
       -DISPC_INCLUDE_UTILS=OFF
-      -DLLVM_TOOLS_BINARY_DIR='#{Formula["llvm"].opt_bin}'
+      -DLLVM_TOOLS_BINARY_DIR='#{llvm.opt_bin}'
       -DISPC_NO_DUMPS=ON
+      -DARM_ENABLED=#{Hardware::CPU.arm? ? "ON" : "OFF"}
     ]
 
     mkdir "build" do
@@ -49,7 +53,15 @@ class Ispc < Formula
         }
       }
     EOS
-    system bin/"ispc", "--arch=x86-64", "--target=sse2", testpath/"simple.ispc",
+
+    if Hardware::CPU.arm?
+      arch = "aarch64"
+      target = "neon"
+    else
+      arch = "x86-64"
+      target = "sse2"
+    end
+    system bin/"ispc", "--arch=#{arch}", "--target=#{target}", testpath/"simple.ispc",
       "-o", "simple_ispc.o", "-h", "simple_ispc.h"
 
     (testpath/"simple.cpp").write <<~EOS

@@ -1,9 +1,10 @@
 class Getdns < Formula
   desc "Modern asynchronous DNS API"
   homepage "https://getdnsapi.net"
-  url "https://getdnsapi.net/releases/getdns-1-6-0/getdns-1.6.0.tar.gz"
-  sha256 "40e5737471a3902ba8304b0fd63aa7c95802f66ebbc6eae53c487c8e8a380f4a"
+  url "https://getdnsapi.net/releases/getdns-1-7-0/getdns-1.7.0.tar.gz"
+  sha256 "ea8713ce5e077ac76b1418ceb6afd25e6d4e39e9600f6f5e81d3a3a13a60f652"
   license "BSD-3-Clause"
+  revision 1
   head "https://github.com/getdnsapi/getdns.git", branch: "develop"
 
   # We check the GitHub releases instead of https://getdnsapi.net/releases/,
@@ -15,17 +16,18 @@ class Getdns < Formula
   end
 
   bottle do
-    cellar :any
-    sha256 "51668c45104b39417c144eb17583f7fb23b8fde01789a6bc1ce74afe45b158b2" => :big_sur
-    sha256 "e921bc22b5d49af0cf93a3daf035828b286cf28faf4e3916c863214c58cb100d" => :catalina
-    sha256 "dddc38b808f9901c02b56755838005ff9f04cb665f40d7145709838e8e38ef99" => :mojave
-    sha256 "431361fe29326a2c2b8ecb57b87f8a09c26fc21b5e3170c74bfe61b9ce6b1864" => :high_sierra
-    sha256 "6179060eae173ee58e6674ba59ed49e2dd1ff0ae7d5339d0225b8edaaaa456ef" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "6418fbe20eac5674ac1492eccba8941c57ab6111fca7a174144a0f7732c037c1"
+    sha256 cellar: :any,                 big_sur:       "d98dc03e72b3e2e6814f47c8d947ff7667d65b79cf4b11f3b1913d2e17f51e84"
+    sha256 cellar: :any,                 catalina:      "3481bfeb92cb2b50ad019c3cc816fe73c3f26dec20e80b4b52536e83c8ff9752"
+    sha256 cellar: :any,                 mojave:        "fabcba2c64119aa84e892266a93260d6c8a6d650e754568b6f5767c9223de001"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "bd9e46bc8d092c657341df3c80991a415c7eeea380e61d8ecc4f4d8f7d0068ea" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
+  depends_on "libev"
   depends_on "libevent"
   depends_on "libidn2"
+  depends_on "libuv"
   depends_on "openssl@1.1"
   depends_on "unbound"
 

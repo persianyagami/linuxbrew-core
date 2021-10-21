@@ -4,32 +4,41 @@ class Ledger < Formula
   url "https://github.com/ledger/ledger/archive/v3.2.1.tar.gz"
   sha256 "92bf09bc385b171987f456fe3ee9fa998ed5e40b97b3acdd562b663aa364384a"
   license "BSD-3-Clause"
-  revision 3
+  revision 7
   head "https://github.com/ledger/ledger.git"
 
   livecheck do
-    url :head
+    url :stable
     regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    sha256 "4946e7b57a72305beb26c88191dcce36e795108525f5eeea10873168c35fe13d" => :big_sur
-    sha256 "3aa99883691fcd92825ba5596633cd7958ccdbc7b14d54879a906b20c8936d2d" => :catalina
-    sha256 "4c50dd4776d1014f83f3f08242af9d0309db9c6afddd45e88912025be803adae" => :mojave
-    sha256 "c63574b6f1df94721c5f20c7d04607a1fe6c3b85f3e72064fd2a10525d12dcd2" => :high_sierra
+    sha256 cellar: :any,                 arm64_big_sur: "f80c6502c9966f8c6c0fdaa04257abe0ec381ac1e71d5c8c7fa040b5f17bf7eb"
+    sha256 cellar: :any,                 big_sur:       "43b45dca311aaac9d9beaa116d7460a9c8ae1018e196e627811f34b0a33b4e33"
+    sha256 cellar: :any,                 catalina:      "339bea75fa51d131603613fb31e95c0b0774cc00e30a7accbcf0560bf8d8f900"
+    sha256 cellar: :any,                 mojave:        "7a030e18924a202197ca72c04fd9f147930e021b428581c7e111dd00acb0dd2d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3712b10009b31cd62388568f4fc1530e25f89afe991f8ecc3a3a931d7ba4a9d5" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
   depends_on "boost"
   depends_on "gmp"
   depends_on "mpfr"
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   uses_from_macos "groff"
 
+  # Compatibility with Boost 1.76
+  # https://github.com/ledger/ledger/issues/2030
+  # https://github.com/ledger/ledger/pull/2036
+  patch do
+    url "https://github.com/ledger/ledger/commit/e60717ccd78077fe4635315cb2657d1a7f539fca.patch?full_index=1"
+    sha256 "edba1dd7bde707f510450db3197922a77102d5361ed7a5283eb546fbf2221495"
+  end
+
   def install
     ENV.cxx11
-    ENV.prepend_path "PATH", Formula["python@3.9"].opt_libexec/"bin"
+    ENV.prepend_path "PATH", Formula["python@3.10"].opt_libexec/"bin"
 
     args = %W[
       --jobs=#{ENV.make_jobs}

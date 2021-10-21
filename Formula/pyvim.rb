@@ -6,22 +6,17 @@ class Pyvim < Formula
   url "https://files.pythonhosted.org/packages/7b/7c/4c44b77642e866bbbe391584433c11977aef5d1dc05da879d3e8476cab10/pyvim-3.0.2.tar.gz"
   sha256 "da94f7a8e8c4b2b4611196987c3ca2840b0011cc399618793e551f7149f26c6a"
   license "BSD-3-Clause"
-  revision OS.mac? ? 1 : 2
-
-  livecheck do
-    url :stable
-  end
+  revision OS.mac? ? 2 : 3
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "868ee3749fceb49de0999143f39ba0514a5c719631df8dc7439097b3a0589884" => :big_sur
-    sha256 "3ecf8e98474fabad21f04c32a9e746e608f4574a3041135093c9dfd4e333cd19" => :catalina
-    sha256 "08cb6c9665bb39e581cd28cd3aad2971c8100735d0361382b98a910344bec2ff" => :mojave
-    sha256 "28c123775817e3cf99d29ec4cb466efd46805731d29b46629a5b67e0a1dff690" => :high_sierra
-    sha256 "043be2f37a454da68e73dc08579b8a8d7c2b23456e7819212f88ca81979b3ed2" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "b321a033c9da601baa469130c8bfd363816e9694a2d8caa2d601339e662b7d72"
+    sha256 cellar: :any_skip_relocation, big_sur:       "0dab59c0c17cc65d81a0ce2e83102d42e188169f6a2ae91c2c08b8ec2ffb2038"
+    sha256 cellar: :any_skip_relocation, catalina:      "fb348c98666df443ca4290cb74fd0c3d9758389bca62ac72ac8595fc3a0025f9"
+    sha256 cellar: :any_skip_relocation, mojave:        "7f3586932432c8244a8d48adc731f122380035b233eb0c1c84d6c6ffb2751e88"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d36a0aca27c55edd1c0b3d89964f471d818d55b2d4dd13bdbe4a5899b13d29a7" # linuxbrew-core
   end
 
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   resource "docopt" do
     url "https://files.pythonhosted.org/packages/a2/55/8f8cab2afd404cf578136ef2cc5dfb50baa1761b68c9da1fb1e4eed343c9/docopt-0.6.2.tar.gz"
@@ -58,7 +53,9 @@ class Pyvim < Formula
   end
 
   test do
-    return if ENV["CI"]
+    on_linux do
+      return if ENV["HOMEBREW_GITHUB_ACTIONS"]
+    end
 
     # Need a pty due to https://github.com/jonathanslenders/pyvim/issues/101
     require "pty"

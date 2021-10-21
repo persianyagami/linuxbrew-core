@@ -2,16 +2,16 @@ class Xgboost < Formula
   desc "Scalable, Portable and Distributed Gradient Boosting Library"
   homepage "https://xgboost.ai/"
   url "https://github.com/dmlc/xgboost.git",
-      tag:      "v1.3.0",
-      revision: "1bf389998383f333490155dba4608bff9ca63b42"
+      tag:      "v1.4.2",
+      revision: "522b8977c27b422a4cdbe1ecc59a4d57a5df2c36"
   license "Apache-2.0"
 
   bottle do
-    cellar :any
-    sha256 "56c88f363161fcf695d5e3fa235256ef22465d405d401aa6d4322c0b79bfb02e" => :big_sur
-    sha256 "5c14b128cbe2c89a944df2cfb50543d9ea6d5890ab4bc3c834d83d42c2485800" => :catalina
-    sha256 "6a91a20f6d716f5a85e7ffd1ce5e6d957b43a414dde7a38fc4d735350dd1556b" => :mojave
-    sha256 "b22be0c6b3db917e0f290bacb2b4ffbf9cc28fe21564358227a1b1f51507a0d3" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "5db187f5a6d6c66a3fd546f7d1855cdfa102c67475de1289d3ec04dd7fbedec5"
+    sha256 cellar: :any,                 big_sur:       "e81b8fd6533fce3a66f0b013dfc0d3c0eede4b54d2071dc6933201d22b135f34"
+    sha256 cellar: :any,                 catalina:      "919b6d95848c782d2c330a7abbb273be7dd3babd4e38395b9ab2065bcea793d0"
+    sha256 cellar: :any,                 mojave:        "a0bc2283a8dfd93406e1b9449286eb4153f306c0cdea70fc88349e970ace4bf7"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "bcfb34b840e3373e664481f75c325c81f2e9bd10bf3405b7339a111d889b3f9f" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
@@ -19,7 +19,23 @@ class Xgboost < Formula
   depends_on "numpy"
   depends_on "scipy"
 
+  on_macos do
+    depends_on "llvm" => :build if DevelopmentTools.clang_build_version <= 1100
+  end
+
+  fails_with :clang do
+    build 1100
+    cause <<-EOS
+      clang: error: unable to execute command: Segmentation fault: 11
+      clang: error: clang frontend command failed due to signal (use -v to see invocation)
+      make[2]: *** [src/CMakeFiles/objxgboost.dir/tree/updater_quantile_hist.cc.o] Error 254
+    EOS
+  end
+
   def install
+    ENV.remove "HOMEBREW_LIBRARY_PATHS", Formula["llvm"].opt_lib
+    ENV.llvm_clang if OS.mac? && (DevelopmentTools.clang_build_version <= 1100)
+
     mkdir "build" do
       system "cmake", *std_cmake_args, ".."
       system "make"
@@ -29,6 +45,9 @@ class Xgboost < Formula
   end
 
   test do
+    # Force use of Clang on Mojave
+    ENV.clang if OS.mac?
+
     cp_r (pkgshare/"demo"), testpath
     cd "demo/data" do
       cp "../CLI/binary_classification/mushroom.conf", "."

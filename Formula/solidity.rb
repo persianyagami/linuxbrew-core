@@ -1,8 +1,8 @@
 class Solidity < Formula
   desc "Contract-oriented programming language"
-  homepage "https://solidity.readthedocs.io"
-  url "https://github.com/ethereum/solidity/releases/download/v0.7.5/solidity_0.7.5.tar.gz"
-  sha256 "b0b0f010ddcd7d77dc78fbc0458001476a4d0fc2d325a7a26208fb357ce5e571"
+  homepage "https://soliditylang.org"
+  url "https://github.com/ethereum/solidity/releases/download/v0.8.9/solidity_0.8.9.tar.gz"
+  sha256 "36643d0282998136b610f740808acb4dc6728144bb9ee70e5fd4124cda85ddab"
   license all_of: ["GPL-3.0-or-later", "MIT", "BSD-3-Clause", "Apache-2.0", "CC0-1.0"]
 
   livecheck do
@@ -11,15 +11,22 @@ class Solidity < Formula
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "4af825a080afedf57d0bae5664e09d12d8169082df6131527f7af3844ae7ccf2" => :big_sur
-    sha256 "76c32257372ae1283395574a839cad3b684f737dbe7f34d911e9b659f21781da" => :catalina
-    sha256 "ca2f5a36270ee10a683fdee22db467a1699b898748aae1665e5c23a36f0af5cc" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "c9067a3ad9a391e5b44aebe95698e4c2a1dbf2a7ef9cb4d691f82ca161a14d4e"
+    sha256 cellar: :any_skip_relocation, big_sur:       "67eec440aaadb1bfa3b3e79adcc98595ccf4b20a330815463520a066c9e9d44b"
+    sha256 cellar: :any_skip_relocation, catalina:      "27e39f6e750a012dcedab5d7203e6a6a9d905fcada819345a2d1d35365f0f06e"
+    sha256 cellar: :any_skip_relocation, mojave:        "c1f61c3aaa6a0652d4cba95ebda4d7c4919f30f7ebea70ffa1223dc1092bca54"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "90664bc09fd6a7836c6cff3054dce6eba730c3643c4f7ac19addcd840acbec24" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
   depends_on xcode: ["11.0", :build]
   depends_on "boost"
+
+  on_linux do
+    depends_on "gcc" # For C++17
+  end
+
+  fails_with gcc: "5"
 
   def install
     mkdir "build" do
@@ -31,7 +38,7 @@ class Solidity < Formula
   test do
     (testpath/"hello.sol").write <<~EOS
       // SPDX-License-Identifier: GPL-3.0
-      pragma solidity ^0.7.0;
+      pragma solidity ^0.8.0;
       contract HelloWorld {
         function helloWorld() external pure returns (string memory) {
           return "Hello, World!";

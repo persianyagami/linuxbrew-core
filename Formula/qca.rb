@@ -1,31 +1,21 @@
 class Qca < Formula
   desc "Qt Cryptographic Architecture (QCA)"
   homepage "https://userbase.kde.org/QCA"
-  license "LGPL-2.1"
-  revision 3
-  head "https://invent.kde.org/libraries/qca.git"
-
-  stable do
-    url "https://download.kde.org/stable/qca/2.3.1/qca-2.3.1.tar.xz"
-    sha256 "c13851109abefc4623370989fae3a745bf6b1acb3c2a13a8958539823e974e4b"
-
-    # use major version for framework, instead of full version
-    # see: https://invent.kde.org/libraries/qca/-/merge_requests/34
-    patch do
-      url "https://invent.kde.org/libraries/qca/-/commit/f899a6aaad6747c703a9ee438a4a75bd7f6052f4.diff"
-      sha256 "1ae6e279d3e1e4dbe10ff80908517dab29e2b538f7c79384901d28bed69cbc9e"
-    end
-  end
+  url "https://download.kde.org/stable/qca/2.3.4/qca-2.3.4.tar.xz"
+  sha256 "6b695881a7e3fd95f73aaee6eaeab96f6ad17e515e9c2b3d4b3272d7862ff5c4"
+  license "LGPL-2.1-or-later"
+  head "https://invent.kde.org/libraries/qca.git", branch: "master"
 
   livecheck do
-    url :head
-    regex(/^v?(\d+(?:\.\d+)+)$/i)
+    url "https://download.kde.org/stable/qca/"
+    regex(%r{href=["']?v?(\d+(?:\.\d+)+)/?["' >]}i)
   end
 
   bottle do
-    sha256 "0ce2bbd226e16d2e037c61f404123be202e6b3be814f3eab5be83f95f6803978" => :big_sur
-    sha256 "55a109c49bc235dd6423f5924b3879c3c9677670bc45650306aa5f14cf9877aa" => :catalina
-    sha256 "41ba9d1f97eab606b1cf30566fa3b8f4a3c1bdf06b32c74deab067896fa6db7a" => :mojave
+    sha256 cellar: :any, arm64_big_sur: "3a2f700c9fbc3f1cdb941f8547345415a312397411f1ec1df5b2867a8f139955"
+    sha256 cellar: :any, big_sur:       "8049ff19056de9b02f71ab6bcda1cee91941d7bc0d4db3a17a6039b786470ae5"
+    sha256 cellar: :any, catalina:      "ac7fc8b88014e339d556e136f73c8db0246bef6ae65abe15c8f13858c8bd95b1"
+    sha256 cellar: :any, mojave:        "fc6386d75f4474fecc8710d99887a4f6c81dace19bd5eddaac5b20270664b0ea"
   end
 
   depends_on "cmake" => :build
@@ -36,7 +26,7 @@ class Qca < Formula
   depends_on "nss"
   depends_on "openssl@1.1"
   depends_on "pkcs11-helper"
-  depends_on "qt"
+  depends_on "qt@5"
 
   def install
     args = std_cmake_args

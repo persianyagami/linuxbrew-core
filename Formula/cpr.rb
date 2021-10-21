@@ -1,18 +1,17 @@
 class Cpr < Formula
   desc "C++ Requests, a spiritual port of Python Requests"
-  homepage "https://whoshuu.github.io/cpr/"
-  url "https://github.com/whoshuu/cpr.git",
-      tag:      "1.5.2",
-      revision: "41fbaca90160950f1397e0ffc6b58bd81063f131"
+  homepage "https://docs.libcpr.org/"
+  url "https://github.com/libcpr/cpr/archive/1.6.2.tar.gz"
+  sha256 "c45f9c55797380c6ba44060f0c73713fbd7989eeb1147aedb8723aa14f3afaa3"
   license "MIT"
-  head "https://github.com/whoshuu/cpr.git"
+  head "https://github.com/libcpr/cpr.git", branch: "master"
 
   bottle do
-    cellar :any
-    sha256 "0f3457ec4a948fb235d26d9bfdd0c1b3f53297c0e7c505a1f34a3d853907ddc8" => :big_sur
-    sha256 "51bbf276165a820d37e9d9dfc829e7dae6f100b57bbb4095283955924027a7e8" => :catalina
-    sha256 "66cfe69826f724c686417117ba2ef710e7765a35c39b648d6d239867f6c47473" => :mojave
-    sha256 "e1e825d5a6b1b58126a9e0dee2212980c505f863c35421429dfa69dd968bc8c1" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "6b725644e68fd8fd18ee1624248de28bff8e0c206d566852a4821714fed3099e"
+    sha256 cellar: :any,                 big_sur:       "f531320c598e51d6fa215fe35caf9766882349bb1e5d89319ec6a0937202f627"
+    sha256 cellar: :any,                 catalina:      "3c3d0ebe3de5371c93a5b1b68b599e9aee2d5abe2e8598a6775b463be05bcddc"
+    sha256 cellar: :any,                 mojave:        "608ac5168dd4ca3ab78d84827ccfce0abba0ad9699bef82ffad074a0b51aefc4"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e847ed5aff9686226c9986e874459b62d668389e41df1102053248a0ccce6cea" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
@@ -20,19 +19,11 @@ class Cpr < Formula
 
   uses_from_macos "curl"
 
-  # Fix system curl detection
-  # See https://github.com/whoshuu/cpr/pull/428
-  #
-  # Remove in the next release
-  patch do
-    url "https://github.com/whoshuu/cpr/commit/451fd1a896c963367ebb3d77cfe4550b2d5636f3.patch?full_index=1"
-    sha256 "74349209c5d28d9261871080341c735517b3e64e91ac6cc6884abb2767f14b33"
-  end
-
   def install
-    args = std_cmake_args
-    args << "-DUSE_SYSTEM_CURL=ON"
-    args << "-DBUILD_CPR_TESTS=OFF"
+    args = std_cmake_args + %w[
+      -DCPR_FORCE_USE_SYSTEM_CURL=ON
+      -DCPR_BUILD_TESTS=OFF
+    ]
 
     system "cmake", ".", *args, "-DBUILD_SHARED_LIBS=ON"
     system "make", "install"

@@ -1,30 +1,29 @@
 class Inko < Formula
   desc "Safe and concurrent object-oriented programming language"
   homepage "https://inko-lang.org/"
-  url "https://releases.inko-lang.org/0.8.1.tar.gz"
-  sha256 "02201fd6203d45e0920c849b91aae0adc459d654a27fb3405d181da275365ef5"
+  url "https://releases.inko-lang.org/0.9.0.tar.gz"
+  sha256 "311f6e675e6f7ca488a71022b62edbbc16946f907d7e1695f3f96747ece2051f"
   license "MPL-2.0"
+  revision 1
   head "https://gitlab.com/inko-lang/inko.git"
 
   bottle do
-    cellar :any
-    sha256 "a32d7804901931240ed8013c30dde09b24c56a25d0b6f2fd49a5ed5efa37a0fc" => :big_sur
-    sha256 "04de7a0e85ea41b689a758e52466595c8aa80454c9bf6fbfa9325679fdfeb6fd" => :catalina
-    sha256 "0ed7a6a90eefbf03348e9e0640f4fbd3869f70b773615df6f758f856950bcf1e" => :mojave
-    sha256 "cca1041a8cafaef5061922687416f533b4e740193b2413ae704d34cbef004990" => :high_sierra
+    sha256 cellar: :any,                 arm64_big_sur: "a7f73e96ff5076466770d434090aa1c49316faa2092dda709554a642bab3e292"
+    sha256 cellar: :any,                 big_sur:       "ebceafed0b8fb72511c5788fe525ad83e204b9fce30116a76acd560ce6c36ba8"
+    sha256 cellar: :any,                 catalina:      "fa964ccada840c98ea19efad5e62cda6f73df789b4b820148c0af2ff3793347e"
+    sha256 cellar: :any,                 mojave:        "536ac0253c59601ac2f717af644997e37a6a801879904f99275c4112fb18c83c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7eb07ab6f5a3cddb616dcb8fc6841877ec7d9e8ba5b15581cd5448ba17ded203" # linuxbrew-core
   end
 
   depends_on "coreutils" => :build
-  depends_on "make" => :build
   depends_on "rust" => :build
   depends_on "libffi"
 
   uses_from_macos "ruby", since: :sierra
 
   def install
-    make = Formula["make"].opt_bin/"gmake"
-    system make, "build", "PREFIX=#{libexec}", "FEATURES=libinko/libffi-system"
-    system make, "install", "PREFIX=#{libexec}"
+    system "make", "build", "PREFIX=#{libexec}", "FEATURES=libinko/libffi-system"
+    system "make", "install", "PREFIX=#{libexec}"
     bin.install Dir[libexec/"bin/*"]
   end
 

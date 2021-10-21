@@ -2,47 +2,87 @@ class Ppsspp < Formula
   desc "PlayStation Portable emulator"
   homepage "https://ppsspp.org/"
   url "https://github.com/hrydgard/ppsspp.git",
-      tag:      "v1.10.3",
-      revision: "087de849bdc74205dd00d8e6e11ba17a591213ab"
+      tag:      "v1.11.3",
+      revision: "f7ace3b8ee33e97e156f3b07f416301e885472c5"
   license all_of: ["GPL-2.0-or-later", "BSD-3-Clause"]
   revision 1
-  head "https://github.com/hrydgard/ppsspp.git"
+  head "https://github.com/hrydgard/ppsspp.git", branch: "master"
 
   bottle do
-    cellar :any
-    sha256 "61164c952a552c94c384ba618b429e8725d812142b58e55c02b89962ce8b28c2" => :big_sur
-    sha256 "637651f2a60d63b33d4944fb075b8e8a564a4a0b94ce824ccf0ba69b6d101f88" => :catalina
-    sha256 "ef1850d442ed09bdec54ace53e6bedf2eb081ca3da4d2ca9fba91293a98f0f6e" => :mojave
-    sha256 "a42d7af34d1aab6f25345aec6711fccedad54fd506eb12947c7c6c8b7e095a55" => :high_sierra
-    sha256 "98b0812ed6977fd6cfc946f7cea7ac1e8fe02d9df9bdcb68ecff6b0aea3b6991" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "efb8896e778451364b3d7f3c91507a0f9d390aa8b5255a31c3ca1f6eeac70d46"
+    sha256 cellar: :any,                 big_sur:       "15a4c66eb2b8fc4af70e8992714660a95b0546b58979c4eb6c076c7ce398efbc"
+    sha256 cellar: :any,                 catalina:      "701e9c89b53df03f4c80c2a0c9a7a957126ec0ab0d5b523e766cd4bc96fec027"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0b2d8d7256fff548fc420f8dbb3ea014a676bd5b977efa0e8bb2b8a0d69001d9" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
+  depends_on "nasm" => :build
   depends_on "pkg-config" => :build
-  depends_on "ffmpeg"
-  depends_on "glew"
+  depends_on "python@3.9" => :build
+  depends_on "libpng"
   depends_on "libzip"
   depends_on "sdl2"
   depends_on "snappy"
 
-  def install
-    args = std_cmake_args
-    # Use brewed FFmpeg rather than precompiled binaries in the repo
-    args << "-DUSE_SYSTEM_FFMPEG=ON"
+  uses_from_macos "zlib"
 
-    # fix missing include for zipconf.h
-    ENV.append_to_cflags "-I#{Formula["libzip"].opt_prefix}/lib/libzip/include"
+  on_macos do
+    depends_on "molten-vk"
+  end
+
+  on_linux do
+    depends_on "glew"
+  end
+
+  def install
+    # Build PPSSPP-bundled ffmpeg from source. Changes in more recent
+    # versions in ffmpeg make it unsuitable for use with PPSSPP, so
+    # upstream ships a modified version of ffmpeg 3.
+    # See https://github.com/Homebrew/homebrew-core/issues/84737.
+    cd "ffmpeg" do
+      if OS.mac?
+        rm_rf "macosx"
+        system "./mac-build.sh"
+      else
+        rm_rf "linux"
+        system "./linux_x86-64.sh"
+      end
+    end
+
+    # Replace bundled MoltenVK dylib with symlink to Homebrew-managed dylib
+    rm "MoltenVK/macOS/Frameworks/libMoltenVK.dylib"
+    (buildpath/"MoltenVK/macOS/Frameworks").install_symlink Formula["molten-vk"].opt_lib/"libMoltenVK.dylib"
 
     mkdir "build" do
+      args = std_cmake_args + %w[
+        -DUSE_SYSTEM_LIBZIP=ON
+        -DUSE_SYSTEM_SNAPPY=ON
+      ]
+
       system "cmake", "..", *args
       system "make"
+
       if OS.mac?
         prefix.install "PPSSPPSDL.app"
         bin.write_exec_script "#{prefix}/PPSSPPSDL.app/Contents/MacOS/PPSSPPSDL"
         mv "#{bin}/PPSSPPSDL", "#{bin}/ppsspp"
+
+        # Replace app bundles with symlinks to allow dependencies to be updated
+        app_frameworks = prefix/"PPSSPPSDL.app/Contents/Frameworks"
+        ln_sf (Formula["molten-vk"].opt_lib/"libMoltenVK.dylib").relative_path_from(app_frameworks), app_frameworks
+        ln_sf (Formula["sdl2"].opt_lib/"libSDL2-2.0.0.dylib").relative_path_from(app_frameworks), app_frameworks
       else
         bin.install "PPSSPPSDL" => "ppsspp"
       end
+    end
+  end
+
+  test do
+    system "#{bin}/ppsspp", "--version"
+    if OS.mac?
+      app_frameworks = prefix/"PPSSPPSDL.app/Contents/Frameworks"
+      assert_predicate app_frameworks/"libMoltenVK.dylib", :exist?, "Broken linkage with `molten-vk`"
+      assert_predicate app_frameworks/"libSDL2-2.0.0.dylib", :exist?, "Broken linkage with `sdl2`"
     end
   end
 end

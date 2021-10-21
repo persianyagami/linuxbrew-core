@@ -1,20 +1,17 @@
 class Libpulsar < Formula
   desc "Apache Pulsar C++ library"
   homepage "https://pulsar.apache.org/"
-  url "https://www.apache.org/dyn/closer.lua?path=pulsar/pulsar-2.7.0/apache-pulsar-2.7.0-src.tar.gz"
-  mirror "https://archive.apache.org/dist/pulsar/pulsar-2.7.0/apache-pulsar-2.7.0-src.tar.gz"
-  sha256 "f1e8168b7f2b8bfc06c84f743eb4f3dfa5f8f376f087c5ef1532f998cf56bab4"
+  url "https://www.apache.org/dyn/closer.lua?path=pulsar/pulsar-2.8.1/apache-pulsar-2.8.1-src.tar.gz"
+  mirror "https://archive.apache.org/dist/pulsar/pulsar-2.8.1/apache-pulsar-2.8.1-src.tar.gz"
+  sha256 "8e30d0414f840477cad8fc27a09904523f3ff039f7c8570feb6acca047661710"
   license "Apache-2.0"
 
-  livecheck do
-    url :stable
-  end
-
   bottle do
-    cellar :any
-    sha256 "05f224f799cc8a8eb1407ff60cc561413b441cb46a603ce7547c8659ab1e9703" => :big_sur
-    sha256 "c5b12dbbe3af5397c3dd6c4c9d7fd34df9fc0be9438dd94b479cd892af955ee8" => :catalina
-    sha256 "964a2f24bb0f57621c8ef283a5e2550ba9b31166d167061a0f15d5ad88383523" => :mojave
+    sha256 cellar: :any,                 arm64_big_sur: "f44531771bffaa687d9061132bd83acafd1288cd82b526028366c88ba52a027a"
+    sha256 cellar: :any,                 big_sur:       "3dd3fd3c00956ed62b9b2fbb91795889fb06b264e1df331fcb58a445cfa0784d"
+    sha256 cellar: :any,                 catalina:      "8538b133cd33c189390d1bcdcaa8d3c41dbac40631697f168f74c415929edf8a"
+    sha256 cellar: :any,                 mojave:        "743de257b0996bcf769a74054fcbee90c24a2a3f77584c34960ba3ffdfa153f2"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c99cc4079c6bd9ec0dfa37812ca3d59349eb96e873b01d76de7636c7c1f17d42" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
@@ -24,6 +21,8 @@ class Libpulsar < Formula
   depends_on "protobuf"
   depends_on "snappy"
   depends_on "zstd"
+
+  uses_from_macos "curl"
 
   def install
     cd "pulsar-client-cpp" do
@@ -47,7 +46,8 @@ class Libpulsar < Formula
         return 0;
       }
     EOS
-    system ENV.cxx, "test.cc", "-L#{lib}", "-lpulsar", "-o", "test"
+
+    system ENV.cxx, "-std=gnu++11", "test.cc", "-L#{lib}", "-lpulsar", "-o", "test"
     system "./test"
   end
 end

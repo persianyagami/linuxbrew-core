@@ -1,21 +1,22 @@
 class CargoEdit < Formula
   desc "Utility for managing cargo dependencies from the command-line"
   homepage "https://killercup.github.io/cargo-edit/"
-  url "https://github.com/killercup/cargo-edit/archive/v0.7.0.tar.gz"
-  sha256 "56b51ef8d52d8b414b5c4001053fa196dc7710fea9b1140171a314bc527a2ea2"
+  url "https://github.com/killercup/cargo-edit/archive/v0.8.0.tar.gz"
+  sha256 "4a08e914c17204cb3ab303b62362ca30d44cf457b3b1d7bde117b8ab4cb2fa64"
   license "MIT"
   revision 1
 
   bottle do
-    cellar :any
-    sha256 "dda337a0b67c8e1b0be8a8718871e72363208f355b2204e1b91f0cb3fd746460" => :big_sur
-    sha256 "6998a3ce2b08aa612b3fa875f368d0fa8012404ef52480292c57d611d176de75" => :catalina
-    sha256 "db8fc1ad91e81679e46f49dddb9280b825b17b6ed9762f66a070af52ddee952a" => :mojave
+    sha256 cellar: :any,                 arm64_big_sur: "07774b6873981705e9d7272aa4503ee9adaa23f412c9618339601b511fc1b035"
+    sha256 cellar: :any,                 big_sur:       "229d3a9bcb2d7a4c8969234b65ffdad50d768de2cef507e8323be69433f708fd"
+    sha256 cellar: :any,                 catalina:      "8bc8ad260d65f9c236b20d162cf1ff041eb68d6c809a242a1fcc5d87d75bc749"
+    sha256 cellar: :any,                 mojave:        "b73bdaca55892f47f5dba3ac1107c7dfc8ab64404be70aad843aa9b818756068"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "31224ba80f4e2367468d19c62baf5bcc05a946367bd49d7f9b64142c7584b77b" # linuxbrew-core
   end
 
-  depends_on "rust" => :build
   depends_on "libgit2"
   depends_on "openssl@1.1"
+  depends_on "rust" # uses `cargo` at runtime
 
   def install
     system "cargo", "install", *std_cargo_args
@@ -24,6 +25,7 @@ class CargoEdit < Formula
   test do
     crate = testpath/"demo-crate"
     mkdir crate do
+      (crate/"src/main.rs").write "// Dummy file"
       (crate/"Cargo.toml").write <<~EOS
         [package]
         name = "demo-crate"
@@ -34,14 +36,14 @@ class CargoEdit < Formula
       system bin/"cargo-add", "add", "-D", "just@0.8.3"
       manifest = (crate/"Cargo.toml").read
 
-      assert_match /clap = "2"/, manifest
-      assert_match /serde = "\d+(?:\.\d+)+"/, manifest
-      assert_match /just = "0.8.3"/, manifest
+      assert_match 'clap = "2"', manifest
+      assert_match(/serde = "\d+(?:\.\d+)+"/, manifest)
+      assert_match 'just = "0.8.3"', manifest
 
       system bin/"cargo-rm", "rm", "serde"
       manifest = (crate/"Cargo.toml").read
 
-      assert_not_match /serde/, manifest
+      refute_match(/serde/, manifest)
     end
   end
 end

@@ -1,17 +1,16 @@
 class Grpcurl < Formula
   desc "Like cURL, but for gRPC"
   homepage "https://github.com/fullstorydev/grpcurl"
-  url "https://github.com/fullstorydev/grpcurl/archive/v1.7.0.tar.gz"
-  sha256 "0999aa1516deb2575bdc1d11d3a5dd8494a5aa25fa899e6afc245c3ccc2bbeb5"
+  url "https://github.com/fullstorydev/grpcurl/archive/v1.8.5.tar.gz"
+  sha256 "1a9612560b2da18d50f0a46e9f2f5a7e5a13c4bb1ccef15ba65cb0c37335342b"
   license "MIT"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "d536025d13aa328655941661eca540fbf8280f0ebd0a0efe9945990737db0bf4" => :big_sur
-    sha256 "b141489fbe726a3f534d86a0f53af867a7b4bff1a92c1c8305e73d5e0fb6f87a" => :catalina
-    sha256 "99121cc3d5c1b521dc69511609d1214b4c297a136902e08384161418ceb320dd" => :mojave
-    sha256 "c62f76f233dfa5686d3018b351436d469ce142c5714cbe67960478c2a5e4f640" => :high_sierra
-    sha256 "e4faaa6c65c1a5424adf6a77175f3d88ef46097a169787d643285004c6d0214f" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "7a8dd3ae573f6d2ccfa345ad82c65b6d619d499d83dc92737f18b4281fb3db24"
+    sha256 cellar: :any_skip_relocation, big_sur:       "ebf419ea7d01fd13e6e6e274a7aed487d41a979f267630838228fe718b7fdc40"
+    sha256 cellar: :any_skip_relocation, catalina:      "e4ccd7f8496238cd23919166ca8721471732919af8b4f21abceb9feef8561003"
+    sha256 cellar: :any_skip_relocation, mojave:        "f2fe91c9954c1c5e2797c9eb10557a3ddea090c0b14cc1623f237a93038161e8"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "46eb83d219deb562546cf83106693d6b10b695060e6bc557e18c41506ef60a9a" # linuxbrew-core
   end
 
   depends_on "go" => :build

@@ -1,37 +1,23 @@
 class Akamai < Formula
   desc "CLI toolkit for working with Akamai's APIs"
   homepage "https://github.com/akamai/cli"
-  url "https://github.com/akamai/cli/archive/1.1.5.tar.gz"
-  sha256 "759c3c3bc59c2623fc8a5f91907f55d870f77aef1839f2ecc703db5c469b852a"
+  url "https://github.com/akamai/cli/archive/1.3.0.tar.gz"
+  sha256 "338d4be3e5878d52c764bb2e2e5faf5ecaf0510a37c582b3644615df39718141"
   license "Apache-2.0"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "6a34e6b26f58c2401efee9e063d44db8e753672751c3f7e9a6783e87f1ba8c70" => :big_sur
-    sha256 "a986f3bfc261227cd44447d5ff9cdfb461c50c002118d36caed068f5859432e1" => :catalina
-    sha256 "ce3ea6b8dba89d48bfec3be3bbf5701e7b1dcdde7a2f76a97dd668752b1e95fb" => :mojave
-    sha256 "2b6d07c4926858e1be33bef070a925a6746f396fa27566aaa313d5a2673cb25f" => :high_sierra
-    sha256 "748751d8976fcaaa48a7921168a25794a81ca3bbd978471f1757e7346854783d" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, big_sur:      "ae02bff8cd5f22c2d8c083950de16addf0f008c98bdd104aee2ef4d41fbbb0e6"
+    sha256 cellar: :any_skip_relocation, catalina:     "c9873ba7c5c27baa7c9783ce964c5c62d97151c4bd4873d11fae343728d9a245"
+    sha256 cellar: :any_skip_relocation, mojave:       "2287e1ca300d155e500392f5628aa8ad953006b1c263caa35c03e4d9591053a1"
   end
 
-  depends_on "dep" => :build
   depends_on "go" => :build
 
   def install
-    ENV["GOPATH"] = buildpath
-    ENV["GLIDE_HOME"] = HOMEBREW_CACHE/"glide_home/#{name}"
-
-    srcpath = buildpath/"src/github.com/akamai/cli"
-    srcpath.install buildpath.children
-
-    cd srcpath do
-      system "dep", "ensure", "-vendor-only"
-      system "go", "build", "-tags", "noautoupgrade nofirstrun", "-o", bin/"akamai"
-      prefix.install_metafiles
-    end
+    system "go", "build", "-tags", "noautoupgrade nofirstrun", *std_go_args, "cli/main.go"
   end
 
   test do
-    assert_match "Purge", shell_output("#{bin}/akamai install --force purge")
+    assert_match "Purge", pipe_output("#{bin}/akamai install --force purge", "n")
   end
 end

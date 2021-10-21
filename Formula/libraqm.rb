@@ -1,16 +1,16 @@
 class Libraqm < Formula
   desc "Library for complex text layout"
   homepage "https://github.com/HOST-Oman/libraqm"
-  url "https://github.com/HOST-Oman/libraqm/archive/v0.7.1.tar.gz"
-  sha256 "3a80118fde37b8c07d35b0d40465e68190bdbd6e984ca6fe5c8192c521bb076d"
+  url "https://github.com/HOST-Oman/libraqm/archive/v0.7.2.tar.gz"
+  sha256 "eeccbb0bf23ef77d8ff2be24a9c6c1547cc8e443d3d6b57814d73d44758d95c2"
   license "MIT"
 
   bottle do
-    cellar :any
-    sha256 "433cfa09f493996f697e288318dddb9f887caaa505e89f54e6258efca30c31c5" => :big_sur
-    sha256 "4c45ed51cac6ceb29ea7d7c6c7461b54b5e7f5ecc708e6fbba4396a26489c743" => :catalina
-    sha256 "d104c74c838f567086230184854a18444c570437434a001adc6ada04ce9a68a9" => :mojave
-    sha256 "b8190ecf8abee2e48e845472e61c92323fc232413ae057ede2b56a3cef285e42" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "05c31c92e29b7202d42cb892a327ed2c5ca4e7f211020dcf4b54d1d08937479a"
+    sha256 cellar: :any,                 big_sur:       "66f14af1e2afb8aa3f89cb6b2bc0e0274a260bf832250364ec691e398296fe8b"
+    sha256 cellar: :any,                 catalina:      "d619aee4f8e198220d88df6c68ab19ad4b4dbb1a16a4c910ffe923281461d4a5"
+    sha256 cellar: :any,                 mojave:        "cd4063f2520edce76e7a53a676508410ba42bdfe34f3a49c58414f94ea2ab647"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9435ed91d1d18865b406874aedd92b2b7c34e211970d19aaccf550b20a68303a" # linuxbrew-core
   end
 
   depends_on "autoconf" => :build

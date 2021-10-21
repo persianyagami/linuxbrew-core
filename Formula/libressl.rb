@@ -2,9 +2,9 @@ class Libressl < Formula
   desc "Version of the SSL/TLS protocol forked from OpenSSL"
   homepage "https://www.libressl.org/"
   # Please ensure when updating version the release is from stable branch.
-  url "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.2.3.tar.gz"
-  mirror "https://mirrorservice.org/pub/OpenBSD/LibreSSL/libressl-3.2.3.tar.gz"
-  sha256 "412dc2baa739228c7779e93eb07cd645d5c964d2f2d837a9fd56db7498463d73"
+  url "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.4.1.tar.gz"
+  mirror "https://mirrorservice.org/pub/OpenBSD/LibreSSL/libressl-3.4.1.tar.gz"
+  sha256 "107ceae6ca800e81cb563584c16afa36d6c7138fade94a2b3e9da65456f7c61c"
   license "OpenSSL"
 
   livecheck do
@@ -13,10 +13,11 @@ class Libressl < Formula
   end
 
   bottle do
-    sha256 "c5060969c420fd7d097a372aeb1c083cb65f26ce4a3a7d760a3e770f56faef0c" => :big_sur
-    sha256 "4a11c712731e131c223b4b73f25507b1c1c826821257b538b1b5f5f05c0f0736" => :catalina
-    sha256 "a84aa0482ece558c5afe0f2bae8ea6175f61e912778a5e9effa1c959b68a56b6" => :mojave
-    sha256 "66bd209a42da9acedf76e642d2e58015f12808122a15c887b9920978e4e25537" => :x86_64_linux
+    sha256 arm64_big_sur: "41f4e9f8cdf03ae83c8fdff6867bbd36127c389004fb89a410630c74dac315f9"
+    sha256 big_sur:       "e3c8dae6f39e42a652df8e66f02a0e581e31697fbfdc7465813306c48f6931d5"
+    sha256 catalina:      "4490e48658eab39495b885811d1762666d6c837013c3f990cda1eebf8bb400fc"
+    sha256 mojave:        "7ce48d13e2e1cae8569598a6d456c8843263547fc1753f2a5869e61fd50c6fa6"
+    sha256 x86_64_linux:  "a238ec0899695526290e0bb26bb0d4cee8e9b9b83fd765cbda38351d26304859" # linuxbrew-core
   end
 
   head do
@@ -28,6 +29,10 @@ class Libressl < Formula
   end
 
   keg_only :provided_by_macos
+
+  on_linux do
+    keg_only "it conflicts with OpenSSL formula"
+  end
 
   def install
     args = %W[
@@ -46,29 +51,50 @@ class Libressl < Formula
   end
 
   def post_install
-    return unless OS.mac?
+    if OS.mac?
+      ohai "Regenerating CA certificate bundle from keychain, this may take a while..."
 
-    keychains = %w[
-      /System/Library/Keychains/SystemRootCertificates.keychain
-    ]
+      keychains = %w[
+        /Library/Keychains/System.keychain
+        /System/Library/Keychains/SystemRootCertificates.keychain
+      ]
 
-    certs_list = `security find-certificate -a -p #{keychains.join(" ")}`
-    certs = certs_list.scan(
-      /-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----/m,
-    )
+      certs_list = `security find-certificate -a -p #{keychains.join(" ")}`
+      certs = certs_list.scan(
+        /-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----/m,
+      )
 
-    valid_certs = certs.select do |cert|
-      IO.popen("#{bin}/openssl x509 -inform pem -checkend 0 -noout", "w") do |openssl_io|
-        openssl_io.write(cert)
-        openssl_io.close_write
+      # Check that the certificate has not expired
+      valid_certs = certs.select do |cert|
+        IO.popen("#{bin}/openssl x509 -inform pem -checkend 0 -noout &>/dev/null", "w") do |openssl_io|
+          openssl_io.write(cert)
+          openssl_io.close_write
+        end
+
+        $CHILD_STATUS.success?
       end
 
-      $CHILD_STATUS.success?
-    end
+      # Check that the certificate is trusted in keychain
+      trusted_certs = begin
+        tmpfile = Tempfile.new
 
-    # LibreSSL install a default pem - We prefer to use macOS for consistency.
-    rm_f %W[#{etc}/libressl/cert.pem #{etc}/libressl/cert.pem.default]
-    (etc/"libressl/cert.pem").atomic_write(valid_certs.join("\n"))
+        valid_certs.select do |cert|
+          tmpfile.rewind
+          tmpfile.write cert
+          tmpfile.truncate cert.size
+          tmpfile.flush
+          IO.popen("/usr/bin/security verify-cert -l -L -R offline -c #{tmpfile.path} &>/dev/null")
+
+          $CHILD_STATUS.success?
+        end
+      ensure
+        tmpfile&.close!
+      end
+
+      # LibreSSL install a default pem - We prefer to use macOS for consistency.
+      rm_f %W[#{etc}/libressl/cert.pem #{etc}/libressl/cert.pem.default]
+      (etc/"libressl/cert.pem").atomic_write(trusted_certs.join("\n") << "\n")
+    end
   end
 
   def caveats

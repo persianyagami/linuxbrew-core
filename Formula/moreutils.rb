@@ -2,8 +2,8 @@ class Moreutils < Formula
   desc "Collection of tools that nobody wrote when UNIX was young"
   homepage "https://joeyh.name/code/moreutils/"
   url "https://git.joeyh.name/git/moreutils.git",
-      tag:      "0.64",
-      revision: "859c6e47b53410dbdcdc714385516bcb81710075"
+      tag:      "0.66",
+      revision: "f0642d6331e89ca5a6ced8c0f1744428983e1780"
   license all_of: [
     "GPL-2.0-or-later",
     { any_of: ["GPL-2.0-only", "Artistic-2.0"] },
@@ -11,18 +11,19 @@ class Moreutils < Formula
   head "https://git.joeyh.name/git/moreutils.git"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "daeab56a9a063d9a81a3b39d3cd8e9c7fa39871b6f9738ced5bd2c780a5e583e" => :big_sur
-    sha256 "2acce86bfb602b3da4577cf429080a138b7a2e587e394b175889c4d190ef3bae" => :catalina
-    sha256 "e4d2496b670b5f4c8fcac0baaaa41afeced3b04ac962ce4963752cc233d68273" => :mojave
-    sha256 "80057e9363725a85da1200dfe87fe669a5dab3980375ad83330ce4b61cbac13c" => :high_sierra
-    sha256 "b45c1a5df01081985d4ff84130e301d9344f0142d304ef78c68b2bd77bb0666e" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "b7bb6a5498e898c303cbbb526f83a12e690315c43260ebab1cf348ecb2a712bb"
+    sha256 cellar: :any_skip_relocation, big_sur:       "98e36f509fe2556660dec088c1dcf380cf1ce60167fcb4289782614feb381821"
+    sha256 cellar: :any_skip_relocation, catalina:      "e7774183139434a9f4707a5931793fb2aed0678fd0257a5860571f320f507c8e"
+    sha256 cellar: :any_skip_relocation, mojave:        "099c5b0cc96ae204c211da65446db79bf83469ed0bcbc40d81e5a9e95b5a678c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0890cc88f2e311ec01cc0439cbfa6a7a43166ebaeb54a8bfa9d22fc21fba4bb4" # linuxbrew-core
   end
 
   depends_on "docbook-xsl" => :build
 
   uses_from_macos "libxml2" => :build
   uses_from_macos "libxslt" => :build
+
+  uses_from_macos "perl"
 
   conflicts_with "parallel", because: "both install a `parallel` executable"
   conflicts_with "pwntools", because: "both install an `errno` executable"

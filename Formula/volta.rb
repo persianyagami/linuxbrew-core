@@ -2,21 +2,39 @@ class Volta < Formula
   desc "JavaScript toolchain manager for reproducible environments"
   homepage "https://volta.sh"
   url "https://github.com/volta-cli/volta.git",
-      tag:      "v0.9.3",
-      revision: "3594af004be527ec007918ddaa52c477ec9d2394"
+      tag:      "v1.0.5",
+      revision: "b8ae859c5b25fb076a93f0d8a0cccc93e7ad8018"
   license "BSD-2-Clause"
 
+  livecheck do
+    url :stable
+    strategy :github_latest
+  end
+
   bottle do
-    cellar :any_skip_relocation
-    sha256 "1f8252db32da052bd833de2f3e71bfd73b9c35e8b45e18c59130de3e60f73970" => :big_sur
-    sha256 "9ed05f093675d06e11d11527f9a8d84683c425cb1e13c7da23e2727023b8da4b" => :catalina
-    sha256 "dd9a7fa26847cfedde18605a26d26966aaf1f3531e0ba933bd3201c40572ffb9" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "4dbcd14a0a63d19d4ac28d20b20d849a14369374cb36f68cc4ae994208324ff6"
+    sha256 cellar: :any_skip_relocation, big_sur:       "f43ad29f446309d9c9fca3031b58dec129134a24dbabdca703e8bf1de6b035cb"
+    sha256 cellar: :any_skip_relocation, catalina:      "8587132e7bc5b76dcac2f47372494a0bc1ceccf19e4eeecc6e29f12f9f8bc824"
+    sha256 cellar: :any_skip_relocation, mojave:        "ade25632752bf387752f88e015694a0b1e353df3922357b51f846b4bfde9ccf5"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "867738e296d4cacd7cb7b144ff9e0a550fcff5664006474a4dfd27493bc7e199" # linuxbrew-core
   end
 
   depends_on "rust" => :build
 
+  on_linux do
+    depends_on "pkg-config" => :build
+    depends_on "openssl@1.1" # Uses Secure Transport on macOS
+  end
+
   def install
     system "cargo", "install", *std_cargo_args
+
+    bash_output = Utils.safe_popen_read("#{bin}/volta", "completions", "bash")
+    (bash_completion/"volta").write bash_output
+    zsh_output = Utils.safe_popen_read("#{bin}/volta", "completions", "zsh")
+    (zsh_completion/"_volta").write zsh_output
+    fish_output = Utils.safe_popen_read("#{bin}/volta", "completions", "fish")
+    (fish_completion/"volta.fish").write fish_output
   end
 
   test do

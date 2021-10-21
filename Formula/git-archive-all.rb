@@ -1,31 +1,18 @@
 class GitArchiveAll < Formula
+  include Language::Python::Shebang
+
   desc "Archive a project and its submodules"
   homepage "https://github.com/Kentzo/git-archive-all"
-  url "https://github.com/Kentzo/git-archive-all/archive/1.22.0.tar.gz"
-  sha256 "3eef66c5af010f75d4d270618ecbfdb670bde14e39bdfeed0bab3a5d12c7d6a2"
+  url "https://github.com/Kentzo/git-archive-all/archive/1.23.0.tar.gz"
+  sha256 "25f36948b704e57c47c98a33280df271de7fbfb74753b4984612eabb08fb2ab1"
   license "MIT"
-  revision 1 unless OS.mac?
+  revision 2
   head "https://github.com/Kentzo/git-archive-all.git"
 
-  bottle do
-    cellar :any_skip_relocation
-    sha256 "13418fa4c3212278d566d1b4ee0a43f62727c71dfea8c268a8994e6aeb33d8f0" => :big_sur
-    sha256 "d83a7c27f97788c8a76ba8fc708a30795e6bede82329dd32e39a8dee6b907a79" => :catalina
-    sha256 "d83a7c27f97788c8a76ba8fc708a30795e6bede82329dd32e39a8dee6b907a79" => :mojave
-    sha256 "d83a7c27f97788c8a76ba8fc708a30795e6bede82329dd32e39a8dee6b907a79" => :high_sierra
-    sha256 "f42da6b60367ebc72568e66009a02fe24174e441e7e6bbe8e05b4bd156f92364" => :x86_64_linux
-  end
-
-  depends_on "python@3.9" unless OS.mac?
+  depends_on "python@3.10"
 
   def install
-    unless OS.mac?
-      Dir["*.py"].each do |file|
-        next unless File.read(file).include?("/usr/bin/env python")
-
-        inreplace file, %r{#! ?/usr/bin/env python}, "#!#{Formula["python@3.9"].opt_bin/"python3"}"
-      end
-    end
+    rewrite_shebang detected_python_shebang, "*.py"
 
     system "make", "prefix=#{prefix}", "install"
   end

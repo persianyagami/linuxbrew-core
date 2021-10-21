@@ -4,14 +4,14 @@ class GitSeries < Formula
   url "https://github.com/git-series/git-series/archive/0.9.1.tar.gz"
   sha256 "c0362e19d3fa168a7cb0e260fcdecfe070853b163c9f2dfd2ad8213289bc7e5f"
   license "MIT"
-  revision 3
+  revision 5
 
   bottle do
-    cellar :any
-    sha256 "2193cb415148a398304ae5cde86bd8f672c62fef1028ad78057d66fa3ca0fd36" => :big_sur
-    sha256 "e273c21ef68060e010e42bc805bf1a2e5baf9a8e7ecec6338490175857713168" => :catalina
-    sha256 "31c32b8df3a5a2c70c54786a0c222ce4fdeccace4cb3a5bf50f3a27d9f46167d" => :mojave
-    sha256 "aeb8fd7080e3d1f792aa568c6810575574afff53fa9d87c9a35ee5fb03a9a865" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "d75d535676dda5c4289d8547cd6959f02aa6d5fa47364ebb561fe8a858683c95"
+    sha256 cellar: :any,                 big_sur:       "40f73d58772d698175f87acceaf11f97720e3248f2cf7182bae19889899ed61d"
+    sha256 cellar: :any,                 catalina:      "944e5375b6975f35b298b03f8ccdd9d530a9991593c6374aa3d93a69a8a0baac"
+    sha256 cellar: :any,                 mojave:        "9edf9487a836d8ddb3b822f1a14931d2e2413edd9d3df29b389259a684681190"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f7f0c42ed01d445e7e567b0c591bfab8757ececd81d3f177700309b2284c7c69" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
@@ -28,6 +28,8 @@ class GitSeries < Formula
     ENV["LIBGIT2_SYS_USE_PKG_CONFIG"] = "1"
     ENV["LIBSSH2_SYS_USE_PKG_CONFIG"] = "1"
 
+    # TODO: In the next version after 0.9.1, update this command as follows:
+    # system "cargo", "install", *std_cargo_args
     system "cargo", "install", "--root", prefix, "--path", "."
     man1.install "git-series.1"
   end

@@ -1,14 +1,15 @@
 class Torchvision < Formula
   desc "Datasets, transforms, and models for computer vision"
   homepage "https://github.com/pytorch/vision"
-  url "https://github.com/pytorch/vision/archive/v0.8.2.tar.gz"
-  sha256 "9a866c3c8feb23b3221ce261e6153fc65a98ce9ceaa71ccad017016945c178bf"
+  url "https://github.com/pytorch/vision/archive/refs/tags/v0.10.1.tar.gz"
+  sha256 "4d595cf0214c8adc817f8e3cd0043a027b52b481e05d67b04f4947fcb43d4277"
   license "BSD-3-Clause"
 
   bottle do
-    sha256 "0100b617cbf2d6558152c7c6b749dca9c040b77eb78e7b3fb6e05f24c87bb5c0" => :big_sur
-    sha256 "d66bb7cbe8121343ddeb88c1f52e01460cb130a062524f8ab073ad71da95498a" => :catalina
-    sha256 "6280671d16b1e72e75994dd9028dd69102176c7c5809ccbb2be16c90a2b602e8" => :mojave
+    sha256 cellar: :any,                 big_sur:      "538900976b4d7efd2ebc3be711c5565b2e20b5e504f84eb338e8dff4eb0aad2c"
+    sha256 cellar: :any,                 catalina:     "fa859b8881a88ea26dc058759752b318a3d163b38256e3000fa5c61a0674d8f6"
+    sha256 cellar: :any,                 mojave:       "f7375ac80c721fccfd1275f5d262d636d7584640507dbc3d047016dde36628aa"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "5e6189643618843f8eb0871b4e7bc6e2fc92cd4cf66dae6ead2fb6852b1255fa" # linuxbrew-core
   end
 
   depends_on "cmake" => :build

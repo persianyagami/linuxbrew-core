@@ -1,42 +1,39 @@
 class Libomp < Formula
   desc "LLVM's OpenMP runtime library"
   homepage "https://openmp.llvm.org/"
-  url "https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/openmp-11.0.0.src.tar.xz"
-  sha256 "2d704df8ca67b77d6d94ebf79621b0f773d5648963dd19e0f78efef4404b684c"
+  url "https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/openmp-13.0.0.src.tar.xz"
+  sha256 "4930ae7a1829a53b698255c2c6b6ee977cc364b37450c14ee458793c0d5e493c"
   license "MIT"
 
   livecheck do
     url "https://llvm.org/"
-    regex(/LLVM (\d+.\d+.\d+)/i)
+    regex(/LLVM (\d+\.\d+\.\d+)/i)
   end
 
   bottle do
-    cellar :any
-    sha256 "e33301d4141f0cff471442679b1ec2e858288f9e280b867d02c185f5cc69a12a" => :big_sur
-    sha256 "c8fbbc1c728059bb02b639ec9701fe542911ae83fd40ce7da5f9bf20abff4e53" => :arm64_big_sur
-    sha256 "a882de3c79dd02d1fd9c622fb8e667d97e7aa0319f2600ec5ad06e5e843a66c6" => :catalina
-    sha256 "0716db5d51938b2fae8ab89c71db9a5786849b84c3924e215916f889f7e9e4c1" => :mojave
-    sha256 "421af56c2bd2980ac04213b9e772ec9593e23737c2816cfca829f22db388cb58" => :high_sierra
-    sha256 "b52917c48ef980351c06a937649d2868529680f901cbf05d5c85acd03c237fee" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "13fb59602f7b525b38416cad3661743d178ca8ef7f817b37306842b58510020e"
+    sha256 cellar: :any,                 big_sur:       "be00288f6f2901b633774b5a3127302a34ef0c9ab0588116d0193be2a627683d"
+    sha256 cellar: :any,                 catalina:      "fe6c16f6998e7648b201f461746fb8466324b6eb1184d3ac5ae55a7793f74b91"
+    sha256 cellar: :any,                 mojave:        "145870f8ede6328f26d81b6aa92980b9b74671b36c6f440b02a4ebae39f55239"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a6dac299ff69a68252a73787f49a7c136f146a12694ab760f23c3b013065559e" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
+  uses_from_macos "llvm" => :build
 
-  # Upstream patch for ARM, accepted, remove in next version
-  # https://reviews.llvm.org/D91002
-  # https://bugs.llvm.org/show_bug.cgi?id=47609
-  patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/7e2ee1d7/libomp/arm.patch"
-    sha256 "6de9071e41a166b74d29fe527211831d2f8e9cb031ad17929dece044f2edd801"
+  on_linux do
+    keg_only "provided by LLVM, which is not keg-only on Linux"
   end
 
   def install
     # Disable LIBOMP_INSTALL_ALIASES, otherwise the library is installed as
     # libgomp alias which can conflict with GCC's libgomp.
-    system "cmake", ".", *std_cmake_args, "-DLIBOMP_INSTALL_ALIASES=OFF"
+    args = ["-DLIBOMP_INSTALL_ALIASES=OFF"]
+    args << "-DOPENMP_ENABLE_LIBOMPTARGET=OFF" if OS.linux?
+
+    system "cmake", ".", *std_cmake_args, *args
     system "make", "install"
-    system "cmake", ".", "-DLIBOMP_ENABLE_SHARED=OFF", *std_cmake_args,
-                         "-DLIBOMP_INSTALL_ALIASES=OFF"
+    system "cmake", ".", "-DLIBOMP_ENABLE_SHARED=OFF", *std_cmake_args, *args
     system "make", "install"
   end
 
@@ -57,8 +54,7 @@ class Libomp < Formula
             return 1;
       }
     EOS
-    system ENV.cxx, "-Werror", "-Xpreprocessor", "-fopenmp", "test.cpp",
-                    ("-std=c++11" unless OS.mac?),
+    system ENV.cxx, "-Werror", "-Xpreprocessor", "-fopenmp", "test.cpp", "-std=c++11",
                     "-L#{lib}", "-lomp", "-o", "test"
     system "./test"
   end

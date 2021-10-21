@@ -1,22 +1,21 @@
 class Sundials < Formula
   desc "Nonlinear and differential/algebraic equations solver"
   homepage "https://computing.llnl.gov/projects/sundials"
-  url "https://computing.llnl.gov/projects/sundials/download/sundials-5.5.0.tar.gz"
-  sha256 "2a755e89aab96d2ff096a4e30bf00bb162e80be20e9e99f424dccfb249098237"
+  url "https://github.com/LLNL/sundials/releases/download/v5.8.0/sundials-5.8.0.tar.gz"
+  sha256 "d4ed403351f72434d347df592da6c91a69452071860525385b3339c824e8a213"
   license "BSD-3-Clause"
 
   livecheck do
-    url "https://computation.llnl.gov/projects/sundials/sundials-software"
+    url "https://computing.llnl.gov/projects/sundials/sundials-software"
     regex(/href=.*?sundials[._-]v?(\d+(?:\.\d+)+)\.t/i)
   end
 
   bottle do
-    cellar :any
-    sha256 "f4ea9f9b38dae6386ee831aedbdc391df4b828af7bf7f0253b0de5e9c26d0525" => :big_sur
-    sha256 "f8fa8527661ffe90b8ae5c4f0a22f910c661c0c723358e818cbc767c5d9cd463" => :catalina
-    sha256 "0caeb5819ed6937bcb984752b445d158793d7cc3e279a06cb0e327bb2d64eceb" => :mojave
-    sha256 "6c938ba77823c909f902c48744ed9221dacf23043d928fd2e0f0896b8136b9bd" => :high_sierra
-    sha256 "2fb4efdd3c775a5c207d58d9d35cd4919a27db226b3fcede66f06de92470a470" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "cde3904eedbacf16fa230074549d7728dcb03345bdea7da67c637744b45b590d"
+    sha256 cellar: :any,                 big_sur:       "a14e546867d769d774bcd5a6a723644cf1004a1627eb483bbeca143245c2834f"
+    sha256 cellar: :any,                 catalina:      "32eb458bf6dc7fcb58336ed4af87de8686fce5d94a1df384a3a29496f1e1d47e"
+    sha256 cellar: :any,                 mojave:        "5739a52fbed858b21ea5078f9371ce443476917552041efc16343c5fc4d48b60"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "05ca7c7fece85b642b70608bb82dae3140d20a83d8a9fa13b37c82751f9a8728" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
@@ -55,8 +54,7 @@ class Sundials < Formula
   test do
     cp Dir[pkgshare/"examples/*"], testpath
     system ENV.cc, "-I#{include}", "test_nvector.c", "sundials_nvector.c",
-                   "test_nvector_serial.c", "-L#{lib}", "-lsundials_nvecserial",
-                   ("-lm" unless OS.mac?)
+                   "test_nvector_serial.c", "-L#{lib}", "-lsundials_nvecserial", "-lm"
     assert_match "SUCCESS: NVector module passed all tests",
                  shell_output("./a.out 42 0")
   end

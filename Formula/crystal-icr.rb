@@ -1,15 +1,16 @@
 class CrystalIcr < Formula
   desc "Interactive console for Crystal programming language"
   homepage "https://github.com/crystal-community/icr"
-  url "https://github.com/crystal-community/icr/archive/v0.8.0.tar.gz"
-  sha256 "8c7825dd035bbb4bc6499873d4bd125185a01cae10dc8dd6f98e6e013def381c"
+  url "https://github.com/crystal-community/icr/archive/v0.9.0.tar.gz"
+  sha256 "2530293e94b60d69919a79b49e83270f1462058499ad37a762233df8d6e5992c"
   license "MIT"
 
   bottle do
-    sha256 "22389822712ed2a634ba8d32817a29e0930eb53669d4c931f740b5c895de9ed4" => :catalina
-    sha256 "5c73c5c37ed0cd5ceb6fc72f88afe4a9156417a0e4752e93500d0aec755646c0" => :mojave
-    sha256 "1ea960e6dd1eeffc8c7e9471a2e17e9dc912eccdc7558d18346a856c10e078bb" => :high_sierra
-    sha256 "8965286da3d3950ee9b0ddfdcb35f292a2370df1581dddb5c9b6e9ce4a4722d9" => :x86_64_linux
+    sha256 arm64_big_sur: "d98e57c4a69bfe60a4d30b304f11b04bd946d5b922325fd20aaa1895f6a392c8"
+    sha256 big_sur:       "8daaa1313d4bde47396ed4f6e0801e937b128b64cc4eb7528325cb27404dd765"
+    sha256 catalina:      "4d419018a1b470514b9ee5833dd8062fa56b954ed8ae255a2062554368f0185f"
+    sha256 mojave:        "19ad5e81e9f9405ebbbf8ed882e77a9e4c0d32965ebda9012126bcc6dfaa2542"
+    sha256 x86_64_linux:  "48da0e7d9157286b442297b39b288d10d382eede43def6cca1f706cadfb8ffe0" # linuxbrew-core
   end
 
   depends_on "crystal"

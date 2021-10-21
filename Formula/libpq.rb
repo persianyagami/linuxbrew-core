@@ -1,21 +1,20 @@
 class Libpq < Formula
   desc "Postgres C API library"
-  homepage "https://www.postgresql.org/docs/12/libpq.html"
-  url "https://ftp.postgresql.org/pub/source/v13.1/postgresql-13.1.tar.bz2"
-  sha256 "12345c83b89aa29808568977f5200d6da00f88a035517f925293355432ffe61f"
+  homepage "https://www.postgresql.org/docs/14/libpq.html"
+  url "https://ftp.postgresql.org/pub/source/v14.0/postgresql-14.0.tar.bz2"
+  sha256 "ee2ad79126a7375e9102c4db77c4acae6ae6ffe3e082403b88826d96d927a122"
   license "PostgreSQL"
 
   livecheck do
-    url "https://ftp.postgresql.org/pub/source/?C=M&O=A"
-    regex(%r{href=.*?v?(\d+(?:\.\d+)+)/?["' >]}i)
+    formula "postgresql"
   end
 
   bottle do
-    sha256 "99324c4145ba1e1ab93dceb0aa0988d2d202a7ee7067ccf402155335a6579224" => :big_sur
-    sha256 "394a2065cf06312fe23f56978cecdd3adc7f73bb6b2a3b9949cb7f3fba364ea2" => :catalina
-    sha256 "af4326fa978a2e4c61070e8ecb6c43ec22fff5a0320a86ceba52366bc2991183" => :mojave
-    sha256 "47101f9b3f690bffef78b2b656583d43e1e91cb2d563abfbbaecff7040a5b097" => :high_sierra
-    sha256 "244481cecdbfab3e50f818ff7a0b27598b727012bb030c525df8464677a797e9" => :x86_64_linux
+    sha256 arm64_big_sur: "c36e78fce303f7320e9d9b972c013ba83511cbfb03eaa344d95c4f76e7642f32"
+    sha256 big_sur:       "a175edce0a65ff0c6b64136bd88271537c946c221f9a6ea41ea41c8191822def"
+    sha256 catalina:      "c1145e71066f8dff4a4f9217d7fc4a8efe3681017fe79a5952e36485c46fd51c"
+    sha256 mojave:        "93b500656d50444c081fc70b0709a38203c621b13713074e2ea866c7f117d172"
+    sha256 x86_64_linux:  "b9ccefe07fd25caa5f04609b6a82765a00f874a65f526ff8308da7e688822f13" # linuxbrew-core
   end
 
   keg_only "conflicts with postgres formula"
@@ -23,9 +22,8 @@ class Libpq < Formula
   # GSSAPI provided by Kerberos.framework crashes when forked.
   # See https://github.com/Homebrew/homebrew-core/issues/47494.
   depends_on "krb5"
-  depends_on "openssl@1.1"
 
-  uses_from_macos "zlib"
+  depends_on "openssl@1.1"
 
   on_linux do
     depends_on "readline"
@@ -80,7 +78,6 @@ class Libpq < Formula
         }
     EOS
     system ENV.cc, "libpq.c", "-L#{lib}", "-I#{include}", "-lpq", "-o", "libpqtest"
-    ENV.prepend_path "LD_LIBRARY_PATH", lib unless OS.mac?
     assert_equal "Connection to database attempted and failed", shell_output("./libpqtest")
   end
 end

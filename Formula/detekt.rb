@@ -1,8 +1,8 @@
 class Detekt < Formula
   desc "Static code analysis for Kotlin"
   homepage "https://github.com/detekt/detekt"
-  url "https://jcenter.bintray.com/io/gitlab/arturbosch/detekt/detekt-cli/1.14.2/detekt-cli-1.14.2-all.jar"
-  sha256 "04d3e959061c546af3cea9e08794621c03a6caf157f6847a31b4d13d55df961a"
+  url "https://github.com/detekt/detekt/releases/download/v1.18.1/detekt-cli-1.18.1-all.jar"
+  sha256 "b20470994a5ffba502c88227377a44f4563df0875dc3f39486e67b7ea4c93c50"
   license "Apache-2.0"
 
   livecheck do
@@ -10,13 +10,15 @@ class Detekt < Formula
     regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
-  bottle :unneeded
+  bottle do
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "f33a4939b86e657b648774ac310024db1401527f7b126747be26eb89edf8c93a" # linuxbrew-core
+  end
 
-  depends_on "openjdk"
+  depends_on "openjdk@11"
 
   def install
     libexec.install "detekt-cli-#{version}-all.jar"
-    bin.write_jar_script libexec/"detekt-cli-#{version}-all.jar", "detekt"
+    bin.write_jar_script libexec/"detekt-cli-#{version}-all.jar", "detekt", java_version: "11"
   end
 
   test do

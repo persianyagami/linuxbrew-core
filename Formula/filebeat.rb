@@ -2,54 +2,37 @@ class Filebeat < Formula
   desc "File harvester to ship log files to Elasticsearch or Logstash"
   homepage "https://www.elastic.co/products/beats/filebeat"
   url "https://github.com/elastic/beats.git",
-      tag:      "v7.10.1",
-      revision: "1da173a9e716715a7a54bb3ff4db05b5c24fc8ce"
+      tag:      "v7.15.1",
+      revision: "5ae799cb1c3c490c9a27b14cb463dc23696bc7d3"
   # Outside of the "x-pack" folder, source code in a given file is licensed
   # under the Apache License Version 2.0
   license "Apache-2.0"
   head "https://github.com/elastic/beats.git"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "5cc1835e59e12a24a232bd57550545bf1f18e2a3a98cb725badafe5eb02eba2c" => :big_sur
-    sha256 "d300d5a673811790c0af4e70d213810115015b4586d7a2a8f5546707c98c44b1" => :catalina
-    sha256 "0357cef2137fe707ce30d64a4be57ac5eea2919605a70fe20b184c0deb1e0ac4" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "6bf898722e09ffd7a6b97bf6aa3096397e999778b7d27707b519f62b9fb8c25a"
+    sha256 cellar: :any_skip_relocation, big_sur:       "cdb7fdcccc782cbf48f4d5a7bae1a2e0a513580871b818ec1947706c18264919"
+    sha256 cellar: :any_skip_relocation, catalina:      "fd1cc0edc98ed5494a3d89c443991ca1e18f329827530c7e7bd51ab482954fc1"
+    sha256 cellar: :any_skip_relocation, mojave:        "150184f53a6f3856ce4b829687741a8e86d84e3b9010083d377a13707f0bab53"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2f5b88347e85621f26306469d7d9228e1bd28e39d061c23080b151af8b663399" # linuxbrew-core
   end
 
   depends_on "go" => :build
-  depends_on "python@3.8" => :build
+  depends_on "mage" => :build
+  depends_on "python@3.9" => :build
 
   uses_from_macos "rsync" => :build
-
-  resource "virtualenv" do
-    url "https://files.pythonhosted.org/packages/b1/72/2d70c5a1de409ceb3a27ff2ec007ecdd5cc52239e7c74990e32af57affe9/virtualenv-15.2.0.tar.gz"
-    sha256 "1d7e241b431e7afce47e77f8843a276f652699d1fa4f93b9d8ce0076fd7b0b54"
-  end
 
   def install
     # remove non open source files
     rm_rf "x-pack"
 
-    ENV["GOPATH"] = buildpath
-    (buildpath/"src/github.com/elastic/beats").install Dir["{*,.git,.gitignore}"]
-
-    xy = Language::Python.major_minor_version "python3"
-    ENV.prepend_create_path "PYTHONPATH", buildpath/"vendor/lib/python#{xy}/site-packages"
-
-    resource("virtualenv").stage do
-      system Formula["python@3.8"].opt_bin/"python3", *Language::Python.setup_install_args(buildpath/"vendor")
-    end
-
-    ENV.prepend_path "PATH", buildpath/"vendor/bin" # for virtualenv
-    ENV.prepend_path "PATH", buildpath/"bin" # for mage (build tool)
-
-    cd "src/github.com/elastic/beats/filebeat" do
+    cd "filebeat" do
       # don't build docs because it would fail creating the combined OSS/x-pack
       # docs and we aren't installing them anyway
       inreplace "magefile.go", "mg.SerialDeps(Fields, Dashboards, Config, includeList, fieldDocs,",
                                "mg.SerialDeps(Fields, Dashboards, Config, includeList,"
 
-      system "make", "mage"
       # prevent downloading binary wheels during python setup
       system "make", "PIP_INSTALL_PARAMS=--no-binary :all", "python-env"
       system "mage", "-v", "build"
@@ -60,8 +43,6 @@ class Filebeat < Formula
       (libexec/"bin").install "filebeat"
       prefix.install "build/kibana"
     end
-
-    prefix.install_metafiles buildpath/"src/github.com/elastic/beats"
 
     (bin/"filebeat").write <<~EOS
       #!/bin/sh
@@ -74,24 +55,8 @@ class Filebeat < Formula
     EOS
   end
 
-  plist_options manual: "filebeat"
-
-  def plist
-    <<~EOS
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN"
-      "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-        <dict>
-          <key>Label</key>
-          <string>#{plist_name}</string>
-          <key>Program</key>
-          <string>#{opt_bin}/filebeat</string>
-          <key>RunAtLoad</key>
-          <true/>
-        </dict>
-      </plist>
-    EOS
+  service do
+    run opt_bin/"filebeat"
   end
 
   test do

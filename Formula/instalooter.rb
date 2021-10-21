@@ -5,23 +5,18 @@ class Instalooter < Formula
   homepage "https://github.com/althonos/instalooter"
   url "https://files.pythonhosted.org/packages/30/13/907e6aaba6280e1001080ab47e750068ffc5fb7174203985b3c9d678e3f2/instalooter-2.4.4.tar.gz"
   sha256 "fb9b4a948702361a161cc42e58857e3a6c9dafd9e22568b07bc0d0b09c3c34a9"
-  license "GPL-3.0"
-  revision 1
-
-  livecheck do
-    url :stable
-  end
+  license "GPL-3.0-or-later"
+  revision 2
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "cfee59324b528c7c9987e381a76bbaa246596e8606e90ffefd13741dce12f65b" => :big_sur
-    sha256 "1ac4f0428acf9da6314fde7734672ce9f7ff5bd68a02f99d862b0ceafe109dee" => :catalina
-    sha256 "8e9a6b3f62bf93f9b2c39134b989a5f3cb82f5f52b2b62644b5ca2577da80337" => :mojave
-    sha256 "6e9b033c6fa3b209d3d4dd6991f2ba3b0202ef2d3a1cf9061db5a597ba082e6f" => :high_sierra
-    sha256 "0aa47937e895a43f4a367dc695ae1a4ce4aa16492f1af30d494ee60dc05529bc" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "20316dff8da3999d6aa335e8e9d6555e1bdb4f9237421692c67944828ca1e60d"
+    sha256 cellar: :any_skip_relocation, big_sur:       "da5e277f2cd0dbdef07b853b1952de7798195760885dc39185ba20783109a5e3"
+    sha256 cellar: :any_skip_relocation, catalina:      "0f5793e71d06911c8345f2a8e4cb6c47ad92100695862f1e0cf7c0bbc16be5da"
+    sha256 cellar: :any_skip_relocation, mojave:        "76edccfab0fe943afd0754e2bb142fb6eec24462718efc49d915b3f0517058bd"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0460ede0db96ff2fc062fd7c63e361b5d205715247103358a5ba61f5d0da0b1b" # linuxbrew-core
   end
 
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   resource "appdirs" do
     url "https://files.pythonhosted.org/packages/d7/d8/05696357e0311f5b5c316d7b95f46c669dd9c15aaeecbb48c7d0aeb88c40/appdirs-1.4.4.tar.gz"

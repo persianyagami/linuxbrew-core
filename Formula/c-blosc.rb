@@ -1,17 +1,16 @@
 class CBlosc < Formula
   desc "Blocking, shuffling and loss-less compression library"
   homepage "https://blosc.org/"
-  url "https://github.com/Blosc/c-blosc/archive/v1.20.1.tar.gz"
-  sha256 "42c4d3fcce52af9f8e2078f8f57681bfc711706a3330cb72b9b39e05ae18a413"
+  url "https://github.com/Blosc/c-blosc/archive/v1.21.1.tar.gz"
+  sha256 "f387149eab24efa01c308e4cba0f59f64ccae57292ec9c794002232f7903b55b"
   license "BSD-3-Clause"
 
   bottle do
-    cellar :any
-    sha256 "49da68a236e377bfdc400cb8d7bc085d056a223613ee333adaafd3d9e2c69e19" => :big_sur
-    sha256 "64299f26d77e25470481bf817cb5a37589e30646a22b38c0d400d5bde10565a8" => :catalina
-    sha256 "7772266cb93fb92f9815c14ef5a28c6a0c4ca777eb639f1b04a46d02cd19b5e5" => :mojave
-    sha256 "8c91b7d9d3977f8e9d1d95a58b7f907f3091320ef6b52dcdacc3b53fa1575a0f" => :high_sierra
-    sha256 "a62245e45b72af8472249b4e2414f327058e3fc3c8037ed7d07b9952f09d951d" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "1330f5de4f7c9529effbadf7798b73346847d629bf24c8bf90887ed3a6419ab9"
+    sha256 cellar: :any,                 big_sur:       "e7ef0adf43ef181d7645dfd7f6ab74b5c11c07c0b4cebd473a1096bce406b6ac"
+    sha256 cellar: :any,                 catalina:      "feaf08d27a7f27259382d7a67d852b402255e3997daee3dfac0829bd1fc47fd0"
+    sha256 cellar: :any,                 mojave:        "e036c972febeb96fbd84b4d40578e5e49c058e43e789946690d8547bb7358c05"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "19485dcc865d0130c121f9724114d8a320c0724328b5bbf49f4458998f0f860d" # linuxbrew-core
   end
 
   depends_on "cmake" => :build

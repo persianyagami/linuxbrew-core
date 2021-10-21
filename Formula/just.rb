@@ -1,23 +1,28 @@
 class Just < Formula
   desc "Handy way to save and run project-specific commands"
   homepage "https://github.com/casey/just"
-  url "https://github.com/casey/just/archive/v0.8.3.tar.gz"
-  sha256 "31c837cb028a9e32e98c3d7071d80dbbaba7e6f35b3a33496aa39d5d8370d9ba"
+  url "https://github.com/casey/just/archive/0.10.2.tar.gz"
+  sha256 "7be0c7f895191407c70affedc8640fcbc64b50cf72d4d301a1f2391e12478f14"
   license "CC0-1.0"
+  head "https://github.com/casey/just.git"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "78f15ce05d070d3703a12700d6451a581c5f557e87431c08172d767556ce568c" => :big_sur
-    sha256 "b545b774d8b02c850f4ef476a4b0d0e14db13920765ec86c7778fea1affd1d84" => :catalina
-    sha256 "2254dc738e8f62d5fe20467e2bbd93207ce2670628f644ed320b8640d59b51f0" => :mojave
-    sha256 "40b53f4c712088b72fc5a44f1be1040f9a6223f2a66a5126bae20b30fc2edd57" => :high_sierra
-    sha256 "320d4694ccf82a63970f03d6ca8346a90e700a67ca64eca7657277d0dd65db46" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "81075dc8a21e2f4523d0f3c983a8398c5ebb186db8e66a3281f3aa63b39c0256"
+    sha256 cellar: :any_skip_relocation, big_sur:       "fcfa0c920ee2385250351275fa2f3271647a867dff97536e1c6f682c79af5b1e"
+    sha256 cellar: :any_skip_relocation, catalina:      "0c14bf41f8b54741fec10d20450d1828a0bd7bd01b4a389e56d3bac7e1c7e56c"
+    sha256 cellar: :any_skip_relocation, mojave:        "c20538a500aba5489f95ff0d0ec88267952e27de84c0b21426e0c15049d512a5"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c7ceb209fcab522c148e157a83879739652584d84ae37923a5dbdeb7ff6fe6b2" # linuxbrew-core
   end
 
   depends_on "rust" => :build
 
   def install
     system "cargo", "install", *std_cargo_args
+
+    man1.install "man/just.1"
+    bash_completion.install "completions/just.bash" => "just"
+    fish_completion.install "completions/just.fish"
+    zsh_completion.install "completions/just.zsh" => "_just"
   end
 
   test do
@@ -25,7 +30,7 @@ class Just < Formula
       default:
         touch it-worked
     EOS
-    system "#{bin}/just"
+    system bin/"just"
     assert_predicate testpath/"it-worked", :exist?
   end
 end

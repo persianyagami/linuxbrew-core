@@ -1,10 +1,9 @@
 class Chafa < Formula
   desc "Versatile and fast Unicode/ASCII/ANSI graphics renderer"
   homepage "https://hpjansson.org/chafa/"
-  url "https://hpjansson.org/chafa/releases/chafa-1.4.1.tar.xz"
-  sha256 "46d34034f4c96d120e0639f87a26590427cc29e95fe5489e903a48ec96402ba3"
-  license "GPL-3.0"
-  revision 1
+  url "https://hpjansson.org/chafa/releases/chafa-1.8.0.tar.xz"
+  sha256 "21ff652d836ba207098c40c459652b2f1de6c8a64fbffc62e7c6319ced32286b"
+  license "LGPL-3.0-or-later"
 
   livecheck do
     url "https://hpjansson.org/chafa/releases/?C=M&O=D"
@@ -12,12 +11,12 @@ class Chafa < Formula
   end
 
   bottle do
-    cellar :any
-    sha256 "6786313633e6b08f00a5f79c6391505f670d30e52d5836c2b1ae2eede5186816" => :big_sur
-    sha256 "040dab4ba89bdd45f5fc1429fd40f4952b0b1b1365e7143f0a8f2fab9f14d60f" => :catalina
-    sha256 "d102685671b1816d8c7b79e530d960778dc58655593721e0fdcd69a99b29fed1" => :mojave
-    sha256 "f75d4bbd7bfe8caaec6b386b8217c70ee432c17d7dd9ebf42ae04c0c58a88ca2" => :high_sierra
-    sha256 "983c9156edacebadd8f0a07aa7d85fec48284acbb18f6223c36f7ba1f646957d" => :x86_64_linux
+    rebuild 1
+    sha256 cellar: :any,                 arm64_big_sur: "4664b6326ef88f1cb9a333f44e3efae718dd36c0b9022fd4f13f94c75aa000b8"
+    sha256 cellar: :any,                 big_sur:       "9c435dd20ac686e44a6d0bade2aeb1fc38aab2f8581abcd52edd24fcd481df52"
+    sha256 cellar: :any,                 catalina:      "f9d29df82aafb93d30039a25a7fff50eda674fea0df040690aa5e9367be6d07a"
+    sha256 cellar: :any,                 mojave:        "59b934180ef0f7bde637fe66f433d0a1bf7f18a0787bb2ea433225c2dffc62fd"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ab71c2288640e08cd267cbf92bb5bd126a7cf30147561891188cfc2f4a6b431d" # linuxbrew-core
   end
 
   depends_on "pkg-config" => :build
@@ -30,6 +29,7 @@ class Chafa < Formula
                           "--disable-silent-rules",
                           "--prefix=#{prefix}"
     system "make", "install"
+    man1.install "docs/chafa.1"
   end
 
   test do

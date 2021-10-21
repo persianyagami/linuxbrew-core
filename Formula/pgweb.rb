@@ -1,34 +1,28 @@
 class Pgweb < Formula
   desc "Web-based PostgreSQL database browser"
   homepage "https://sosedoff.github.io/pgweb/"
-  url "https://github.com/sosedoff/pgweb/archive/v0.11.7.tar.gz"
-  sha256 "d35f74a6d80093764aece7b0a0ad6869799d04316efab077e0f7603835a9f159"
+  url "https://github.com/sosedoff/pgweb/archive/v0.11.9.tar.gz"
+  sha256 "2b93e8ebbb381e480c70a4c25ba62b7bb31a04e60be52951ddd874f603bd3789"
   license "MIT"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "e078e2a62bdd3c7d203895cae1c0fcaacf8b26a9dcd40d1f88b760667adc9d1d" => :big_sur
-    sha256 "38ad603da0bc035e5a905f44e22e70335d965a4ca62a2019d08a03cde3fe7f8c" => :catalina
-    sha256 "7230e2f2ef476b2768a25796c3f20d45654eb8fa33ff171e70d91188df7e6527" => :mojave
-    sha256 "536cc0ae5680a2c6316c569e2989868108f4b6626e496ec99c93e1ea823a7ba5" => :high_sierra
-    sha256 "9390d1f9bed7b4326230994f6e0960f5b65a4902f3dc613416445063d723d6f2" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "8850d3804355efc5d38091e65d3f534526dfb1d054948f7204ebeafabf6cbe67"
+    sha256 cellar: :any_skip_relocation, big_sur:       "ec49476c0f86d53843e63e7d0d19bce5a7f8db471bba1d050d0650bea83f8e21"
+    sha256 cellar: :any_skip_relocation, catalina:      "973ebc01c360e25e1b88e274e93e6a948390eeaadd669901916aaffb91888d5f"
+    sha256 cellar: :any_skip_relocation, mojave:        "94a5ede934e422a47e9ba408b6dd5ff7182ff4b69301420b220f4ec6fffdccfb"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2fcde820a38532a5a5371ff9a390841b9013ba5a40e814002092a40061c98b78" # linuxbrew-core
   end
 
   depends_on "go" => :build
-  depends_on "go-bindata" => :build
 
   def install
-    ENV["GOPATH"] = buildpath
-    (buildpath/"src/github.com/sosedoff/pgweb").install buildpath.children
+    ldflags = %W[
+      -s -w
+      -X github.com/sosedoff/pgweb/pkg/command.BuildTime=#{time.iso8601}
+      -X github.com/sosedoff/pgweb/pkg/command.GoVersion=#{Formula["go"].version}
+    ].join(" ")
 
-    cd "src/github.com/sosedoff/pgweb" do
-      # Avoid running `go get`
-      inreplace "Makefile", "go get", ""
-
-      system "make", "build"
-      bin.install "pgweb"
-      prefix.install_metafiles
-    end
+    system "go", "build", *std_go_args(ldflags: ldflags)
   end
 
   test do

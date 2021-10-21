@@ -1,35 +1,27 @@
 class Mupdf < Formula
   desc "Lightweight PDF and XPS viewer"
   homepage "https://mupdf.com/"
-  url "https://mupdf.com/downloads/archive/mupdf-1.18.0-source.tar.xz"
-  sha256 "592d4f6c0fba41bb954eb1a41616661b62b134d5b383e33bd45a081af5d4a59a"
+  url "https://mupdf.com/downloads/archive/mupdf-1.19.0-source.tar.xz"
+  sha256 "38f39943e408d60a3e7d6c2fca0d705163540ca24d65682d4426dc6f1fee28c5"
   license "AGPL-3.0-or-later"
-  revision OS.mac? ? 1 : 4
   head "https://git.ghostscript.com/mupdf.git"
 
   livecheck do
     url "https://mupdf.com/downloads/archive/"
-    regex(/href=.*?mupdf[._-]v?(\d+(?:\.\d+)+)-source\.t/i)
+    regex(/href=.*?mupdf[._-]v?(\d+(?:\.\d+)+)-source\.(?:t|zip)/i)
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "aaa1bc3c7a6e77bca62d9b4f6d1b7225cea461d8d28471df79b9ee11e81d9ecc" => :big_sur
-    sha256 "b656ec4a7c2cbb3b55b52678e5129bbeb27215c793cd6e3876d40a51d293bd84" => :catalina
-    sha256 "5b06c1203b68608f64d082b83db659a46d98a849d79530bfa83f28adb970e17e" => :mojave
-    sha256 "32dc7277f5dce0762c695ecf15f3ec745ec7767afec09f6acefc4aea86386873" => :high_sierra
-    sha256 "dc357c140f9f354a50363b529d90f92e16d5867e21d492d2dd1d357a0b7ac63f" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "a7c433b107bec1ae16959302f426bbf9eed5144efd3db390bd50a5a993d17029"
+    sha256 cellar: :any,                 big_sur:       "d4d5eb0345a58ffb91e4119dc2c1204d0383ce9cf31a9a0e21b8b69be9e34e04"
+    sha256 cellar: :any,                 catalina:      "ce072c384dc4f09671d8b2e531f4bf2a9f6c7a6fb296be86a56d39d3a9d20582"
+    sha256 cellar: :any,                 mojave:        "9d6f5c2e18ac29be5611c6a4f7c00fe39d56ab61f96a85156c351f5bb491bace"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8514c022a9d5f79690aeaa1eac668abfe06c445e7e66382e0887a2674a634de4" # linuxbrew-core
   end
 
   depends_on "pkg-config" => :build
   depends_on "freeglut"
   depends_on "mesa"
-  depends_on "openssl@1.1"
-
-  unless OS.mac?
-    depends_on "mesa-glu"
-    depends_on "xinput"
-  end
 
   conflicts_with "mupdf-tools",
     because: "mupdf and mupdf-tools install the same binaries"

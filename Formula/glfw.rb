@@ -1,30 +1,24 @@
 class Glfw < Formula
   desc "Multi-platform library for OpenGL applications"
   homepage "https://www.glfw.org/"
-  url "https://github.com/glfw/glfw/archive/3.3.2.tar.gz"
-  sha256 "98768e12e615fbe9f3386f5bbfeb91b5a3b45a8c4c77159cef06b1f6ff749537"
+  url "https://github.com/glfw/glfw/archive/3.3.4.tar.gz"
+  sha256 "cc8ac1d024a0de5fd6f68c4133af77e1918261396319c24fd697775a6bc93b63"
   license "Zlib"
-  revision 2 unless OS.mac?
   head "https://github.com/glfw/glfw.git"
 
   bottle do
-    cellar :any
-    sha256 "2d5c251cffe0dca47f83199b0b0fc500b3464888fd244dd6969a055bf2530d8d" => :big_sur
-    sha256 "deaf1b20e9fc336d5f0c9a927bc07f2c509fc63538c39e4ab3a024ca7c6170d8" => :catalina
-    sha256 "0c0de277c23273346d703004279d92d17a8962f4d62bf01f76021beea3c3f20a" => :mojave
-    sha256 "c6a198383ef979823c1e0071e65771ed9059626071390f2dc5b84b218dc565c3" => :high_sierra
-    sha256 "cac7fec8f28963def819c8b5211cef64d57d8198280a3b4e9ff5530305913ea5" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "254fab48c4f812c65cc73a046a664b0a914ef745c832ab01c8706ee77de6a195"
+    sha256 cellar: :any,                 big_sur:       "cc2a5ebed503daa988847659ce72bcbafd44387ecebb55fa422631edb731cade"
+    sha256 cellar: :any,                 catalina:      "b6505ca02cb672280ce332952dd188b7ffd139b4b48b1afb33a1619143bfd126"
+    sha256 cellar: :any,                 mojave:        "fb4c73abb6b230ffc2cacf187114584a1e589e67f399b78a56396911b2e1b483"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9c52f68f2db30fa7b0ccfe392369c2734889f4e113f70ed3922ecc691c51179a" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
 
-  unless OS.mac?
+  on_linux do
     depends_on "freeglut"
-    depends_on "libx11"
     depends_on "libxcursor"
-    depends_on "libxi"
-    depends_on "libxinerama"
-    depends_on "libxrandr"
     depends_on "mesa"
   end
 
@@ -40,9 +34,6 @@ class Glfw < Formula
   end
 
   test do
-    # glfw doesn't work in headless mode
-    return if !OS.mac? && ENV["CI"]
-
     (testpath/"test.c").write <<~EOS
       #define GLFW_INCLUDE_GLU
       #include <GLFW/glfw3.h>
@@ -58,6 +49,12 @@ class Glfw < Formula
 
     system ENV.cc, "test.c", "-o", "test",
                    "-I#{include}", "-L#{lib}", "-lglfw"
+
+    on_linux do
+      # glfw does not work in headless mode
+      return if ENV["HOMEBREW_GITHUB_ACTIONS"]
+    end
+
     system "./test"
   end
 end

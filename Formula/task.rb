@@ -1,39 +1,35 @@
 class Task < Formula
   desc "Feature-rich console based todo list manager"
   homepage "https://taskwarrior.org/"
-  url "https://taskwarrior.org/download/task-2.5.1.tar.gz"
-  sha256 "d87bcee58106eb8a79b850e9abc153d98b79e00d50eade0d63917154984f2a15"
+  url "https://github.com/GothenburgBitFactory/taskwarrior/releases/download/v2.6.0/task-2.6.0.tar.gz"
+  sha256 "3d0b445d45ffc578c3fefadc82501e35de898d09e8cd7460709077751e55b9c5"
   license "MIT"
-  head "https://github.com/GothenburgBitFactory/taskwarrior.git", branch: "2.6.0", shallow: false
+  head "https://github.com/GothenburgBitFactory/taskwarrior.git", branch: "develop"
 
   livecheck do
-    url "https://taskwarrior.org/download/"
-    regex(/href=.*?task[._-]v?(\d+(?:\.\d+)+)\.t/i)
+    url :stable
+    regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
   bottle do
-    sha256 "0a5aa472b0830025324a8f73c58215fecef5c3c1bf8f1b0990a1fd370931c4c0" => :big_sur
-    sha256 "24c80011867aa34766864a4bbac071493fb45c93bd3e08b3e9979b3ba4780fa2" => :catalina
-    sha256 "bba98b6bdfb3f79f1434229d8ade4b0622119320353da0eb8fec39809d66947d" => :mojave
-    sha256 "6a651be957b736bef14633efedef011a81c49ee37178eae4d8ef863549d7c584" => :high_sierra
-    sha256 "d1cb582ab9ee211ec154690634b5988f8058ead31000c74d5cdfa949d319d0ed" => :sierra
-    sha256 "07aa2c19ae6d7a9a46b286bfc48fa970aa9a9e0237e034bbaab354dcfc4f6848" => :el_capitan
-    sha256 "113fc7ce057c51ea14021006a4106c25d29e361e4b70113e33fb7a83e57ee8d1" => :yosemite
-    sha256 "7888e42210edb6691ff57d056585536abd318d62b43a898bb98e286373519164" => :mavericks
-    sha256 "8ef84bc6520fe829996effd80d992c4ea192fa5199e29603a0a4ca35ad2d1b1c" => :x86_64_linux
+    sha256                               arm64_big_sur: "c0078f45218be9eda3843a45cd8a804e9268f1b57d6deacb4508970182fa7aa4"
+    sha256                               big_sur:       "dfce309ab06701933c0bc0f7d6d1c7ecbe4dd29e5b18accd9ba665fb99ba652d"
+    sha256                               catalina:      "29ebd088d472e31ae57e83bd09a2eafc76a38ebb309cd6277939243a5bfbd4ad"
+    sha256                               mojave:        "52bd72001be7ba3ebaf730dac5506fcb4f070cc756f2d06924b6997a689cf5d1"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7c6f580418109f7e31066b3224c11c50f5eb90649a532d095baf9fbef00cecfa" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
   depends_on "gnutls"
-  unless OS.mac?
-    depends_on "util-linux" # for libuuid
-    depends_on "linux-headers"
-    depends_on "readline"
-  end
 
   on_linux do
+    depends_on "gcc"
+    depends_on "linux-headers@4.4"
+    depends_on "readline"
     depends_on "util-linux"
   end
+
+  fails_with gcc: "5"
 
   def install
     system "cmake", ".", *std_cmake_args

@@ -1,21 +1,16 @@
 class GsettingsDesktopSchemas < Formula
   desc "GSettings schemas for desktop components"
   homepage "https://download.gnome.org/sources/gsettings-desktop-schemas/"
-  url "https://download.gnome.org/sources/gsettings-desktop-schemas/3.38/gsettings-desktop-schemas-3.38.0.tar.xz"
-  sha256 "5704c8266004b296036671f223c705dc046aa694a1b1abb87c67e7d2747a8c67"
+  url "https://download.gnome.org/sources/gsettings-desktop-schemas/41/gsettings-desktop-schemas-41.0.tar.xz"
+  sha256 "77289972e596d044583f0c056306d8f1dbd8adcf912910a50da0a663e65332ed"
   license "LGPL-2.1-or-later"
 
-  livecheck do
-    url :stable
-  end
-
   bottle do
-    cellar :any_skip_relocation
-    sha256 "abb92dac931cdbbe96c43137c3df3173b41c86565c1053a5578e4b36312de480" => :big_sur
-    sha256 "0bcc0f743e141beb151ad2b400c40a4d30e317d1080437e359095fb53da3c8e4" => :catalina
-    sha256 "dd69129d87fd0b0c435b29b19e2ac9cea2d1a72d557aed9b3db1202afb49578d" => :mojave
-    sha256 "63a1370fe1e1e58eabb9e608cb992a8391e2ba11c0940899d4c37c3c43088ff2" => :high_sierra
-    sha256 "185a46e8efd2130c5bd689aba522e72c950e96e92d42f9083be82e6009a876c7" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "d27eabf5d5e5f619418a2b6be7ca9b42de63572e595ab92e6e8960256ca176c4"
+    sha256 cellar: :any_skip_relocation, big_sur:       "57cdbf1950a1dea3008b6f4c8ed0a1d7d38a5a9e8cedfa31ca3ac5b4dfbead66"
+    sha256 cellar: :any_skip_relocation, catalina:      "57cdbf1950a1dea3008b6f4c8ed0a1d7d38a5a9e8cedfa31ca3ac5b4dfbead66"
+    sha256 cellar: :any_skip_relocation, mojave:        "57cdbf1950a1dea3008b6f4c8ed0a1d7d38a5a9e8cedfa31ca3ac5b4dfbead66"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "08f6428fc391dda01e161b14a0bd183d340b78cf5cb85a9e66b4ba33be790fa8" # linuxbrew-core
   end
 
   depends_on "gobject-introspection" => :build

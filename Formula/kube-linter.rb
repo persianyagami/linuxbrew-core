@@ -1,24 +1,25 @@
 class KubeLinter < Formula
   desc "Static analysis tool for Kubernetes YAML files and Helm charts"
   homepage "https://github.com/stackrox/kube-linter"
-  url "https://github.com/stackrox/kube-linter.git",
-      tag:      "0.1.4",
-      revision: "12db88411cafedbe9d6870d57a45c0927d27a760"
+  url "https://github.com/stackrox/kube-linter/archive/0.2.5.tar.gz"
+  sha256 "5d2e724e291b00b6a61ebd2bd97f3f3c26298f890be2b555b60f0fb719c5384f"
   license "Apache-2.0"
   head "https://github.com/stackrox/kube-linter.git"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "2036d2265ffca6ed1fd00af1fdf59fd1b55547e5d3611901ba86b96316d97f67" => :big_sur
-    sha256 "262886a27d45e35393a579d4add002a5badbef49b14f06b9b4706fdd2e173c01" => :catalina
-    sha256 "fedfd6ca49c4b2da0458143eb582ed29bb6807b72fc5ae58dbc364d028efa259" => :mojave
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "87711140134751dcea5d007d097ff4b15d607af2da66dd4612c50c1e97b20945"
+    sha256 cellar: :any_skip_relocation, big_sur:       "c7153d6da6821e27d636c10474a5af10d15ff39d01d5acbed154829ae4b3c824"
+    sha256 cellar: :any_skip_relocation, catalina:      "c7153d6da6821e27d636c10474a5af10d15ff39d01d5acbed154829ae4b3c824"
+    sha256 cellar: :any_skip_relocation, mojave:        "c7153d6da6821e27d636c10474a5af10d15ff39d01d5acbed154829ae4b3c824"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8d1d227be6c5734af7cd11940e0429f5516e71f7574326bdc3722e0d2348bad2" # linuxbrew-core
   end
 
   depends_on "go" => :build
 
   def install
-    system "make", "build"
-    bin.install ".gobin/kube-linter"
+    ENV["CGO_ENABLED"] = "0"
+    ldflags = "-s -w -X golang.stackrox.io/kube-linter/internal/version.version=#{version}"
+    system "go", "build", *std_go_args(ldflags: ldflags), "./cmd/kube-linter"
   end
 
   test do
@@ -48,5 +49,6 @@ class KubeLinter < Formula
 
     # Lint pod.yaml for default errors
     assert_match "No lint errors found!", shell_output("#{bin}/kube-linter lint pod.yaml 2>&1").chomp
+    assert_equal version.to_s, shell_output("#{bin}/kube-linter version").chomp
   end
 end

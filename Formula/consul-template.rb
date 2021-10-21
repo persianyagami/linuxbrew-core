@@ -2,29 +2,27 @@ class ConsulTemplate < Formula
   desc "Generic template rendering and notifications with Consul"
   homepage "https://github.com/hashicorp/consul-template"
   url "https://github.com/hashicorp/consul-template.git",
-      tag:      "v0.25.1",
-      revision: "171d54d1d3e732a7e960988b72ff9c2fddb3cd8f"
+      tag:      "v0.27.1",
+      revision: "799d6561e1cfdc34c08352d23ebe623f40fb022f"
   license "MPL-2.0"
-  head "https://github.com/hashicorp/consul-template.git"
+  head "https://github.com/hashicorp/consul-template.git", branch: "master"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "978bab61f0209e37b5a14a1af8d9b55a767701cb5cded8107e9c7447e5e0b78d" => :big_sur
-    sha256 "79c0b42239bae3e2771b9cce86d2e816654126aa6c5907be3999eadec34ecd8a" => :catalina
-    sha256 "169f7d647729d546330b8268f5e07eb378fc95e35831fb6f24d508901f607499" => :mojave
-    sha256 "37f32e5b0d9e2ffc20846be7f4e97607e76f5b27b29cf015c941c9c03cc506f4" => :high_sierra
-    sha256 "82156cf24d9f81ccb675ae81982560d0ccb67be6bc5f760c368f973a295e70f4" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "1daf66b8cde3eb1483b130185eccaadd947686a830562d415dc92017f746b04a"
+    sha256 cellar: :any_skip_relocation, big_sur:       "72d06c3eca6b73058c6fc7b35e9c275ab9a9fff8ecd0b1200520f1b711f25c74"
+    sha256 cellar: :any_skip_relocation, catalina:      "5cb5d29ad3beb7cb51e9762f1908924a7a0e8cc8b3ae6bc10d9289818721c090"
+    sha256 cellar: :any_skip_relocation, mojave:        "54d27658a88b49a16dd37995b435a6eb51d55d109e10aa584e39d91142784151"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c0834b775b96acd416a5177f9580fbfd54ff82dff79644ade93e9bde8edc608e" # linuxbrew-core
   end
 
   depends_on "go" => :build
 
   def install
     project = "github.com/hashicorp/consul-template"
-    commit = Utils.safe_popen_read("git", "rev-parse", "--short", "HEAD").chomp
     ldflags = %W[
       -s -w
       -X #{project}/version.Name=consul-template
-      -X #{project}/version.GitCommit=#{commit}
+      -X #{project}/version.GitCommit=#{Utils.git_short_head}
     ]
     system "go", "build", "-ldflags", ldflags.join(" "), *std_go_args
     prefix.install_metafiles

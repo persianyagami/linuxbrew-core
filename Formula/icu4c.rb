@@ -1,35 +1,28 @@
 class Icu4c < Formula
   desc "C/C++ and Java libraries for Unicode and globalization"
   homepage "http://site.icu-project.org/home"
-  url "https://github.com/unicode-org/icu/releases/download/release-67-1/icu4c-67_1-src.tgz"
-  version "67.1"
-  sha256 "94a80cd6f251a53bd2a997f6f1b5ac6653fe791dfab66e1eb0227740fb86d5dc"
+  url "https://github.com/unicode-org/icu/releases/download/release-69-1/icu4c-69_1-src.tgz"
+  version "69.1"
+  sha256 "4cba7b7acd1d3c42c44bb0c14be6637098c7faf2b330ce876bc5f3b915d09745"
   license "ICU"
 
   livecheck do
     url :stable
-    strategy :github_latest
-    regex(%r{href=.*?/tag/release[._-]v?(\d+(?:[.-]\d+)+)["' >]}i)
+    regex(/^release[._-]v?(\d+(?:[.-]\d+)+)$/i)
+    strategy :git do |tags, regex|
+      tags.map { |tag| tag[regex, 1]&.gsub("-", ".") }.compact
+    end
   end
 
   bottle do
-    cellar :any
-    sha256 "114cce72e22c5eb713f56b9f91a076b2f2d5930152d3638a95c6decee511aa3e" => :big_sur
-    sha256 "0d03423f2a4a557fc04a021fad963ab71d05b9129693887522dde996aff8c9f9" => :arm64_big_sur
-    sha256 "2d1e91b5127f66e7941790c004817c94c892725c88f84f1e4c37297fcbc0c72f" => :catalina
-    sha256 "b6069459c78f18045ee922ce5cb5b235d4b479597d79c3c298d09e0de3d70794" => :mojave
-    sha256 "0720bd47f020d5ca895ae79eb61623ed3c7de0d4c4f221613105f47147aec01f" => :high_sierra
-    sha256 "f941a4963851701801719bd9d5fa15cf41064dd74ea5e2d15349f0536b4442da" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "25a1ec460d422ba5abff15dc5cb60ad36003ad021585fa7be278d1dca6fcd2c4"
+    sha256 cellar: :any,                 big_sur:       "d46b8ec5c3db629e7848e9fd31e5ec99ed952d9c81c8936a2511fae803d831fd"
+    sha256 cellar: :any,                 catalina:      "3f75c907dadc6e7e647920506e740a312e56279369f3c9708cac54b018410120"
+    sha256 cellar: :any,                 mojave:        "e0362362d26379b8c2456de163a148bc4e186d058ea8ed4a38fe41354bea96a8"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "82d3861ec48854128519eb3c959542105086aa4d7013bf0a0b8bf56641822e5a" # linuxbrew-core
   end
 
   keg_only :provided_by_macos, "macOS provides libicucore.dylib (but nothing else)"
-
-  # fix C++14 compatibility of U_ASSERT macro.
-  # Remove with next release (ICU 68).
-  patch :p2 do
-    url "https://github.com/unicode-org/icu/commit/715d254a02b0b22681cb6f861b0921ae668fa7d6.patch?full_index=1"
-    sha256 "a87e1b9626ec5803b1220489c0d6cc544a5f293f1c5280e3b27871780c4ecde8"
-  end
 
   def install
     args = %W[
@@ -37,9 +30,9 @@ class Icu4c < Formula
       --disable-samples
       --disable-tests
       --enable-static
+      --with-library-bits=64
     ]
 
-    args << "--with-library-bits=64" if OS.mac?
     cd "source" do
       system "./configure", *args
       system "make"
@@ -48,7 +41,7 @@ class Icu4c < Formula
   end
 
   test do
-    if File.readable? "/usr/share/dict/words"
+    if File.exist? "/usr/share/dict/words"
       system "#{bin}/gendict", "--uchars", "/usr/share/dict/words", "dict"
     else
       (testpath/"hello").write "hello\nworld\n"

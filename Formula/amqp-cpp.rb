@@ -1,10 +1,10 @@
 class AmqpCpp < Formula
   desc "C++ library for communicating with a RabbitMQ message broker"
   homepage "https://github.com/CopernicaMarketingSoftware/AMQP-CPP"
-  url "https://github.com/CopernicaMarketingSoftware/AMQP-CPP/archive/v4.3.10.tar.gz"
-  sha256 "4fa1e9650f7a08ae7217899431a3b3f0a173ad826dd819f0b8c760e4e2a65298"
+  url "https://github.com/CopernicaMarketingSoftware/AMQP-CPP/archive/v4.3.15.tar.gz"
+  sha256 "21e6ae69dcf535cd1be49b272c3ff019134dddc7d812c0050e5d7bf4e19d0c3b"
   license "Apache-2.0"
-  head "https://github.com/CopernicaMarketingSoftware/AMQP-CPP.git"
+  head "https://github.com/CopernicaMarketingSoftware/AMQP-CPP.git", branch: "master"
 
   livecheck do
     url :stable
@@ -12,11 +12,11 @@ class AmqpCpp < Formula
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "7ac83ccaae984ecc6fbd138b417c7613a87049bf15db87bddeb359a9c6168e6a" => :big_sur
-    sha256 "04110248cacbc6f2139945936635906e3225a8ca69f2481774c3f23f9918707a" => :catalina
-    sha256 "5c90bc9289b6de7c8f7604ee67767cd8df2629b8657bce2652d26d96e812cddc" => :mojave
-    sha256 "92218957556ac0b7ea1044f4fd4f0ad0b66a6e8576ca99010e369ea0ede40ea9" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "78924eacf7c24bfb70d6c3ff041427fbb57b476321e274535e3e5b06e45278e9"
+    sha256 cellar: :any_skip_relocation, big_sur:       "b246ab5a6bfb862ee23c89fbf0ebca57eeb99314e219c7c6d9c5a1bb42c81ce2"
+    sha256 cellar: :any_skip_relocation, catalina:      "fd48a53d76c86b10729b81bffe84af39435db4c221c9aa0cd021849a6a194f21"
+    sha256 cellar: :any_skip_relocation, mojave:        "580fa1d90bac47c4edec0e5ee1b34c1db4953a51fc2ac5ca7022fae2ec0bef3c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4ed9d8149c436e2e1aa3cc000ec637dd3afd1748845e45c22b4b1c88520f1b7d" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
@@ -42,7 +42,7 @@ class AmqpCpp < Formula
       }
     EOS
     system ENV.cxx, "test.cpp", "-std=c++11", "-L#{lib}", "-o",
-                    "test", *("-lc++" if OS.mac?), "-lamqpcpp"
+                    "test", "-lamqpcpp"
     system "./test"
   end
 end

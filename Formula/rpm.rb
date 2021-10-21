@@ -1,21 +1,22 @@
 class Rpm < Formula
   desc "Standard unix software packaging tool"
   homepage "https://rpm.org/"
-  url "http://ftp.rpm.org/releases/rpm-4.15.x/rpm-4.15.1.tar.bz2"
-  mirror "https://ftp.osuosl.org/pub/rpm/releases/rpm-4.15.x/rpm-4.15.1.tar.bz2"
-  sha256 "ddef45f9601cd12042edfc9b6e37efcca32814e1e0f4bb8682d08144a3e2d230"
-  revision 2
+  url "http://ftp.rpm.org/releases/rpm-4.17.x/rpm-4.17.0.tar.bz2"
+  mirror "https://ftp.osuosl.org/pub/rpm/releases/rpm-4.17.x/rpm-4.17.0.tar.bz2"
+  sha256 "2e0d220b24749b17810ed181ac1ed005a56bbb6bc8ac429c21f314068dc65e6a"
+  license "GPL-2.0-only"
   version_scheme 1
 
   livecheck do
-    url "https://github.com/rpm-software-management/rpm.git"
-    regex(/rpm[._-]v?(\d+(?:\.\d+)+)-release/i)
+    url "https://rpm.org/download.html"
+    regex(/href=.*?rpm[._-]v?(\d+(?:\.\d+)+)\.t/i)
   end
 
   bottle do
-    sha256 "0ab53d077ad1a661161e45dc2af8c7a3767808d3efa14e736346d2001d8bd002" => :big_sur
-    sha256 "b8ff31d0e3a8404442c6ab8cab9d6970f53960cb58002a812e1fde9fc0bdc47c" => :catalina
-    sha256 "84f9e5185d8aa8a711ec5065380fab393eb6288b470d0f8af68affc9727304c0" => :mojave
+    sha256 big_sur:      "6f857111ed59bf5efb8f97ad26c7ed52fb8e70a92d2978dc7d2f6173d14675cd"
+    sha256 catalina:     "29846a4e13dd2683318362442fe7a84c2b7cd71813291be24cc356bc657f8a8d"
+    sha256 mojave:       "aeab2644677216b3d631a4a1abb3d75aada85152f7f85a550ab43943b934f994"
+    sha256 x86_64_linux: "1147c07948c53779fdf751623b349d6da6d6b4753103ce2c898da2cc68a0a041" # linuxbrew-core
   end
 
   depends_on "berkeley-db"
@@ -27,6 +28,7 @@ class Rpm < Formula
   depends_on "openssl@1.1"
   depends_on "pkg-config"
   depends_on "popt"
+  depends_on "sqlite"
   depends_on "xz"
   depends_on "zstd"
 
@@ -61,6 +63,8 @@ class Rpm < Formula
                           "__GIT=/usr/bin/git",
                           "__LD=/usr/bin/ld"
     system "make", "install"
+
+    inreplace lib/"rpm/macros", Superenv.shims_path, "" if OS.mac?
   end
 
   def post_install
@@ -112,8 +116,8 @@ class Rpm < Formula
     EOS
 
     system "#{bin}/rpm", "-vv", "-qa", "--dbpath=#{testpath}/var/lib/rpm"
-    assert_predicate testpath/"var/lib/rpm/Packages", :exist?,
-                     "Failed to create 'Packages' file!"
+    assert_predicate testpath/"var/lib/rpm/rpmdb.sqlite", :exist?,
+                     "Failed to create 'rpmdb.sqlite' file"
     rpmdir("%_builddir").mkpath
     specfile = rpmdir("%_specdir")+"test.spec"
     specfile.write(test_spec)

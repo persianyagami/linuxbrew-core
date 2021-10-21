@@ -1,29 +1,29 @@
 class GitDelta < Formula
   desc "Syntax-highlighting pager for git and diff output"
   homepage "https://github.com/dandavison/delta"
-  url "https://github.com/dandavison/delta/archive/0.4.4.tar.gz"
-  sha256 "4068cb88a4110bbef24b8148e3ae283ff007f4f6aa4780789cda7a412928daa0"
+  url "https://github.com/dandavison/delta/archive/0.8.3.tar.gz"
+  sha256 "cf48d52d20a12e11a3a6afd436a75550e78fc39c358e85a75caa08b39e4e75c6"
   license "MIT"
   head "https://github.com/dandavison/delta.git"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "9ca2f88662822e52195b10e52f16f0261a3faebddf4ec30496997fab3ebc699c" => :big_sur
-    sha256 "3561fccb1ff28c7021d5cc5ed549f3be47dfd4127787510aac38192670077f17" => :catalina
-    sha256 "6ece760a0d39fbee0b2d40237c3a0e81c1d67df655502072dc06077676ac43ea" => :mojave
-    sha256 "a5767a8e9621884bb26cfb4205ffb9b2e2c0ff53536d79981ee2e22ff823a474" => :high_sierra
-    sha256 "1eb5cfa359e6988eea397b71b7da0d6ffbb5846a4277402664601a2d9f87c026" => :x86_64_linux
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "7d4b289524162783f5d0a7faba4154c409674eec25febdd02121a00557c1540e"
+    sha256 cellar: :any_skip_relocation, big_sur:       "075eee68cef594866b780645be5f795128e9d1a2af3ba7b054ad422e1d126431"
+    sha256 cellar: :any_skip_relocation, catalina:      "1ab8fa326b32a62852cc582c70bda7a01bfa4468263e0ff64ff014518abf6726"
+    sha256 cellar: :any_skip_relocation, mojave:        "1ee66c5891a38d1e70e8562509534308d1f1dd22ff15cbfd8207d48abb022916"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "339b5e71c2820fe5f14c9b40f37b6b514f2c59fe0370ae7755ae7395b990d08f" # linuxbrew-core
   end
 
   depends_on "rust" => :build
-  depends_on "llvm" => :build unless OS.mac?
-
   uses_from_macos "zlib"
 
   conflicts_with "delta", because: "both install a `delta` binary"
 
   def install
     system "cargo", "install", *std_cargo_args
+    bash_completion.install "etc/completion/completion.bash" => "delta"
+    zsh_completion.install "etc/completion/completion.zsh" => "_delta"
   end
 
   test do

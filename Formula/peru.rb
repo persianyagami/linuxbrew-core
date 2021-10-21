@@ -3,26 +3,21 @@ class Peru < Formula
 
   desc "Dependency retriever for version control and archives"
   homepage "https://github.com/buildinspace/peru"
-  url "https://files.pythonhosted.org/packages/14/ef/9226d6a47f34afacb241b3d8acf25e5cd958a17f7bdb9f24d3b284aa59e0/peru-1.2.0.tar.gz"
-  sha256 "5bcf70b49fd5a6b089a23d49d93fd6deb05bde560219704de53ae5e48cb49acb"
+  url "https://files.pythonhosted.org/packages/d5/40/d97b481076e7691bb7593bfbce209d64da7fb17d1fc5c170fe7a656dbb03/peru-1.3.0.tar.gz"
+  sha256 "e70f11633422ac95595f943e693f3b72da0ac852b9b43220e04096c92d5d2c35"
   license "MIT"
-  revision OS.mac? ? 2 : 3
-
-  livecheck do
-    url :stable
-  end
+  revision 1
 
   bottle do
-    cellar :any
-    sha256 "57f925b823115f0eaa2ae96f25dcac171496737e0caa1a7fb86972cd80c86045" => :big_sur
-    sha256 "505d7ab6f8c65dd5414a67e88b1a30ca0a1dbab35415b4c48aea8ab99616362f" => :catalina
-    sha256 "31f7ea3a66e854e6dddfa1127b3d208f6a04406cb0aa6e4b94a034c63c7bd2db" => :mojave
-    sha256 "c4eb15429ad2c832220b2ac782745e06bfc29dd8c6a7a3bce15b9291246793ac" => :high_sierra
-    sha256 "b75ef7e3418a3c3bbed295426b65d2107bfb49ddfcd9c1e5971db81fedac16b1" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "10bb71d1c3053196036bf75ea13605541101f74ca00fc27902718d99195e9432"
+    sha256 cellar: :any,                 big_sur:       "d48061587fc2627b0584dcf23438c3097e280564955adb5f556023cad7ca46b1"
+    sha256 cellar: :any,                 catalina:      "4fac7c1d51da92f85bb3b3be8f328d72154a6372cdc59864faae8d6c6f98baa7"
+    sha256 cellar: :any,                 mojave:        "69a0a72326ffa8622569865a8121253e59c071d7d4e04b7a714d613074bd4724"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "89345636da0be97c07638a7b0dee967f705941d8edf21c507c7be75dbc995813" # linuxbrew-core
   end
 
   depends_on "libyaml"
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   resource "docopt" do
     url "https://files.pythonhosted.org/packages/a2/55/8f8cab2afd404cf578136ef2cc5dfb50baa1761b68c9da1fb1e4eed343c9/docopt-0.6.2.tar.gz"
@@ -30,14 +25,14 @@ class Peru < Formula
   end
 
   resource "PyYAML" do
-    url "https://files.pythonhosted.org/packages/64/c2/b80047c7ac2478f9501676c988a5411ed5572f35d1beff9cae07d321512c/PyYAML-5.3.1.tar.gz"
-    sha256 "b8eac752c5e14d3eca0e6dd9199cd627518cb5ec06add0de9d32baeee6fe645d"
+    url "https://files.pythonhosted.org/packages/a0/a4/d63f2d7597e1a4b55aa3b4d6c5b029991d3b824b5bd331af8d4ab1ed687d/PyYAML-5.4.1.tar.gz"
+    sha256 "607774cbba28732bfa802b54baa7484215f530991055bb562efbed5b2f20a45e"
   end
 
   def install
     # Fix plugins (executed like an executable) looking for Python outside the virtualenv
     Dir["peru/resources/plugins/**/*.py"].each do |f|
-      inreplace f, "#! /usr/bin/env python3", "#!#{libexec}/bin/python3.9"
+      inreplace f, "#! /usr/bin/env python3", "#!#{libexec}/bin/python3.10"
     end
 
     virtualenv_install_with_resources

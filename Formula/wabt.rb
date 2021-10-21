@@ -2,9 +2,10 @@ class Wabt < Formula
   desc "Web Assembly Binary Toolkit"
   homepage "https://github.com/WebAssembly/wabt"
   url "https://github.com/WebAssembly/wabt.git",
-      tag:      "1.0.20",
-      revision: "830d32a41449278cacb0bf17530618d47c43340b"
+      tag:      "1.0.24",
+      revision: "21279a861fa3dbac9af9d2bab16c741df17a86af"
   license "Apache-2.0"
+  revision 1
 
   livecheck do
     url :stable
@@ -12,12 +13,11 @@ class Wabt < Formula
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "06bedfd798d896d5530c8801f830b1ace48bcce10ff438a393e2e01d4b8d1a7c" => :big_sur
-    sha256 "910d30dea89023dadf308768eee1f8d186e88ff50210a5603c392e3dc33546b7" => :catalina
-    sha256 "e9eba56a16e053365d515a6637a1b12217cf65c2c3f81988a0d80af8fc2f0094" => :mojave
-    sha256 "77e89094c8a0d95abeb513f6ff3bbfcecab82ed4cc740b7be1445cee79eef6a0" => :high_sierra
-    sha256 "1b8cf42144e66988a172727fd420c8eea4c69dcb2aa025aaac0a791fd78549b8" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "8dcefbff4b9770d496d8771b2294763a7686c425ed85da1e69cc778deeacdc85"
+    sha256 cellar: :any_skip_relocation, big_sur:       "558e3533b83784044c443aaab28cbbd83b6bce18ef34e7c54898b33e96b56e8b"
+    sha256 cellar: :any_skip_relocation, catalina:      "c66077777e94c758da994582e4b6ee260a5a5e0641554efaf9b62e6791cf1398"
+    sha256 cellar: :any_skip_relocation, mojave:        "c9cd360e6896f9eb340874dd0deea7e99c72a8352c2e66bb2aa334690bed870b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d5636c0dffcf89fffb369cda7689336a5f96420ccec756deaffe0d8e16ed3436" # linuxbrew-core
   end
 
   depends_on "cmake" => :build
@@ -25,7 +25,7 @@ class Wabt < Formula
 
   def install
     mkdir "build" do
-      system "cmake", "..", "-DBUILD_TESTS=OFF", *std_cmake_args
+      system "cmake", "..", "-DBUILD_TESTS=OFF", "-DWITH_WASI=ON", *std_cmake_args
       system "make", "install"
     end
   end

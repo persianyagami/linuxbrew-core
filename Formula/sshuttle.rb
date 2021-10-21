@@ -3,32 +3,25 @@ class Sshuttle < Formula
 
   desc "Proxy server that works as a poor man's VPN"
   homepage "https://github.com/sshuttle/sshuttle"
-  url "https://github.com/sshuttle/sshuttle.git",
-      tag:      "v1.0.4",
-      revision: "abb48f199656f776be0f05601ff5746f36df3370"
+  url "https://files.pythonhosted.org/packages/e9/4b/51d6aaa900a6a13efb380b0a084a327c41aad28a267d4c1f074cb2e41baa/sshuttle-1.0.5.tar.gz"
+  sha256 "fd8c691aac2cb80933aae7f94d9d9e271a820efc5c48e73408f1a90da426a1bd"
   license "LGPL-2.1-or-later"
   revision 1
-  head "https://github.com/sshuttle/sshuttle.git"
+  head "https://github.com/sshuttle/sshuttle.git", branch: "master"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "465a87922822f59c5e3cbc014a2eb15e3dde2fa30064db8ec8eda3752fe58be1" => :big_sur
-    sha256 "41b9c52318318597e31403c66bc1fff91fd3da97047e6d82344f406118d06d17" => :catalina
-    sha256 "5ee6b7d0f0afdd178a769213c1da1c1caea53228e8a21dcd4571b7fcc643deef" => :mojave
-    sha256 "ddc86c2b17f9b3caedd813a8f2d11b9154637f5783b73a031276aef78909b1c1" => :high_sierra
-    sha256 "d4e6f4bd4c0ecb6838c07a891a59d06219e523c0f64d82e506584743ec9cc944" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "b42243ff9ffd1eb0d6e4166ba785c906b481599cd2b2b9565d4904c910aa89ae"
+    sha256 cellar: :any_skip_relocation, big_sur:       "4473c1b22e08070fa71beebecd01c9fdf5d396cf9b56907e6b1e27d32bceb389"
+    sha256 cellar: :any_skip_relocation, catalina:      "f02f3c772af4b221b9469849c315be5c92abbc12f5024bdfc1bb03d12ed2fcac"
+    sha256 cellar: :any_skip_relocation, mojave:        "21d7eff40bde6f0ad2f2003136d934e85867f5d6a5d7c7c669294cbdd378eb3d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "5a49ae38bb94abe1487b2982a9058c7c2be134fedee80b9bcc58a6b3829d8135" # linuxbrew-core
   end
 
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   resource "psutil" do
-    url "https://files.pythonhosted.org/packages/aa/3e/d18f2c04cf2b528e18515999b0c8e698c136db78f62df34eee89cee205f1/psutil-5.7.2.tar.gz"
-    sha256 "90990af1c3c67195c44c9a889184f84f5b2320dce3ee3acbd054e3ba0b4a7beb"
-  end
-
-  resource "psutil" do
-    url "https://files.pythonhosted.org/packages/aa/3e/d18f2c04cf2b528e18515999b0c8e698c136db78f62df34eee89cee205f1/psutil-5.7.2.tar.gz"
-    sha256 "90990af1c3c67195c44c9a889184f84f5b2320dce3ee3acbd054e3ba0b4a7beb"
+    url "https://files.pythonhosted.org/packages/e1/b0/7276de53321c12981717490516b7e612364f2cb372ee8901bd4a66a000d7/psutil-5.8.0.tar.gz"
+    sha256 "0c9ccb99ab76025f2f0bbecf341d4656e9c1351db8cc8a03ccd62e318ab4b5c6"
   end
 
   def install

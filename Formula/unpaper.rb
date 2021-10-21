@@ -3,15 +3,15 @@ class Unpaper < Formula
   homepage "https://www.flameeyes.com/projects/unpaper"
   url "https://www.flameeyes.com/files/unpaper-6.1.tar.xz"
   sha256 "237c84f5da544b3f7709827f9f12c37c346cdf029b1128fb4633f9bafa5cb930"
-  revision 6
+  license "GPL-2.0-or-later"
+  revision 7
 
   bottle do
-    cellar :any
-    sha256 "4272a437e23c502b03ceea130c0ea2c2d1312a11834452638862251d395e0ecc" => :big_sur
-    sha256 "20b2e6bf4adebadfeb7705f2a3b6437aac39cbec0eeeac0a924a2985d15f014d" => :catalina
-    sha256 "722874cb52df909ea30a72d519f3db40a9c98389281629b4910aeefbdf88b959" => :mojave
-    sha256 "649ba3d0be5c4c2ce5e32f32c2023ea3296bb59ff0473f641092173f8a664552" => :high_sierra
-    sha256 "33a521cb8348474d42eb3abf8414ac05843f06fcf01c7d83e427ff857e310dcb" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "8aadd07d5712465893b6c3625e7da966c8bfdee572c7ba660cedaa3b0cdff034"
+    sha256 cellar: :any,                 big_sur:       "a9841d58884ee1a0616a2a115c21c593eab613c0e040bf2b21d02ddeec682765"
+    sha256 cellar: :any,                 catalina:      "63a30f9ac771386a0f7d7302c31abe60855b4c4028458cbf9371270f42ee49e6"
+    sha256 cellar: :any,                 mojave:        "15d95668bd014ac329b703502832f020efcdb9011558ab8ba86ee0c8a458046d"
+    sha256 cellar: :any,                 x86_64_linux:  "4b33080abfc98babdd5df76a516bcd0f744030b02a0b21bbcb2a625feab94650" # linuxbrew-core
   end
 
   head do
@@ -31,7 +31,10 @@ class Unpaper < Formula
   end
 
   def install
-    system "autoreconf", "-i" if build.head? || !OS.mac?
+    system "autoreconf", "-i" if build.head?
+
+    system "autoreconf", "-i" if OS.linux?
+
     system "./configure", "--disable-dependency-tracking", "--prefix=#{prefix}"
     system "make", "install"
   end

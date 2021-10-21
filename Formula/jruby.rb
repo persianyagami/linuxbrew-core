@@ -1,8 +1,8 @@
 class Jruby < Formula
   desc "Ruby implementation in pure Java"
   homepage "https://www.jruby.org/"
-  url "https://search.maven.org/remotecontent?filepath=org/jruby/jruby-dist/9.2.14.0/jruby-dist-9.2.14.0-bin.tar.gz"
-  sha256 "32e73b2551f01e459ece84f732bcbf80712c3b71b6df7dbd063354b4d277e0b5"
+  url "https://search.maven.org/remotecontent?filepath=org/jruby/jruby-dist/9.3.0.0/jruby-dist-9.3.0.0-bin.tar.gz"
+  sha256 "2dc1f85936d3ff3adc20d90e5f4894499c585a7ea5fedec67154e2f9ecb1bc9b"
   license any_of: ["EPL-2.0", "GPL-2.0-only", "LGPL-2.1-only"]
 
   livecheck do
@@ -10,7 +10,13 @@ class Jruby < Formula
     regex(%r{href=.*?/jruby-dist[._-]v?(\d+(?:\.\d+)+)-bin\.t}i)
   end
 
-  bottle :unneeded
+  bottle do
+    sha256 cellar: :any,                 arm64_big_sur: "4e588bf056c56b699fbe79b3f6e3f1726b9a129bd20d7e6132e18e3e7c29ce8c"
+    sha256 cellar: :any,                 big_sur:       "b7741941d9b16c003932b4143ccfbfa0fe3e942f9bba3c8ef32f596bc29dcdd7"
+    sha256 cellar: :any,                 catalina:      "b7741941d9b16c003932b4143ccfbfa0fe3e942f9bba3c8ef32f596bc29dcdd7"
+    sha256 cellar: :any,                 mojave:        "b7741941d9b16c003932b4143ccfbfa0fe3e942f9bba3c8ef32f596bc29dcdd7"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "22af5cc9e3d2a67c04669b80642c56230a0b5ae387deecf6cd1b4c9a9feca694" # linuxbrew-core
+  end
 
   depends_on "openjdk"
 
@@ -20,7 +26,7 @@ class Jruby < Formula
 
     cd "bin" do
       # Prefix a 'j' on some commands to avoid clashing with other rubies
-      %w[ast rake rdoc ri testrb].each { |f| mv f, "j#{f}" }
+      %w[ast rake rdoc ri racc].each { |f| mv f, "j#{f}" }
       # Delete some unnecessary commands
       rm "gem" # gem is a wrapper script for jgem
       rm "irb" # irb is an identical copy of jirb

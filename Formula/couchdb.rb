@@ -1,20 +1,15 @@
 class Couchdb < Formula
   desc "Apache CouchDB database server"
   homepage "https://couchdb.apache.org/"
-  url "https://www.apache.org/dyn/closer.lua?path=couchdb/source/3.1.1/apache-couchdb-3.1.1.tar.gz"
-  mirror "https://archive.apache.org/dist/couchdb/source/3.1.1/apache-couchdb-3.1.1.tar.gz"
-  sha256 "8ffe766bba2ba39a7b49689a0732afacf69caffdf8e2d95447e82fb173c78ca3"
+  url "https://www.apache.org/dyn/closer.lua?path=couchdb/source/3.2.0/apache-couchdb-3.2.0.tar.gz"
+  mirror "https://archive.apache.org/dist/couchdb/source/3.2.0/apache-couchdb-3.2.0.tar.gz"
+  sha256 "8bea574faa6bb0926c670542d8318c322268cf7e6614dab318dea734ccf1b00c"
   license "Apache-2.0"
 
-  livecheck do
-    url :stable
-  end
-
   bottle do
-    cellar :any
-    sha256 "8d192716d7cb1aabe1e0d556ee86717c11c9079e18699d718ffd3aa7c94d57ec" => :catalina
-    sha256 "d683b22eecb84fe5326b8644d8ff5a0f72a0c935e84d0411369271e521a7b7dc" => :mojave
-    sha256 "ba42a4ef666858aa21beccaa8b3d80799860e5501af9453dd649988d5603cade" => :high_sierra
+    sha256 cellar: :any, big_sur:  "4d0f0c145720db23f52483fdf3b35363f9343e3b39285c91255da1993ab91bff"
+    sha256 cellar: :any, catalina: "3a2892f1076c575372e4012c8858c23fc05a787abfa679376ce1c4a7ea4fa8ae"
+    sha256 cellar: :any, mojave:   "ef4e1a3ef761a58fe16b4d163c0b4331f1ffd3833b7fe6d7cf820c6a5064c37d"
   end
 
   depends_on "autoconf" => :build
@@ -57,27 +52,9 @@ class Couchdb < Formula
     EOS
   end
 
-  plist_options manual: "couchdb"
-
-  def plist
-    <<~EOS
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-      <dict>
-        <key>KeepAlive</key>
-        <true/>
-        <key>Label</key>
-        <string>#{plist_name}</string>
-        <key>ProgramArguments</key>
-        <array>
-          <string>#{bin}/couchdb</string>
-        </array>
-        <key>RunAtLoad</key>
-        <true/>
-      </dict>
-      </plist>
-    EOS
+  service do
+    run opt_bin/"couchdb"
+    keep_alive true
   end
 
   test do
@@ -90,7 +67,7 @@ class Couchdb < Formula
     fork do
       exec "#{bin}/couchdb -couch_ini #{testpath}/etc/default.ini #{testpath}/etc/local.ini"
     end
-    sleep 2
+    sleep 30
 
     output = JSON.parse shell_output("curl --silent localhost:#{port}")
     assert_equal "Welcome", output["couchdb"]

@@ -1,16 +1,16 @@
 class Corral < Formula
   desc "Dependency manager for the Pony language"
   homepage "https://github.com/ponylang/corral"
-  url "https://github.com/ponylang/corral/archive/0.4.0.tar.gz"
-  sha256 "5c74eef22c8481330bf23fdf7f8477667c56c3ef4442f1490e80795ddcf3be7f"
+  url "https://github.com/ponylang/corral/archive/0.5.4.tar.gz"
+  sha256 "ca2fff8568fd14404d25de402dec2cae16cad39edb7937f829f88a23a66da2d1"
   license "BSD-2-Clause"
-  head "https://github.com/ponylang/corral.git"
+  head "https://github.com/ponylang/corral.git", branch: "main"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "bf397d0dbb3a63d8347546fa082a854b196f39a2a23263c00eb4fda8d0265a1a" => :catalina
-    sha256 "309858fccac2b1015620240276b2bb53955ea37160632231d88d0deff70931f9" => :mojave
-    sha256 "7a8958c3ce14b94054ca831330f459e84848eac1a6fab7298b02abda185a974f" => :high_sierra
+    sha256 cellar: :any_skip_relocation, big_sur:      "bdd3bdc4acaeab7247b76aa1dbe3b319c1a512c2d066ca41d30c03aa69dfef0b"
+    sha256 cellar: :any_skip_relocation, catalina:     "8faf06cfba7afa9efee5505a50b3c2490ea2f501085f8a5880dbd00a1f1b6997"
+    sha256 cellar: :any_skip_relocation, mojave:       "c9bec6571d663be1e46a599d5d99ae273f25816e8c19a1857f46f9652344cbb2"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "5a07c267dfac65f0f2481674cb713be30abf89cb4f948b8e3ffc77f87a445fa7" # linuxbrew-core
   end
 
   depends_on "ponyc"

@@ -1,26 +1,26 @@
 class Dune < Formula
   desc "Composable build system for OCaml"
   homepage "https://dune.build/"
-  url "https://github.com/ocaml/dune/releases/download/2.7.1/dune-2.7.1.tbz"
-  sha256 "c3528f2f8b3a2e3fe18e166fc823e6caeee8b7c78ade6b6fe4d2fa978070925d"
+  url "https://github.com/ocaml/dune/releases/download/2.9.1/dune-2.9.1.tbz"
+  sha256 "b374feb22b34099ccc6dd32128e18d088ff9a81837952b29f05110b308c09f26"
   license "MIT"
   head "https://github.com/ocaml/dune.git"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "7f5a035846320482950c3f5763a0eca689de8c9b22c1c3a09583baf7cc6f8cf9" => :big_sur
-    sha256 "a915f93d1b30931e577598deb935ca2326c523836b6fa0795db01bfd391911fe" => :catalina
-    sha256 "4c35344cfb436b2238bf46846b382a4777a424da0b9ff1b769ed37c0f3f77520" => :mojave
-    sha256 "b93f2bfaf0038552e9b7fba63aaf7ddb0cc53d464411f83d019b7044d83c49b0" => :high_sierra
-    sha256 "9269d24a9393e50f0041463ac179770cabb3b5ac56c5f584a27e2100508bffbe" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "a272b312a8a6292184312151256f94eedd92f31919a0cae103230dc37c9051b3"
+    sha256 cellar: :any_skip_relocation, big_sur:       "5014448d4ccc8257e3b7edc05ae3d7ee4b7e3b552ea648090e5d2e1d6b11eadc"
+    sha256 cellar: :any_skip_relocation, catalina:      "e44461f150faf4ab772c7ecd2ac57bb6d42f48771a7a67b72da1a327ce38119d"
+    sha256 cellar: :any_skip_relocation, mojave:        "083e184745d8eac51f5035c3528a045e359cab971bc58ab662615128182acf4c"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "2738f26e089b7b6d2dc9adccaec72ef176b950a083f91c6a031673193d119845" # linuxbrew-core
   end
 
   depends_on "ocaml" => [:build, :test]
 
   def install
-    system "ocaml", "bootstrap.ml"
-    system "./dune.exe", "build", "-p", "dune", "--profile", "dune-bootstrap"
-    bin.install "_build/default/bin/dune.exe" => "dune"
+    system "make", "release"
+    system "make", "PREFIX=#{prefix}", "install"
+    share.install prefix/"man"
+    elisp.install Dir[share/"emacs/site-lisp/*"]
   end
 
   test do

@@ -1,22 +1,21 @@
 class Sqldiff < Formula
   desc "Displays the differences between SQLite databases"
   homepage "https://www.sqlite.org/sqldiff.html"
-  url "https://www.sqlite.org/2020/sqlite-src-3340000.zip"
-  version "3.34.0"
-  sha256 "a5c2000ece56d2de13c474658b9cdba6b7f2608a4d711e245518ea02a2a2333e"
+  url "https://www.sqlite.org/2021/sqlite-src-3360000.zip"
+  version "3.36.0"
+  sha256 "25a3b9d08066b3a9003f06a96b2a8d1348994c29cc912535401154501d875324"
   license "blessing"
 
   livecheck do
-    url "https://sqlite.org/news.html"
-    regex(%r{v?(\d+(?:\.\d+)+)</h3>}i)
+    formula "sqlite"
   end
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "bc9c5f75179eebb911074c3ee03c3b569bcf78fd2b86638426cf80fcc0545ccb" => :big_sur
-    sha256 "90f82a12f8b463d6ae92da105788e8a855968250f6ae2ea971e3945d3b3a5cc7" => :catalina
-    sha256 "8461ed8c4664c0c026fac15277fa6d2e18586f6be60e0ea71fd6eaaffa27e8d1" => :mojave
-    sha256 "1354f7deebc371dc37d59d4b5690a818ffb8b0043139abba9915fd1b16027a77" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "21de15f86c125a02389a2dca0a7d53dc3dd01dddd6bcc38ceb7d322597a093de"
+    sha256 cellar: :any_skip_relocation, big_sur:       "90601ff9aed7b0638b959e765878f42e38430dead627adbb7d6b68530ecb0915"
+    sha256 cellar: :any_skip_relocation, catalina:      "8ccda1604107c379c4072127825ac3a1c042ad03ccb8d6f763335403ca01790c"
+    sha256 cellar: :any_skip_relocation, mojave:        "470d541de3685a5b7ba46a997e493e6a69faf1ff69d29b15dbbed0c1e10fd166"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3d4152b7daec60f5864e9e17c8d91f17de3bb5ffcdd81375fcf1351a7a7fd027" # linuxbrew-core
   end
 
   uses_from_macos "tcl-tk" => :build
@@ -31,9 +30,8 @@ class Sqldiff < Formula
   test do
     dbpath = testpath/"test.sqlite"
     sqlpath = testpath/"test.sql"
-    sqlite = OS.mac? ? "/usr/bin/sqlite3" : Formula["sqlite"].bin/"sqlite3"
     sqlpath.write "create table test (name text);"
-    system "#{sqlite} #{dbpath} < #{sqlpath}"
+    system "sqlite3 #{dbpath} < #{sqlpath}"
     assert_equal "test: 0 changes, 0 inserts, 0 deletes, 0 unchanged",
                  shell_output("#{bin}/sqldiff --summary #{dbpath} #{dbpath}").strip
   end

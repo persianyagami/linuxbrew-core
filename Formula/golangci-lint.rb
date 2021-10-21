@@ -2,36 +2,39 @@ class GolangciLint < Formula
   desc "Fast linters runner for Go"
   homepage "https://golangci-lint.run/"
   url "https://github.com/golangci/golangci-lint.git",
-      tag:      "v1.33.0",
-      revision: "b90551cdf9c6214075f2a40d1b5595c6b41ffff0"
+      tag:      "v1.42.1",
+      revision: "54f4301ddfc884a7eac5b6ebf68868d6078279d3"
   license "GPL-3.0-only"
+  head "https://github.com/golangci/golangci-lint.git"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "3042277ec4e58631bc6cce5d643a77003ffd88a5f5a300dc850129f6aeb8462b" => :big_sur
-    sha256 "d9d8d30df68b927cf16979ccb327a0f764f0f722a74b1b8f40ff6be76c8b95b9" => :catalina
-    sha256 "ea486d4398aebf87e5b2b9415e6bbd7f12b53d6149d3f487d2635b02d9942b10" => :mojave
-    sha256 "351e2481507cf4d5c2a7b5c67b5ed95dc426d9413dab3d21846ee44cb1fe26b0" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "0e7f13fd8b6e7eb315a66d810ee22d53e5337a40a4855f0befe3a7cb1fc511c0"
+    sha256 cellar: :any_skip_relocation, big_sur:       "bcbdd5583eeacfd97dde10cd5db41dff4a473f14ebf53d0cb7aa99ae9a241dbc"
+    sha256 cellar: :any_skip_relocation, catalina:      "218b2b3110ab2a1fe46b7eae2f8ebab0c320f92b44b3b3b00796e8bd9ce01256"
+    sha256 cellar: :any_skip_relocation, mojave:        "eb9c9bac43be153ec8a69329409fc0786744a8c8992fa93403797a4aa663f150"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "59b45d6e936c53b98f7e2420b2726bd8dc5ffa2d73bb3dbc2af6b7a2361066a1" # linuxbrew-core
   end
 
   depends_on "go"
 
   def install
-    commit = Utils.safe_popen_read("git", "rev-parse", "--short=7", "HEAD").chomp
     ldflags = %W[
       -s -w
       -X main.version=#{version}
-      -X main.commit=#{commit}
-      -X main.date=#{Time.now.utc.rfc3339}
+      -X main.commit=#{Utils.git_short_head(length: 7)}
+      -X main.date=#{time.rfc3339}
     ].join(" ")
 
-    system "go", "build", *std_go_args, "-ldflags", ldflags, "./cmd/golangci-lint"
+    system "go", "build", *std_go_args(ldflags: ldflags), "./cmd/golangci-lint"
 
-    output = Utils.safe_popen_read({ "SHELL" => "bash" }, "#{bin}/golangci-lint", "completion", "bash")
+    output = Utils.safe_popen_read("#{bin}/golangci-lint", "completion", "bash")
     (bash_completion/"golangci-lint").write output
 
-    output = Utils.safe_popen_read({ "SHELL" => "zsh" }, "#{bin}/golangci-lint", "completion", "zsh")
-    (zsh_completion/"golangci-lint").write output
+    output = Utils.safe_popen_read("#{bin}/golangci-lint", "completion", "zsh")
+    (zsh_completion/"_golangci-lint").write output
+
+    output = Utils.safe_popen_read("#{bin}/golangci-lint", "completion", "fish")
+    (fish_completion/"golangci-lint.fish").write output
   end
 
   test do

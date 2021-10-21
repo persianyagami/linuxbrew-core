@@ -1,8 +1,8 @@
 class Maxwell < Formula
   desc "Reads MySQL binlogs and writes row updates as JSON to Kafka"
   homepage "https://maxwells-daemon.io/"
-  url "https://github.com/zendesk/maxwell/releases/download/v1.28.2/maxwell-1.28.2.tar.gz"
-  sha256 "59b679b9c43c9a7a45cbe4ad19b9ba45e57c875d10b6e2a1f5d9aed0d34e79ea"
+  url "https://github.com/zendesk/maxwell/releases/download/v1.34.1/maxwell-1.34.1.tar.gz"
+  sha256 "dfad47cc29a69312241361964bf663de082f518e1e14399340ca4e23a0e128d8"
   license "Apache-2.0"
 
   livecheck do
@@ -10,9 +10,7 @@ class Maxwell < Formula
     strategy :github_latest
   end
 
-  bottle :unneeded
-
-  depends_on "openjdk@8"
+  depends_on "openjdk@11"
 
   def install
     libexec.install Dir["*"]
@@ -21,14 +19,22 @@ class Maxwell < Formula
       bin.install libexec/"bin/#{f}"
     end
 
-    bin.env_script_all_files(libexec/"bin", Language::Java.java_home_env("1.8"))
+    bin.env_script_all_files(libexec/"bin", Language::Java.java_home_env("11.0"))
   end
 
   test do
+    log = testpath/"maxwell.log"
+
     fork do
-      exec "#{bin}/maxwell --log_level=OFF > #{testpath}/maxwell.log 2>/dev/null"
+      $stdout.reopen(log)
+      $stderr.reopen(log)
+      # Tell Maxwell to connect to a bogus host name so we don't actually connect to a local instance
+      # The '.invalid' TLD is reserved as never to be installed as a valid TLD.
+      exec "#{bin}/maxwell --host not.real.invalid"
     end
     sleep 15
-    assert_match "Using kafka version", IO.read("#{testpath}/maxwell.log")
+
+    # Validate that we actually got in to Maxwell far enough to attempt to connect.
+    assert_match "ERROR Maxwell - SQLException: Communications link failure", log.read
   end
 end

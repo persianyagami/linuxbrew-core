@@ -2,10 +2,10 @@ class Git < Formula
   desc "Distributed revision control system"
   homepage "https://git-scm.com"
   # NOTE: Please keep these values in sync with git-gui.rb when updating.
-  url "https://mirrors.edge.kernel.org/pub/software/scm/git/git-2.29.2.tar.xz"
-  sha256 "f2fc436ebe657821a1360bcd1e5f4896049610082419143d60f6fa13c2f607c1"
+  url "https://mirrors.edge.kernel.org/pub/software/scm/git/git-2.33.1.tar.xz"
+  sha256 "e054a6e6c2b088bd1bff5f61ed9ba5aa91c9a3cd509539a4b41c5ddf02201f2f"
   license "GPL-2.0-only"
-  head "https://github.com/git/git.git", shallow: false
+  head "https://github.com/git/git.git"
 
   livecheck do
     url "https://www.kernel.org/pub/software/scm/git/"
@@ -13,33 +13,33 @@ class Git < Formula
   end
 
   bottle do
-    sha256 "99ffa981e42bfb6ed77fc1a9f4d1dc07681b2ba532ffc122d02b75eb002047e1" => :big_sur
-    sha256 "38b43c6daeb7bd6d4555ad62b77465a13fc61d81be51bc7976ae6d016da05288" => :arm64_big_sur
-    sha256 "47cffc0d84e2a273cc6088802633e1d4d1fc8afe67633ed8487b497cd78c54f8" => :catalina
-    sha256 "97cd781a7060f6c1dc456d36e6d17d68ec78470affe3fc0b1d8ff46402be6fcf" => :mojave
-    sha256 "b0ad755307e1f83e0c844aeef94774e499ebb85f1e36934966ac9bb31618da61" => :high_sierra
-    sha256 "5ba84829ee8f3e294724734caceba253f0ac10e1f21c4831d3d490d78fc50b56" => :x86_64_linux
+    sha256 arm64_big_sur: "4e8cc9c2b83d5c376f0342afa91ff4c73a1505ac9963dad06b44c23423fcebf8"
+    sha256 big_sur:       "66e2ded73f2a3b13ac3369cd9416378307337959d3bd61a0c6297fed8456cb3c"
+    sha256 catalina:      "b3a7b591b8c990f4936a917ce17c697a5645e4c2cacc7ae3e0de417b5f5af6fd"
+    sha256 mojave:        "3fc2a3ac7e21325382bd1117081e068fe29206169f0e7b62d31c055012d976d0"
+    sha256 x86_64_linux:  "3446786a29a0e1f10a00224f9b5c9b61000a75d97b795002cb31af9c9d666538" # linuxbrew-core
   end
 
   depends_on "gettext"
   depends_on "pcre2"
 
+  uses_from_macos "curl", since: :catalina # macOS < 10.15.6 has broken cert path logic
+  uses_from_macos "expat"
+  uses_from_macos "zlib"
+
   on_linux do
-    depends_on "curl"
-    depends_on "expat"
-    depends_on "linux-headers"
-    depends_on "openssl@1.1"
-    depends_on "zlib"
+    depends_on "linux-headers@4.4"
+    depends_on "openssl@1.1" # Uses CommonCrypto on macOS
   end
 
   resource "html" do
-    url "https://mirrors.edge.kernel.org/pub/software/scm/git/git-htmldocs-2.29.2.tar.xz"
-    sha256 "f7c762cc5c8c5230885b76134cbc801f6149c29c812d3f276ff1914176a7dab8"
+    url "https://mirrors.edge.kernel.org/pub/software/scm/git/git-htmldocs-2.33.1.tar.xz"
+    sha256 "6a6b8a0f064c78e0033aa4fce0520325496de019b09fff99fa82eeb472038f5c"
   end
 
   resource "man" do
-    url "https://mirrors.edge.kernel.org/pub/software/scm/git/git-manpages-2.29.2.tar.xz"
-    sha256 "e2d44a2a30b9d43a770262f1328b77df2f532f16c2dcd235655e5c9bd39bd792"
+    url "https://mirrors.edge.kernel.org/pub/software/scm/git/git-manpages-2.33.1.tar.xz"
+    sha256 "c75219f1c9f56caad4f8eb17915e4fe34ca5e1b453773df279a2cec98205ab87"
   end
 
   resource "Net::SMTP::SSL" do
@@ -70,13 +70,6 @@ class Git < Formula
       end.join(":")
     end
 
-    # Ensure we are using the correct system headers (for curl) to workaround
-    # mismatched Xcode/CLT versions:
-    # https://github.com/Homebrew/homebrew-core/issues/46466
-    if MacOS.version == :mojave && MacOS::CLT.installed? && MacOS::CLT.provides_sdk?
-      ENV["HOMEBREW_SDKROOT"] = MacOS::CLT.sdk_path(MacOS.version)
-    end
-
     # The git-gui and gitk tools are installed by a separate formula (git-gui)
     # to avoid a dependency on tcl-tk and to avoid using the broken system
     # tcl-tk (see https://github.com/Homebrew/homebrew-core/issues/36390)
@@ -90,11 +83,12 @@ class Git < Formula
       NO_TCLTK=1
     ]
 
-    if OS.mac?
-      args += %w[NO_OPENSSL=1 APPLE_COMMON_CRYPTO=1]
+    args += if OS.mac?
+      %w[NO_OPENSSL=1 APPLE_COMMON_CRYPTO=1]
     else
       openssl_prefix = Formula["openssl@1.1"].opt_prefix
-      args += %W[NO_APPLE_COMMON_CRYPTO=1 OPENSSLDIR=#{openssl_prefix}]
+
+      %W[NO_APPLE_COMMON_CRYPTO=1 OPENSSLDIR=#{openssl_prefix}]
     end
 
     system "make", "install", *args
@@ -149,7 +143,7 @@ class Git < Formula
     chmod 0644, Dir["#{share}/doc/git-doc/**/*.{html,txt}"]
     chmod 0755, Dir["#{share}/doc/git-doc/{RelNotes,howto,technical}"]
 
-    # git-send-email needs Net::SMTP::SSL
+    # git-send-email needs Net::SMTP::SSL or Net::SMTP >= 2.34
     resource("Net::SMTP::SSL").stage do
       (share/"perl5").install "lib/Net"
     end
@@ -160,20 +154,15 @@ class Git < Formula
     # only contains the perllocal.pod installation file.
     rm_rf prefix/"Library/Perl"
 
-    pod = Dir[lib/"*/*/perllocal.pod"][0]
-    unless pod.nil?
-      # Remove perllocal.pod, which conflicts with the perl formula.
-      # I don't know why this issue doesn't affect Mac.
-      rm_r Pathname.new(pod).dirname.dirname
-    end
-
     # Set the macOS keychain credential helper by default
     # (as Apple's CLT's git also does this).
-    (buildpath/"gitconfig").write <<~EOS
-      [credential]
-      \thelper = osxkeychain
-    EOS
-    etc.install "gitconfig" if OS.mac?
+    if OS.mac?
+      (buildpath/"gitconfig").write <<~EOS
+        [credential]
+        \thelper = osxkeychain
+      EOS
+      etc.install "gitconfig"
+    end
   end
 
   def caveats
@@ -185,19 +174,14 @@ class Git < Formula
   test do
     system bin/"git", "init"
     %w[haunted house].each { |f| touch testpath/f }
-
-    # Test environment has no git configuration, which prevents commiting
-    system bin/"git", "config", "user.email", "you@example.com"
-    system bin/"git", "config", "user.name", "Your Name"
-
     system bin/"git", "add", "haunted", "house"
     system bin/"git", "config", "user.name", "'A U Thor'"
     system bin/"git", "config", "user.email", "author@example.com"
     system bin/"git", "commit", "-a", "-m", "Initial Commit"
     assert_equal "haunted\nhouse", shell_output("#{bin}/git ls-files").strip
 
-    if OS.mac?
-      # Check Net::SMTP::SSL was installed correctly.
+    # Check Net::SMTP or Net::SMTP::SSL works for git-send-email
+    on_macos do
       %w[foo bar].each { |f| touch testpath/f }
       system bin/"git", "add", "foo", "bar"
       system bin/"git", "commit", "-a", "-m", "Second Commit"

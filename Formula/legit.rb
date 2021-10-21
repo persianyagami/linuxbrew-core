@@ -6,23 +6,18 @@ class Legit < Formula
   url "https://files.pythonhosted.org/packages/cb/e4/8cc5904c486241bf2edc4dd84f357fa96686dc85f48eedb835af65f821bf/legit-1.2.0.post0.tar.gz"
   sha256 "949396b68029a8af405ab20c901902341ef6bd55c7fec6dab71141d63d406b11"
   license "BSD-3-Clause"
-  revision OS.mac? ? 1 : 2
+  revision OS.mac? ? 2 : 3
   head "https://github.com/frostming/legit.git", branch: "master"
 
-  livecheck do
-    url :stable
-  end
-
   bottle do
-    cellar :any_skip_relocation
-    sha256 "73161b2eb5a55db6d984dbf1b1aae96072419b500672bf6d58c0352e840cbc73" => :big_sur
-    sha256 "3564e73b3de899626951b43275564ad6435816d0ad540c3f6c7941c89f6c6b60" => :catalina
-    sha256 "175045954b783f943c2e8b27d5df01d0a8bf21034439f7f9abd99cc8ced744e3" => :mojave
-    sha256 "b4a46a53103b33f06eefdee01e64f87839b28c41288f96388a7f5e311234115e" => :high_sierra
-    sha256 "16ee3b086cba066ce4c679a432f3d2f263c9ad3d83786f6ac65563ef8c07fd80" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "074f805ae9c628e46e894167fe2ecc7851fab6ee097091114a812b4d1c1c6500"
+    sha256 cellar: :any_skip_relocation, big_sur:       "854ec2ea856e780bcc1a37f2c43d8047973cb3592f19614074a8f1267647cab1"
+    sha256 cellar: :any_skip_relocation, catalina:      "854ec2ea856e780bcc1a37f2c43d8047973cb3592f19614074a8f1267647cab1"
+    sha256 cellar: :any_skip_relocation, mojave:        "854ec2ea856e780bcc1a37f2c43d8047973cb3592f19614074a8f1267647cab1"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3d03b6facb4ef010967c9bae4e522347986a42854d931e0bcf39f147484e9acb" # linuxbrew-core
   end
 
-  depends_on "python@3.9"
+  depends_on "python@3.10"
 
   resource "args" do
     url "https://files.pythonhosted.org/packages/e5/1c/b701b3f4bd8d3667df8342f311b3efaeab86078a840fb826bd204118cc6b/args-0.1.0.tar.gz"

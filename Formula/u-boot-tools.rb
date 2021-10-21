@@ -1,8 +1,9 @@
 class UBootTools < Formula
   desc "Universal boot loader"
   homepage "https://www.denx.de/wiki/U-Boot/"
-  url "https://ftp.denx.de/pub/u-boot/u-boot-2020.10.tar.bz2"
-  sha256 "0d481bbdc05c0ee74908ec2f56a6daa53166cc6a78a0e4fac2ac5d025770a622"
+  url "https://ftp.denx.de/pub/u-boot/u-boot-2021.10.tar.bz2"
+  sha256 "cde723e19262e646f2670d25e5ec4b1b368490de950d4e26275a988c36df0bd4"
+  license all_of: ["GPL-2.0-only", "GPL-2.0-or-later", "BSD-3-Clause"]
 
   livecheck do
     url "https://ftp.denx.de/pub/u-boot/"
@@ -10,14 +11,14 @@ class UBootTools < Formula
   end
 
   bottle do
-    cellar :any
-    sha256 "38d66ae4e6d926bc35e4eb833f6810a367f2cf3cdd8ec5185a861daadc30743e" => :big_sur
-    sha256 "c4e1c77a34e57576f9ab599781be090820a4d5911f4147e10d0e99114cd3c8c6" => :catalina
-    sha256 "44d21cc3ac974b0538d24d4e5a74f25e3df764c8b5fc3458214890bacfa138ac" => :mojave
-    sha256 "afb5dea722a9ae646809a3c8b59dbbd80b55042e3c3de8f45741e6ebb460df6a" => :high_sierra
-    sha256 "790a16df06987ebba7a1f0b6120098f5808aa29af313f7fc966a0aa877746d9c" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "7ed89bdfdf7c129de811e6bf1ee2b306a20c0a922e9a998011c652e81b9ba099"
+    sha256 cellar: :any,                 big_sur:       "4dfb85faaad3da512619216a0159864f21acd8d9c41e70461ea97a680e296c76"
+    sha256 cellar: :any,                 catalina:      "e74626de6dda88a5dde743eeeec5c807169cda61b5a67462ae5d673e1c4edaaa"
+    sha256 cellar: :any,                 mojave:        "f67521ce162fdcb22ce0c5d5236376260f63f9a32d5cb0a5b3b308faec3d3764"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c1a01204bd4e86fec942c4890eda4cd74549e28059119737132ee3c7d40dfc19" # linuxbrew-core
   end
 
+  depends_on "coreutils" => :build # Makefile needs $(gdate)
   depends_on "openssl@1.1"
 
   uses_from_macos "bison" => :build
@@ -27,8 +28,8 @@ class UBootTools < Formula
     # Replace keyword not present in make 3.81
     inreplace "Makefile", "undefine MK_ARCH", "unexport MK_ARCH"
 
-    system "make", "sandbox_defconfig"
-    system "make", "tools", "NO_SDL=1"
+    system "make", "tools-only_defconfig"
+    system "make", "tools-only", "NO_SDL=1"
     bin.install "tools/mkimage"
     bin.install "tools/dumpimage"
     man1.install "doc/mkimage.1"

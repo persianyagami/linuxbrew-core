@@ -1,19 +1,17 @@
 class Rbenv < Formula
   desc "Ruby version manager"
   homepage "https://github.com/rbenv/rbenv#readme"
-  url "https://github.com/rbenv/rbenv/archive/v1.1.2.tar.gz"
-  sha256 "80ad89ffe04c0b481503bd375f05c212bbc7d44ef5f5e649e0acdf25eba86736"
+  url "https://github.com/rbenv/rbenv/archive/v1.2.0.tar.gz"
+  sha256 "3f3a31b8a73c174e3e877ccc1ea453d966b4d810a2aadcd4d8c460bc9ec85e0c"
   license "MIT"
-  head "https://github.com/rbenv/rbenv.git"
+  head "https://github.com/rbenv/rbenv.git", branch: "master"
 
   bottle do
-    cellar :any
-    sha256 "60b045c8843745c45d01616ee3f71b91f6a16ee09c47e23a7817a3edabeaccfd" => :big_sur
-    sha256 "503ed6d818502f00f031b9f49461934e252b9bfba2876e90a326fc27bb1052d6" => :catalina
-    sha256 "d1019098dee8d037587069398e5ad04e6d736f834dc44ae73943bec46b10b260" => :mojave
-    sha256 "b5984102794a9d39388ca1f6ec77965aeea29b971cc00cb5af8ede8ee6c926d6" => :high_sierra
-    sha256 "873175a851e5aa4f5b3438072030b945c252f08a9a07760c64dc045e2cce4724" => :sierra
-    sha256 "b3c384b5d154ce9566e59760682035d3be05bf997e2c336942a9423f12eb74ef" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "d5e6168ad6ab8843946273319fc6949b322c80f2d666a6bdda62466e256e6746"
+    sha256 cellar: :any,                 big_sur:       "8a1b159909d472cc461d0a9b85a192a31ab58860e34f022fcbb33175732d24aa"
+    sha256 cellar: :any,                 catalina:      "a2ca52c4fe3b7000d9f84f81836ddcb9b3aea9c20ee092dd71c1e10cf3a6a19a"
+    sha256 cellar: :any,                 mojave:        "87ca53a9f4f84aff56ccbf2f823f903d20bc6669dde548018892857cc8871936"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f4be8e4efef32c1fcdaa585312b3262d33b3306d9d7d9c75abd1230227b10bb7" # linuxbrew-core
   end
 
   depends_on "ruby-build"
@@ -32,7 +30,7 @@ class Rbenv < Formula
 
     if build.head?
       # Record exact git revision for `rbenv --version` output
-      git_revision = `git rev-parse --short HEAD`.chomp
+      git_revision = Utils.git_short_head
       inreplace "libexec/rbenv---version", /^(version=)"([^"]+)"/,
                                            %Q(\\1"\\2-g#{git_revision}")
     end
@@ -41,6 +39,22 @@ class Rbenv < Formula
   end
 
   test do
-    shell_output("eval \"$(#{bin}/rbenv init -)\" && rbenv versions")
+    # Create a fake ruby version and executable.
+    rbenv_root = Pathname(shell_output("rbenv root").strip)
+    ruby_bin = rbenv_root/"versions/1.2.3/bin"
+    foo_script = ruby_bin/"foo"
+    foo_script.write "echo hello"
+    chmod "+x", foo_script
+
+    # Test versions.
+    versions = shell_output("eval \"$(#{bin}/rbenv init -)\" && rbenv versions").split("\n")
+    assert_equal 2, versions.length
+    assert_match(/\* system/, versions[0])
+    assert_equal("  1.2.3", versions[1])
+
+    # Test rehash.
+    system "rbenv", "rehash"
+    refute_match "Cellar", (rbenv_root/"shims/foo").read
+    assert_equal "hello", shell_output("eval \"$(#{bin}/rbenv init -)\" && rbenv shell 1.2.3 && foo").chomp
   end
 end

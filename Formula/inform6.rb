@@ -1,18 +1,18 @@
 class Inform6 < Formula
   desc "Design system for interactive fiction"
   homepage "https://inform-fiction.org/inform6.html"
-  url "https://ifarchive.org/if-archive/infocom/compilers/inform6/source/inform-6.34-6.12.2.tar.gz"
-  mirror "https://ifarchive.org/if-archive/infocom/compilers/inform6/source/old/inform-6.34-6.12.2.tar.gz"
-  version "6.34-6.12.2"
-  sha256 "c149f143f2c29a4cb071e578afef8097647cc9e823f7fcfab518ac321d9d259f"
+  url "https://ifarchive.org/if-archive/infocom/compilers/inform6/source/inform-6.35-r3.tar.gz"
+  version "6.35-r3"
+  sha256 "6284a60b7680cc5e228ad6d944d88d6f3eeee5838812ee86dbe42910c9f6e7e2"
   license "Artistic-2.0"
   head "https://gitlab.com/DavidGriffith/inform6unix.git"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "961725b635b0a0bec6c5ee2de80485cc2ae54c6704692095bf73afb45d4934a0" => :catalina
-    sha256 "be06ad010ef37eb03a5ec804cd6547087772350ccc1c03d6854cd4bebd8a5b9d" => :mojave
-    sha256 "087ee415674833ac532a1fe70c30d8d84015d91e1eeab76273707e7754ef8be4" => :high_sierra
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "405eb7f9b7210aac100f069acc228a8058013c947961bc3c9ab1a0ede7a24740"
+    sha256 cellar: :any_skip_relocation, big_sur:       "0d546e5f3ad90dec09e480b1be8f6cac0d1cd3a62138444f17b827eb599c169d"
+    sha256 cellar: :any_skip_relocation, catalina:      "dd0c1f7bbc4c07025ceca29441fa6dc8b821c6dfc0224a7576d64f714db34a53"
+    sha256 cellar: :any_skip_relocation, mojave:        "2cdc7aa7871f147452be33738b78ed671e8006def20cd2774cdea610bda04878"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a3712d8dcc5f3ec6edd340e2d88a5d81949463d08c6bfd5883cccc8f02ad585c" # linuxbrew-core
   end
 
   resource "Adventureland.inf" do
@@ -21,7 +21,11 @@ class Inform6 < Formula
   end
 
   def install
-    system "make", "PREFIX=#{prefix}", "MAN_PREFIX=#{man}", "install"
+    # Parallel install fails at:
+    # install -d -m 755 /usr/local/Cellar/inform6/6.35-r3/share/inform/punyinform/documentation
+    # install: /usr/local/Cellar/inform6/6.35-r3/bin/punyinform.sh: Not a directory
+    ENV.deparallelize
+    system "make", "PREFIX=#{prefix}", "MAN_PREFIX=#{man}", "MANDIR=#{man1}", "install"
   end
 
   test do

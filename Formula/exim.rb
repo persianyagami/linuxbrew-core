@@ -1,27 +1,39 @@
 class Exim < Formula
   desc "Complete replacement for sendmail"
   homepage "https://exim.org"
-  url "https://ftp.exim.org/pub/exim/exim4/exim-4.94.tar.xz"
-  mirror "https://dl.bintray.com/homebrew/mirror/exim-4.94.tar.xz"
-  sha256 "f77ee8faf04f5db793243c3ae81c1f4e452cd6ad7dd515a80edf755c4b144bdb"
-  license "GPL-2.0"
+  url "https://ftp.exim.org/pub/exim/exim4/exim-4.95.tar.xz"
+  sha256 "cc9cb653fff2ea947c3702680b59c99ac0bd1bbf19976d37e22a463cd804f167"
+  license "GPL-2.0-or-later"
 
-  # The upstream download page at https://ftp.exim.org/pub/exim/exim4/ places
-  # maintenance releases (e.g., 4.93.0.4) in a separate "fixes" subdirectory.
-  # As a result, we can't create a check that finds both the main releases
-  # (e.g., 4.93) and the aforementioned maintenance releases. The Git repo tags
-  # seem to be the best solution currently and we're using the GitHub mirror
-  # below since the upstream repo (git://git.exim.org/exim.git) doesn't work
-  # over https.
+  # Maintenance releases are kept in a `fixes` subdirectory, so it's necessary
+  # to check both the main `exim4` directory and the `fixes` subdirectory to
+  # identify the latest version.
   livecheck do
-    url "https://github.com/Exim/exim.git"
-    regex(/^exim[._-]v?(\d+(?:\.\d+)+)$/i)
+    url "https://ftp.exim.org/pub/exim/exim4/"
+    regex(/href=.*?exim[._-]v?(\d+(?:\.\d+)+)\.t/i)
+    strategy :page_match do |page, regex|
+      # Match versions from files in the `exim4` directory
+      versions = page.scan(regex).flatten.uniq
+
+      # Return versions if a `fixes` subdirectory isn't present
+      next versions if page.match(%r{href=["']?fixes/?["' >]}i).blank?
+
+      # Fetch the page for the `fixes` directory
+      fixes_page = Homebrew::Livecheck::Strategy.page_content(URI.join(@url, "fixes").to_s)
+      next versions if fixes_page[:content].blank?
+
+      # Match maintenance releases and add them to the versions array
+      versions += fixes_page[:content].scan(regex).flatten
+      versions
+    end
   end
 
   bottle do
-    sha256 "74e195304b29ce8ce47fbccc2c58e468a677482a94efecc1cfd9dcc0210c07d1" => :catalina
-    sha256 "bae912aa71182fd91e5e65b38cba3ea162f7d63d4dc4b4b365ef6532c4329a7a" => :mojave
-    sha256 "230f63be05a2dde5fcb4487e7159db758abe984cbc70d495a697c209107fc284" => :high_sierra
+    sha256 arm64_big_sur: "c47a9b199a7c8d21242cc6155b96845d7da106d724a7f164e3e39a5eb9b919ea"
+    sha256 big_sur:       "d0f080aa74fcacedab9959c9971b8f5b215cf0eda29c93bcfab0fd79a3d8e0b7"
+    sha256 catalina:      "7568c4385faf5f74893b8c93f927b95ee16daa4467bfc0c5a31da1383657747b"
+    sha256 mojave:        "08261de0fa2fdecfbfd426247ca7d56fe95bad0d5e9410df69ce94bfbb789c61"
+    sha256 x86_64_linux:  "073483eb6602a0c563a66f8b999763e27deb6a53bf4018b0c2267a4eebe1cec6" # linuxbrew-core
   end
 
   depends_on "berkeley-db@4"
@@ -38,6 +50,8 @@ class Exim < Formula
       s.gsub! "/var/spool/exim", var/"spool/exim"
       # https://trac.macports.org/ticket/38654
       s.gsub! 'TMPDIR="/tmp"', "TMPDIR=/tmp"
+    end
+    open("Local/Makefile", "a") do |s|
       s << "AUTH_PLAINTEXT=yes\n"
       s << "SUPPORT_TLS=yes\n"
       s << "USE_OPENSSL=yes\n"
@@ -51,6 +65,8 @@ class Exim < Formula
 
     bdb4 = Formula["berkeley-db@4"]
 
+    cp "OS/unsupported/Makefile-Darwin", "OS/Makefile-Darwin"
+    cp "OS/unsupported/os.h-Darwin", "OS/os.h-Darwin"
     inreplace "OS/Makefile-Darwin" do |s|
       s.remove_make_var! %w[CC CFLAGS]
       # Add include and lib paths for BDB 4

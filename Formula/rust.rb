@@ -4,22 +4,23 @@ class Rust < Formula
   license any_of: ["Apache-2.0", "MIT"]
 
   stable do
-    url "https://static.rust-lang.org/dist/rustc-1.47.0-src.tar.gz"
-    sha256 "3185df064c4747f2c8b9bb8c4468edd58ff4ad6d07880c879ac1b173b768d81d"
+    url "https://static.rust-lang.org/dist/rustc-1.55.0-src.tar.gz"
+    sha256 "b2379ac710f5f876ee3c3e03122fe33098d6765d371cac6c31b1b6fc8e43821e"
 
+    # From https://github.com/rust-lang/rust/tree/#{version}/src/tools
     resource "cargo" do
       url "https://github.com/rust-lang/cargo.git",
-          tag:      "0.47.0",
-          revision: "149022b1d8f382e69c1616f6a46b69ebf59e2dea"
+          tag:      "0.56.0",
+          revision: "32da73ab19417aa89686e1d85c1440b72fdf877d"
     end
   end
 
   bottle do
-    sha256 "9658dfa0ecf5f57b14223b56d60c4d303db1939174ae3bd9c3aea2918c3fafb6" => :big_sur
-    sha256 "643cb64baa823b8db5e7a4848ec157f45811db9891a641569a3963b0a6d75c6d" => :catalina
-    sha256 "5d24baae2f6e47a826849f61b7ac370dcfd3616802617b41a82501cc576e9e3f" => :mojave
-    sha256 "eba5a173f9a7db88af4999c3ba1743cf564d31f367a5c941147306cb39797ae2" => :high_sierra
-    sha256 "d4902d59161504dc8af150cd2ce01e3b4320ddf926862081bd8f33c5b041d2f7" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "a83ae63ce2f8767921cecccfed2296f573535af2c72ecc729a22ea1b60163cca"
+    sha256 cellar: :any,                 big_sur:       "0703f28e13084ee17a1d6b30754fb839d8f8d8286c51386a689c794ce93f35bf"
+    sha256 cellar: :any,                 catalina:      "3da9d889082cde3a79cfabcb396ec12f0b8b0d661d3d8ab999e71c076f92b7ec"
+    sha256 cellar: :any,                 mojave:        "4486ea172caf99286586f661120b78d8331a6641f27bf9f5a21f9bf7830ac0ef"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "bd9342435a0972be1ddd0f632c973e1874b2c03cb4ed9676b9c12d78b6d6bd8e" # linuxbrew-core
   end
 
   head do
@@ -31,6 +32,7 @@ class Rust < Formula
   end
 
   depends_on "cmake" => :build
+  depends_on "ninja" => :build
   depends_on "python@3.9" => :build
   depends_on "libssh2"
   depends_on "openssl@1.1"
@@ -39,21 +41,22 @@ class Rust < Formula
   uses_from_macos "curl"
   uses_from_macos "zlib"
 
-  on_linux do
-    depends_on "binutils"
-  end
-
   resource "cargobootstrap" do
     on_macos do
       # From https://github.com/rust-lang/rust/blob/#{version}/src/stage0.txt
-      url "https://static.rust-lang.org/dist/2020-08-27/cargo-0.47.0-x86_64-apple-darwin.tar.gz"
-      sha256 "6e8f3319069dd14e1ef756906fa0ef3799816f1aba439bdeea9d18681c353ad6"
+      if Hardware::CPU.arm?
+        url "https://static.rust-lang.org/dist/2021-07-29/cargo-1.54.0-aarch64-apple-darwin.tar.gz"
+        sha256 "7bac3901d8eb6a4191ffeebe75b29c78bcb270158ec901addb31f588d965d35d"
+      else
+        url "https://static.rust-lang.org/dist/2021-07-29/cargo-1.54.0-x86_64-apple-darwin.tar.gz"
+        sha256 "68564b771c94ed95705ef28ea30bfd917c4b225b476551c998a0b267152cd798"
+      end
     end
 
     on_linux do
       # From: https://github.com/rust-lang/rust/blob/#{version}/src/stage0.txt
-      url "https://static.rust-lang.org/dist/2020-08-27/cargo-0.47.0-x86_64-unknown-linux-gnu.tar.gz"
-      sha256 "30e494f3848d0335870698e438eaa22388d3226c9786aa282e4fd41fb9cd164d"
+      url "https://static.rust-lang.org/dist/2021-07-29/cargo-1.54.0-x86_64-unknown-linux-gnu.tar.gz"
+      sha256 "8c4f404e6fd3e26a535230d1d47d162d0e4a51a0ff82025ae526b5121bdbf6ad"
     end
   end
 
@@ -68,13 +71,6 @@ class Rust < Formula
     # https://crates.io/crates/openssl#manual-configuration
     ENV["OPENSSL_DIR"] = Formula["openssl@1.1"].opt_prefix
 
-    # Fix build failure for cmake v0.1.24 "error: internal compiler error:
-    # src/librustc/ty/subst.rs:127: impossible case reached" on 10.11, and for
-    # libgit2-sys-0.6.12 "fatal error: 'os/availability.h' file not found
-    # #include <os/availability.h>" on 10.11 and "SecTrust.h:170:67: error:
-    # expected ';' after top level declarator" among other errors on 10.12
-    ENV["SDKROOT"] = MacOS.sdk_path if OS.mac?
-
     args = ["--prefix=#{prefix}"]
     if build.head?
       args << "--disable-rpath"
@@ -82,6 +78,7 @@ class Rust < Formula
     else
       args << "--release-channel=stable"
     end
+
     system "./configure", *args
     system "make"
     system "make", "install"
@@ -93,14 +90,15 @@ class Rust < Formula
 
     resource("cargo").stage do
       ENV["RUSTC"] = bin/"rustc"
-      args = %W[--root #{prefix} --path . --features curl-sys/force-system-lib-on-osx]
-      args -= %w[--features curl-sys/force-system-lib-on-osx] unless OS.mac?
+      args = %W[--root #{prefix} --path .]
+      args += %w[--features curl-sys/force-system-lib-on-osx] if OS.mac?
       system "cargo", "install", *args
       man1.install Dir["src/etc/man/*.1"]
       bash_completion.install "src/etc/cargo.bashcomp.sh"
       zsh_completion.install "src/etc/_cargo"
     end
 
+    (lib/"rustlib/src/rust").install "library"
     rm_rf prefix/"lib/rustlib/uninstall.sh"
     rm_rf prefix/"lib/rustlib/install.log"
   end

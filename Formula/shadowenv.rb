@@ -1,17 +1,16 @@
 class Shadowenv < Formula
   desc "Reversible directory-local environment variable manipulations"
   homepage "https://shopify.github.io/shadowenv/"
-  url "https://github.com/Shopify/shadowenv/archive/2.0.3.tar.gz"
-  sha256 "9d86db156b84e8df9cdc3c6084af4e538a5928fb6817567778464b10fe12a095"
+  url "https://github.com/Shopify/shadowenv/archive/2.0.6.tar.gz"
+  sha256 "d23e8bfa2a251e164b6c1a13583a89f81628728951b49b404c73c0cae461eff9"
   license "MIT"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "43ef903f8c706b1aaa787a28a101bb488f80fecfcf5207d56a55205464cd3ca3" => :big_sur
-    sha256 "a8e73028069e37003f2e019230e48947913b164ebb9cdb50ea088b6398fc352c" => :catalina
-    sha256 "5022c65cf81ba99f8be31fdd879201e566f203f357e5ca88d14daaa0d9a83325" => :mojave
-    sha256 "fe0a543dc0a0ce7adba2eebc9f8f224aa55a4f63b49a4474d576d6467d604065" => :high_sierra
-    sha256 "3b0ef65fd759b3d7c236fd3ab88177289a110e855a4fc4c78146c371ebcb840a" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, arm64_big_sur: "e1385722a4196c36cac9be0f24f41a134031ec800caf336cb52d29beccd1777e"
+    sha256 cellar: :any_skip_relocation, big_sur:       "0aa59a919ee173a4f52a792cf8efac267df60233fcd5ea48ea89749dad43f350"
+    sha256 cellar: :any_skip_relocation, catalina:      "a61f75e84322bc9554691f540a53c51042034163d85328c6f1eb78cb4cb0cfd6"
+    sha256 cellar: :any_skip_relocation, mojave:        "cbbfa9a3b1a4850cf12f8f025533edb6c142ed68e75f201061773d0cd6006750"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "dcb47fa72005c040117c9409206ae8c4274a5d0ceb7a0e94a728fd760afc58a3" # linuxbrew-core
   end
 
   depends_on "rust" => :build

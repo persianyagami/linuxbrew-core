@@ -1,21 +1,22 @@
 class LibcapNg < Formula
   desc "Library for Linux that makes using posix capabilities easy"
   homepage "https://people.redhat.com/sgrubb/libcap-ng"
-  url "https://github.com/stevegrubb/libcap-ng/archive/v0.8.tar.gz"
-  sha256 "836ea8188ae7c658cdf003e62a241509dd542f3dec5bc40c603f53a5aadaa93f"
+  url "https://github.com/stevegrubb/libcap-ng/archive/v0.8.2.tar.gz"
+  sha256 "65b86885b8d873e55c05bd49427fd370d559b26f0c2089ac9194828e6a2fe233"
+  license "LGPL-2.1-or-later"
 
   bottle do
-    cellar :any_skip_relocation
-    sha256 "b80f865fba28f721976d784077aeef490582200130b2ae9ddaf5d5527c312911" => :x86_64_linux
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "299f81ad46a4d91a8a89b1cfb5eeb01a216f3568b755aa9b87d1ba7dad80cb26" # linuxbrew-core
   end
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
-  depends_on "m4" => :build
-  depends_on "python" => :build
+  depends_on "python@3.9" => :build
   depends_on "swig" => :build
   depends_on :linux
+
+  uses_from_macos "m4" => :build
 
   def install
     system "./autogen.sh"

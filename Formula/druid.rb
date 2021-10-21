@@ -1,9 +1,9 @@
 class Druid < Formula
   desc "High-performance, column-oriented, distributed data store"
   homepage "https://druid.apache.org/"
-  url "https://www.apache.org/dyn/closer.lua?path=druid/0.20.0/apache-druid-0.20.0-bin.tar.gz"
-  mirror "https://archive.apache.org/dist/druid/0.20.0/apache-druid-0.20.0-bin.tar.gz"
-  sha256 "734f836375bc1121100712b0501149f8bcbcb6d4cf2109b522af06367a8b1cb5"
+  url "https://www.apache.org/dyn/closer.lua?path=druid/0.22.0/apache-druid-0.22.0-bin.tar.gz"
+  mirror "https://archive.apache.org/dist/druid/0.22.0/apache-druid-0.22.0-bin.tar.gz"
+  sha256 "5ce9ba185361a20694fd107ffc818fb42d13a44911d010739227b5c62a8fc1da"
   license "Apache-2.0"
 
   livecheck do
@@ -11,14 +11,13 @@ class Druid < Formula
     regex(/href=.*?druid[._-]v?(\d+(?:\.\d+)+)-bin\.t/i)
   end
 
-  bottle :unneeded
-
   depends_on "zookeeper" => :test
+  depends_on arch: :x86_64
   depends_on "openjdk@8"
 
-  resource "mysql-metadata-storage" do
-    url "http://static.druid.io/artifacts/releases/mysql-metadata-storage-0.12.3.tar.gz"
-    sha256 "8ee27e3c7906abcd401cfd59072602bd1f83828b66397ae2cf2c3ff0e1860162"
+  resource "mysql-connector-java" do
+    url "https://search.maven.org/remotecontent?filepath=mysql/mysql-connector-java/5.1.48/mysql-connector-java-5.1.48.jar"
+    sha256 "56e26caaa3821f5ae4af44f9c74f66cf8b84ea01516ad3803cbb0e9049b6eca8"
   end
 
   def install
@@ -42,7 +41,7 @@ class Druid < Formula
       s.gsub! ":=var/druid/pids", ":=#{var}/druid/pids"
     end
 
-    resource("mysql-metadata-storage").stage do
+    resource("mysql-connector-java").stage do
       (libexec/"extensions/mysql-metadata-storage").install Dir["*"]
     end
 
@@ -78,9 +77,11 @@ class Druid < Formula
       pid = fork { exec bin/"druid-broker.sh", "start" }
       sleep 40
       output = shell_output("curl -s http://localhost:8082/status")
-      assert_match /version/m, output
+      assert_match "version", output
     ensure
       system bin/"druid-broker.sh", "stop"
+      # force zookeeper stop since it is sometimes still alive after druid-broker.sh finishes
+      system Formula["zookeeper"].opt_bin/"zkServer", "stop"
       Process.wait pid
     end
   end

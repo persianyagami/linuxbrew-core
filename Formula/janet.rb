@@ -1,18 +1,17 @@
 class Janet < Formula
   desc "Dynamic language and bytecode vm"
   homepage "https://janet-lang.org"
-  url "https://github.com/janet-lang/janet/archive/v1.12.2.tar.gz"
-  sha256 "1cdbc4e944fb429a80bb415b657fc955579a4d7b1206fed9b32b9c60b20e477c"
+  url "https://github.com/janet-lang/janet/archive/v1.18.1.tar.gz"
+  sha256 "bfc29c11a070cc175666f74eb99ea992276d6e269701ba9558a72cef05ac80b4"
   license "MIT"
   head "https://github.com/janet-lang/janet.git"
 
   bottle do
-    cellar :any
-    sha256 "ce99c0aa40fd84c95a6e166fc89b2527214352f2803497139a04ab1eed620b58" => :big_sur
-    sha256 "1181c2738d9c4479f7d46f5d9518955369b19fad9814eabb3b1481ee0d2055a0" => :catalina
-    sha256 "594711312d351ef2f2c97c9fa1d1212e23f20cb36b4f0b685ab2ba35a9a6fb83" => :mojave
-    sha256 "53f6d8aba6d1b8a6804c497a34370172b4801cfa1bb76c403a3a9a5894e820cb" => :high_sierra
-    sha256 "3e99843d0e72cc99202bacac93cb08a5b4ca0864004edaf835847fe5be8a676b" => :x86_64_linux
+    sha256 cellar: :any,                 arm64_big_sur: "54a74c42eb9a5613594754888bb758f8c89005b212080e3dc057179d3e82a130"
+    sha256 cellar: :any,                 big_sur:       "0dfbb7d6613f324cffb47cc2f7c4b0865d104a2be559d2e4f5f5ac43fd5f9a51"
+    sha256 cellar: :any,                 catalina:      "a3c0e99db2191455c55689b9d241bea2934e11d469b43c95dcdd8443a751ba4d"
+    sha256 cellar: :any,                 mojave:        "3535f49220d2167757143455e51e61c8290523fa46c4e7821037d9b541817efe"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "daa2c336cb30021515485c28fd3ba90932e767406f0eb4bf7e92575c76110cd4" # linuxbrew-core
   end
 
   depends_on "meson" => :build
