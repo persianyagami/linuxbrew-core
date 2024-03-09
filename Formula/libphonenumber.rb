@@ -1,33 +1,27 @@
 class Libphonenumber < Formula
   desc "C++ Phone Number library by Google"
   homepage "https://github.com/google/libphonenumber"
-  url "https://github.com/google/libphonenumber/archive/v8.12.14.tar.gz"
-  sha256 "d4bd7f53879031861663792132632db672a21bddee7cfa0afb9d5196738a1aca"
+  url "https://github.com/google/libphonenumber/archive/v8.12.15.tar.gz"
+  sha256 "0a734a63e70ecd7bbb3c2f59ef05acd724e3f98e8d2edba26f153cc8db58a500"
   license "Apache-2.0"
 
   bottle do
     cellar :any
-    sha256 "9029d77e13cb1e4b23bd89f140e2fb5de8bf6cbafad0a595409d9a62bb7f27f2" => :big_sur
-    sha256 "9da34cfd62ed2f5811a5ab8a696e683e663c6cbf7448fde275bf45b80db86a5c" => :catalina
-    sha256 "8892f85366649b7fb1d77904755978fd01b286e75556655fc49f6e67c606620d" => :mojave
+    sha256 "ee9063f6468e03a32ac4c4c486a988312be41d34d0cd99ac657d1612a70569e1" => :big_sur
+    sha256 "53a33a6126452a7c65f92a7b344e047703692426d18976456703cda6de911a5c" => :catalina
+    sha256 "a5259c647acf6281508df5d490a138edb640f295ed31109206e51f5882acadc0" => :mojave
   end
 
   depends_on "cmake" => :build
+  depends_on "googletest" => :build
   depends_on "boost"
   depends_on "icu4c"
   depends_on "protobuf"
   depends_on "re2"
 
-  resource "gtest" do
-    url "https://github.com/google/googletest/archive/release-1.10.0.tar.gz"
-    sha256 "9dc9157a9a1551ec7a7e43daea9a694a0bb5fb8bec81235d8a1e6ef64c716dcb"
-  end
-
   def install
     ENV.cxx11
-    (buildpath/"gtest").install resource("gtest")
-    system "cmake", "cpp", "-DGTEST_SOURCE_DIR=gtest/googletest",
-                           "-DGTEST_INCLUDE_DIR=gtest/googletest/include",
+    system "cmake", "cpp", "-DGTEST_INCLUDE_DIR=#{Formula["googletest"].include}",
                            *std_cmake_args
     system "make", "install"
   end

@@ -8,6 +8,7 @@ class Nghttp2 < Formula
 
   bottle do
     sha256 "3d0437a63bcc51ec17d456847bcc0a624be2e00755ecc96b8445bc15020ff413" => :big_sur
+    sha256 "b42fa3e6e332f1a4efc34773894606e17e5dcd34c8d12735e83d6464b92af888" => :arm64_big_sur
     sha256 "ddc63177feae52a5d07ec0f5793a8dcb5a344f0bdd4f4ba0633dacfd8249b0be" => :catalina
     sha256 "e7a509ec209f20e204f82009b2dec7667e6a28958d018d8f1ee0fefbe4b73999" => :mojave
     sha256 "48012f0e4ad147b1f724ef14082232094b02da641a4a11a9b084ef4f4e4f89ba" => :x86_64_linux
@@ -30,13 +31,13 @@ class Nghttp2 < Formula
   uses_from_macos "libxml2"
   uses_from_macos "zlib"
 
-  unless OS.mac?
+  on_linux do
+    # Fix: shrpx_api_downstream_connection.cc:57:3: error:
+    # array must be initialized with a brace-enclosed initializer
+    # https://github.com/nghttp2/nghttp2/pull/1269
     patch do
-      # Fix: shrpx_api_downstream_connection.cc:57:3: error:
-      # array must be initialized with a brace-enclosed initializer
-      url "https://gist.githubusercontent.com/iMichka/5dda45fbad3e70f52a6b4e7dfd382969/raw/" \
-          "19797e17926922bdd1ef21a47e162d8be8e2ca65/nghttp2?full_index=1"
-      sha256 "0759d448d4b419911c12fa7d5cbf1df2d6d41835c9077bf3accf9eac58f24f12"
+      url "https://github.com/nghttp2/nghttp2/commit/829258e7038fe7eff849677f1ccaeca3e704eb67.patch?full_index=1"
+      sha256 "c4bcf5cf73d5305fc479206676027533bb06d4ff2840eb672f6265ba3239031e"
     end
   end
 

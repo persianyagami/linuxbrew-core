@@ -1,7 +1,7 @@
 class Thefuck < Formula
   include Language::Python::Virtualenv
 
-  desc "Programatically correct mistyped console commands"
+  desc "Programmatically correct mistyped console commands"
   homepage "https://github.com/nvbn/thefuck"
   url "https://files.pythonhosted.org/packages/46/ed/11176f81a85876f4016c18907d6e085862df464a76628b91b3e91f080c7e/thefuck-3.30.tar.gz"
   sha256 "32b41db4360a810d8e761e80fe09868ce634476ee1829e26869d49484b7a95cc"
@@ -16,6 +16,7 @@ class Thefuck < Formula
   bottle do
     cellar :any_skip_relocation
     sha256 "00fb2bb9fbd724cf47c75e99ffc44a356587cd34d423feefe21ec1b57f954133" => :big_sur
+    sha256 "3bc7586bc2ff253689bfe24ff35af100c6659605dddaefbec92cec29e2a25389" => :arm64_big_sur
     sha256 "7f8ecd031ae58cc414d695058d7332b4b93c8e2959cf5114c82609d5676b24a7" => :catalina
     sha256 "b7ff0b5553c12c27d3311d557604b708e0e4ea0c315b03198f354667b057a1c8" => :mojave
     sha256 "e2d94b4c4d959f39370227a2a029956f85b5ef6e739bb0b55969ca2b0c034bb5" => :high_sierra

@@ -11,6 +11,7 @@ class Vtk < Formula
     sha256 "ea36dc06606798e1348a8ca2938feca695a1acbeca4302d1423dffd9b0cc8424" => :big_sur
     sha256 "be3d8520d149de99a4770dfbdc101af4ea0a415a3a0d356132e9cdd5f28f1e17" => :catalina
     sha256 "e336aad63691695bc958ef52bfc456a7f8ab2970292b69463515f9e777b6eac5" => :mojave
+    sha256 "9f24e4dded4d44836b1ae5c651c79be7a61111ebfc077da4114f4592b44f36c8" => :x86_64_linux
   end
 
   depends_on "cmake" => [:build, :test]
@@ -47,6 +48,7 @@ class Vtk < Formula
     depends_on "zlib"
     depends_on "tcl-tk"
     depends_on "mesa"
+    depends_on "mesa-glu"
   end
 
   def install
@@ -89,6 +91,7 @@ class Vtk < Formula
       -DVTK_GROUP_ENABLE_Qt:STRING=YES
     ]
     args << "-DVTK_USE_COCOA=" + (OS.mac? ? "ON" : "OFF")
+    args << "-DOpenGL_GL_PREFERENCE=LEGACY" unless OS.mac?
 
     mkdir "build" do
       system "cmake", "..", *args

@@ -1,16 +1,19 @@
 class Vips < Formula
   desc "Image processing library"
   homepage "https://github.com/libvips/libvips"
-  url "https://github.com/libvips/libvips/releases/download/v8.10.2/vips-8.10.2.tar.gz"
-  sha256 "c1d0d9cb54d75cd4f66dce787fbcac99f834f6621fbf47bce9e02ef65b4ab02a"
+  url "https://github.com/libvips/libvips/releases/download/v8.10.5/vips-8.10.5.tar.gz"
+  sha256 "a4eef2f5334ab6dbf133cd3c6d6394d5bdb3e76d5ea4d578b02e1bc3d9e1cfd8"
   license "LGPL-2.1-or-later"
-  revision 4
+
+  livecheck do
+    url :stable
+    strategy :github_latest
+  end
 
   bottle do
-    sha256 "dd25f969679d33294b24b5e9747b71a2027ca5233f28505299c172901d8de253" => :big_sur
-    sha256 "973a9f7c048c0cd8a6accbbf17f6d50eff097ddf173936e67d0343d374dc8d8f" => :catalina
-    sha256 "e042b2fc609bacb722b19d4222852d61cc2aa2ff1bca8785383b623dd1026734" => :mojave
-    sha256 "c53ea0f48bfbcfdfc469d9d1999e46e8fcc452dc28d15e0e4e7dd35323f0eb54" => :high_sierra
+    sha256 "aefbb05247c07af755696c9f994ba6e44692aba5844d55df06ab0aa6513a226e" => :big_sur
+    sha256 "8fdf396edcd6c1dc1a657fe23257bc78d0fb236639e720a499659c3e49c31015" => :catalina
+    sha256 "bbe5ad35785e28a73c2bc920988db9a63a9fa06f44ab6122aa9b1b9395649268" => :mojave
   end
 
   depends_on "pkg-config" => :build

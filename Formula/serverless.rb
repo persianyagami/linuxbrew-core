@@ -3,20 +3,20 @@ require "language/node"
 class Serverless < Formula
   desc "Build applications with serverless architectures"
   homepage "https://www.serverless.com/"
-  url "https://github.com/serverless/serverless/archive/v2.15.0.tar.gz"
-  sha256 "9f382acf2e66299d6348cea288724cb14ffe0cb16b603607a5b21de88176b075"
+  url "https://github.com/serverless/serverless/archive/v2.16.1.tar.gz"
+  sha256 "b3ca46e792c2fcef24e94583b70f299c4ba67b8770e5ded7d9b28b90f0f16589"
   license "MIT"
 
   bottle do
-    sha256 "bb45ef565245efc4031049647407887209f88c38c8d7efc32781cd54063c1a8e" => :big_sur
-    sha256 "47d92cb8ffa65023dd0c3f40c992dd11e808de4e1c02df3f5889aff6b0043763" => :catalina
-    sha256 "f6699e54aed7db10e89b8e740a12ac71798e3eab59f4a76a07ada34cb8d48927" => :mojave
+    sha256 "a0659cfde7d73e4bd859c37191b9b003b3bf633e62d1ae8d1b0f6fd8cd6810f0" => :big_sur
+    sha256 "de78d07871e8d7aca35def658da29a079c20a19c08a5b4632e619c5b4c3191a1" => :catalina
+    sha256 "e5eb7a13334512d5b8695160f63064e54cefaca9183216f5372f065a55f4f45d" => :mojave
   end
 
   depends_on "node"
 
   on_linux do
-    depends_on "python"
+    depends_on "python@3.9"
   end
 
   def install
